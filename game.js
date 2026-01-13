@@ -1,5 +1,6 @@
 import { 
   screenHeight, 
+  screenWidth,
   blockSize, 
   blocksCount, 
   layers, 
@@ -21,11 +22,44 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.createSkyBackground();
     this.createPlayer();
     this.generateTerrain();
     this.createBlocks();
     this.setupCollisions();
     this.createCamera();
+  }
+  
+  createSkyBackground() {
+    // Create a simple sky background - use a large rectangle
+    const skyHeight = screenHeight * 20; // Very tall to cover everything
+    const skyWidth = blocksCount * blockSize * 4; // Very wide to cover everything
+    
+    // Create sky using graphics directly (simpler and more reliable)
+    const graphics = this.add.graphics();
+    
+    // Start drawing from top
+    graphics.clear();
+    
+    // Fill with sky blue gradient
+    for (let i = 0; i < skyHeight; i++) {
+      const ratio = i / skyHeight;
+      // Gradient from darker blue at bottom to lighter blue at top
+      const r = Math.floor(135 + (40 * ratio)); // 135 to 175
+      const g = Math.floor(206 + (30 * ratio)); // 206 to 236
+      const b = Math.floor(250 + (5 * ratio));  // 250 to 255
+      
+      graphics.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
+      graphics.fillRect(-skyWidth / 2, -skyHeight / 2 + i, skyWidth, 1);
+    }
+    
+    // Position the graphics object at world origin
+    graphics.x = 0;
+    graphics.y = 0;
+    graphics.setDepth(-1000); // Behind everything
+    graphics.setScrollFactor(1, 1); // No parallax - moves with camera normally
+    
+    this.sky = graphics;
   }
   
   generateTerrain() {
@@ -240,7 +274,10 @@ const config = {
       debug: false // Set to true to see physics bodies for debugging
     }
   },
-  render: { pixelArt: true }
+  render: { 
+    pixelArt: true,
+    backgroundColor: 0x4b90ac // Sky blue background color (fallback) - use hex number
+  }
 };
 
 const game = new Phaser.Game(config);

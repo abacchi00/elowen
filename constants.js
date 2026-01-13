@@ -15,6 +15,6 @@ export const jumpSpeed = voxelSize * 300;
 export const gravity = voxelSize * 800;
 
 // Block constants
-export const HOVER_TINT = 0x666666; // Dark gray for hover effect
+export const HOVER_TINT = 0x00FF00; // Dark gray for hover effect
 export const BLOCK_MAX_LIFE = 100; // Maximum life points for a block
 export const MINING_DAMAGE = 34; // Damage dealt per mining attempt

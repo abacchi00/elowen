@@ -10,6 +10,7 @@ import {
 import { Player } from './Player.js';
 import { Block } from './Block.js';
 import { Pickaxe } from './Pickaxe.js';
+import { TerrainGenerator } from './TerrainGenerator.js';
 
 class GameScene extends Phaser.Scene {
   preload() {
@@ -21,9 +22,17 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.createPlayer();
+    this.generateTerrain();
     this.createBlocks();
     this.setupCollisions();
     this.createCamera();
+  }
+  
+  generateTerrain() {
+    // Generate terrain matrix
+    const terrainGen = new TerrainGenerator();
+    this.mapMatrix = terrainGen.generate();
+    this.terrainGenerator = terrainGen; // Store for block updates
   }
 
   createPlayer() {
@@ -39,16 +48,29 @@ class GameScene extends Phaser.Scene {
     // Create a group for blocks with physics
     this.blocks = this.physics.add.staticGroup();
     
-    // Render blocks below the player in world coordinates
-    // Blocks start at y = 0 (ground level) and go downward
-    for (let y = 0; y < layers; y++) {
-      for (let x = -blocksCount / 2; x < blocksCount / 2; x++) {
-        const blockY = groundY + (y * blockSize) + (blockSize / 2);
-        const blockX = x * blockSize + (blockSize / 2);
-        const texture = y === 0 ? 'grass_block' : 'dirt_block';
+    // Create blocks from matrix
+    for (let matrixX = 0; matrixX < this.mapMatrix.length; matrixX++) {
+      for (let matrixY = 0; matrixY < this.mapMatrix[matrixX].length; matrixY++) {
+        const blockType = this.mapMatrix[matrixX][matrixY];
+        
+        // Skip if no block at this position
+        if (!blockType) continue;
+        
+        // Convert matrix coordinates to world coordinates
+        const worldX = (matrixX - Math.floor(blocksCount / 2)) * blockSize + (blockSize / 2);
+        // For mountains: matrixY=0 represents the highest point (top of tallest mountain)
+        // Calculate max height to offset properly
+        const maxHeight = Math.max(...this.terrainGenerator.heightMap || [0]);
+        // Offset worldY so mountains go upward (smaller matrixY = higher worldY = higher up)
+        // Invert: matrixY 0 (top of mountain) → negative worldY (higher up)
+        const worldY = groundY - (maxHeight - matrixY) * blockSize + (blockSize / 2);
         
         // Create block instance
-        const block = new Block(this, blockX, blockY, texture);
+        const block = new Block(this, worldX, worldY, blockType);
+        
+        // Store matrix coordinates in block for later reference
+        block.matrixX = matrixX;
+        block.matrixY = matrixY;
         
         // Add to physics group (this automatically enables static physics)
         this.blocks.add(block);
@@ -70,6 +92,11 @@ class GameScene extends Phaser.Scene {
       this.currentMiningBlock = null;
       this.miningTimer = 0;
       return;
+    }
+    
+    // Update matrix to remove block
+    if (this.terrainGenerator && block.matrixX !== undefined && block.matrixY !== undefined) {
+      this.mapMatrix[block.matrixX][block.matrixY] = null;
     }
     
     // Remove block from physics group

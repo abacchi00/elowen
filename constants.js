@@ -1,8 +1,8 @@
 // Game constants and configuration
-export const voxelSize = 4;
+export const voxelSize = 8;
 
-export const screenWidth = 1000;
-export const screenHeight = 600;
+export const screenWidth = window.innerWidth;
+export const screenHeight = window.innerHeight;
 
 export const blockSize = voxelSize * 4;
 export const blocksCount = 300; // Number of blocks horizontally
@@ -16,3 +16,5 @@ export const gravity = voxelSize * 800;
 
 // Block constants
 export const HOVER_TINT = 0x666666; // Dark gray for hover effect
+export const BLOCK_MAX_LIFE = 100; // Maximum life points for a block
+export const MINING_DAMAGE = 34; // Damage dealt per mining attempt

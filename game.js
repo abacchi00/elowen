@@ -1,9 +1,7 @@
 import { 
   screenHeight, 
-  screenWidth,
   blockSize, 
   blocksCount, 
-  layers, 
   groundY, 
   gravity,
   MINING_DAMAGE
@@ -18,7 +16,8 @@ class GameScene extends Phaser.Scene {
     this.load.image('grass_block', './assets/grass_block.png');
     this.load.image('dirt_block', './assets/dirt_block.png');
     this.load.image('pickaxe', './assets/pickaxe.png');
-    this.load.image('player_character', './assets/player.png');
+    this.load.image('player_sprite_right', './assets/player_sprite_right.png');
+    this.load.image('player_sprite_left', './assets/player_sprite_left.png');
   }
 
   create() {

@@ -1,5 +1,5 @@
 // Game constants and configuration
-export const voxelSize = 8;
+export const voxelSize = 6;
 
 export const screenWidth = window.innerWidth;
 export const screenHeight = window.innerHeight;

@@ -3,14 +3,14 @@ import { blockSize, speed, jumpSpeed, screenHeight } from './constants.js';
 export class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y) {
     // Create a simple character texture
-    super(scene, x, y, 'player_character');
+    super(scene, x, y, 'player_sprite_right');
     
     // Add to scene and enable physics
     scene.add.existing(this);
     scene.physics.add.existing(this);
     
     // Set display properties
-    this.setDisplaySize(blockSize, blockSize * 2);
+    this.setDisplaySize(blockSize * 2, blockSize * 3);
     this.setCollideWorldBounds(false);
     this.setBounce(0);
     
@@ -35,8 +35,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // Horizontal movement
     if (this.cursors.left.isDown || this.wasd.A.isDown) {
       this.setVelocityX(-speed);
+      this.setTexture('player_sprite_left');
     } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
       this.setVelocityX(speed);
+      this.setTexture('player_sprite_right');
     }
     
     // Jumping (only when on ground)

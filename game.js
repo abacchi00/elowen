@@ -160,18 +160,19 @@ class GameScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    // Update player movement
+    // Update player movement first
     if (this.player && this.player.update) {
       this.player.update();
     }
     
-    // Handle continuous mining
-    this.handleMining(delta);
-    
-    // Update pickaxe (rotation to mouse, mining animation)
+    // Update pickaxe IMMEDIATELY after player - this ensures we get the latest player position
+    // Do this before any other updates to minimize delay
     if (this.pickaxe && this.pickaxe.update) {
       this.pickaxe.update();
     }
+    
+    // Handle continuous mining
+    this.handleMining(delta);
   }
   
   handleMining(delta) {

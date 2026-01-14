@@ -1,19 +1,17 @@
 import { blockSize } from './constants.js';
 
-export class Pickaxe extends Phaser.GameObjects.Container {
+export class Pickaxe extends Phaser.GameObjects.Image {
   constructor(scene, player) {
-    super(scene, 0, 0);
+    super(scene, 0, 0, 'pickaxe');
     
     this.player = player;
     this.scene = scene;
     
-    // Create pickaxe sprite
-    this.pickaxeSprite = scene.add.image(0, 0, 'pickaxe');
-    this.add(this.pickaxeSprite);
-    this.pickaxeSprite.setDisplaySize(blockSize, blockSize);
+    // Set display size
+    this.setDisplaySize(blockSize, blockSize);
     
     // Set pivot point at the handle (where player holds it)
-    this.pickaxeSprite.setOrigin(-0.2, 0.9); // Origin near the handle
+    this.setOrigin(-0.2, 0.9); // Origin near the handle
     
     // Add to scene
     scene.add.existing(this);
@@ -26,12 +24,17 @@ export class Pickaxe extends Phaser.GameObjects.Container {
   }
   
   update() {
+    // Get player's current position - use body position if available (most accurate)
+    // Physics.Arcade.Sprite syncs x/y with body, but body might be more current
+    const playerX = this.player.body ? this.player.body.center.x : this.player.x;
+    const playerY = this.player.body ? this.player.body.center.y : this.player.y;
+    
     // Get mouse position in world coordinates
     const mouseWorldX = this.scene.cameras.main.scrollX + this.scene.input.mousePointer.x;
     const mouseWorldY = this.scene.cameras.main.scrollY + this.scene.input.mousePointer.y;
     
     // Determine which side of the player the mouse is on
-    const mouseRelativeToPlayer = mouseWorldX - this.player.x;
+    const mouseRelativeToPlayer = mouseWorldX - playerX;
     const isMouseOnLeft = mouseRelativeToPlayer < 0;
     
     // Position pickaxe in the appropriate hand
@@ -39,24 +42,26 @@ export class Pickaxe extends Phaser.GameObjects.Container {
     const handOffsetY = blockSize * 0.4;
     
     // Flip pickaxe sprite horizontally when on left side
-    this.pickaxeSprite.setFlipY(isMouseOnLeft);
+    this.setFlipY(isMouseOnLeft);
     // Set origin to the handle correctly on both sides
-    this.pickaxeSprite.setOrigin(-0.2, isMouseOnLeft ? 0.1 : 0.9); // Origin near the handle
+    this.setOrigin(-0.2, isMouseOnLeft ? 0.1 : 0.9); // Origin near the handle
 
-    // Set position relative to player
-    this.x = this.player.x + handOffsetX;
-    this.y = this.player.y + handOffsetY;
+    // Update position FIRST - do this before any other calculations
+    const newX = playerX + handOffsetX;
+    const newY = playerY + handOffsetY;
+    this.x = newX;
+    this.y = newY;
     this.setDepth(this.player.depth + 1); // In front of player
     
-    // Calculate angle to mouse (default target)
-    const dx = mouseWorldX - this.x;
-    const dy = mouseWorldY - this.y;
+    // Calculate angle to mouse (default target) using current pickaxe position
+    const dx = mouseWorldX - newX;
+    const dy = mouseWorldY - newY;
     let targetRotation = Math.atan2(dy, dx);
     
     // Update target rotation if we have a mining block
     if (this.currentTargetBlock && this.currentTargetBlock.active) {
-      const blockDx = this.currentTargetBlock.x - this.x;
-      const blockDy = this.currentTargetBlock.y - this.y;
+      const blockDx = this.currentTargetBlock.x - newX;
+      const blockDy = this.currentTargetBlock.y - newY;
       targetRotation = Math.atan2(blockDy, blockDx);
     }
     
@@ -83,9 +88,6 @@ export class Pickaxe extends Phaser.GameObjects.Container {
         this.mineAnimationProgress = 0;
       }
     }
-    
-    // Make sure pickaxe is visible
-    this.setVisible(true);
   }
   
   startMining(targetBlock) {

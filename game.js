@@ -18,6 +18,11 @@ class GameScene extends Phaser.Scene {
     this.load.image('pickaxe', './assets/pickaxe.png');
     this.load.image('player_sprite_right', './assets/player_sprite_right.png');
     this.load.image('player_sprite_left', './assets/player_sprite_left.png');
+    
+    // Load audio files
+    this.load.audio('running', './assets/running.mp3');
+    this.load.audio('jump', './assets/jump.mp3');
+    this.load.audio('pickaxe_hit', './assets/pickaxe_hit.mp3');
   }
 
   create() {
@@ -27,6 +32,21 @@ class GameScene extends Phaser.Scene {
     this.createBlocks();
     this.setupCollisions();
     this.createCamera();
+    this.setupSounds();
+  }
+  
+  setupSounds() {
+    // Create sound objects
+    this.sounds = {
+      running: this.sound.add('running', { loop: true, volume: 2 }),
+      jump: this.sound.add('jump', { volume: 0.6 }),
+      pickaxeHit: this.sound.add('pickaxe_hit', { volume: 0.4 }),
+    };
+    
+    // Pass sounds to player
+    if (this.player) {
+      this.player.sounds = this.sounds;
+    }
   }
   
   createSkyBackground() {
@@ -75,6 +95,11 @@ class GameScene extends Phaser.Scene {
     // Create pickaxe for player
     this.pickaxe = new Pickaxe(this, this.player);
     this.player.pickaxe = this.pickaxe;
+    
+    // Pass sounds to player if they exist
+    if (this.sounds) {
+      this.player.sounds = this.sounds;
+    }
   }
 
   createBlocks() {
@@ -219,6 +244,10 @@ class GameScene extends Phaser.Scene {
         
         // Damage block after interval
         if (this.miningTimer >= this.miningInterval) {
+          // Play random pickaxe hit sound
+          if (this.sounds && this.sounds.pickaxeHit) {
+            this.sounds.pickaxeHit.play();
+          }
           this.damageBlock(blockUnderMouse);
           this.miningTimer = 0;
         }

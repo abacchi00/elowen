@@ -16,6 +16,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     
     // Player state
     this.isOnGround = false;
+    this.wasMoving = false;
     
     // Input controls
     this.cursors = scene.input.keyboard.createCursorKeys();
@@ -23,6 +24,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     
     // Pickaxe (will be created by game scene)
     this.pickaxe = null;
+    
+    // Sounds (will be set by game scene)
+    this.sounds = null;
   }
   
   update() {
@@ -31,6 +35,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     
     // Reset horizontal velocity
     this.setVelocityX(0);
+    
+    // Track if player is moving horizontally
+    const isMoving = (this.cursors.left.isDown || this.wasd.A.isDown || 
+                     this.cursors.right.isDown || this.wasd.D.isDown) && this.isOnGround;
     
     // Horizontal movement
     if (this.cursors.left.isDown || this.wasd.A.isDown) {
@@ -41,10 +49,32 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.setTexture('player_sprite_right');
     }
     
+    // Handle walking sound
+    if (isMoving && this.isOnGround) {
+      if (!this.wasMoving && this.sounds && this.sounds.running) {
+        this.sounds.running.play();
+      }
+      this.wasMoving = true;
+    } else {
+      if (this.wasMoving && this.sounds && this.sounds.running) {
+        this.sounds.running.stop();
+      }
+      this.wasMoving = false;
+    }
+    
     // Jumping (only when on ground)
     if ((this.cursors.up.isDown || this.wasd.W.isDown || this.cursors.space.isDown) && this.isOnGround) {
       this.setVelocityY(-jumpSpeed);
       this.isOnGround = false;
+      // Play jump sound
+      if (this.sounds && this.sounds.jump) {
+        this.sounds.jump.play();
+      }
+      // Stop running sound when jumping
+      if (this.sounds && this.sounds.running) {
+        this.sounds.running.stop();
+      }
+      this.wasMoving = false;
     }
   }
 }

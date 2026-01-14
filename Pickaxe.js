@@ -13,7 +13,7 @@ export class Pickaxe extends Phaser.GameObjects.Container {
     this.pickaxeSprite.setDisplaySize(blockSize, blockSize);
     
     // Set pivot point at the handle (where player holds it)
-    this.pickaxeSprite.setOrigin(0.2, 0.9); // Origin near the handle
+    this.pickaxeSprite.setOrigin(-0.2, 0.9); // Origin near the handle
     
     // Add to scene
     scene.add.existing(this);
@@ -38,12 +38,16 @@ export class Pickaxe extends Phaser.GameObjects.Container {
     const handOffsetX = isMouseOnLeft ? -blockSize * 0.3 : blockSize * 0.3; // Left or right hand
     const handOffsetY = blockSize * 0.4;
     
+    // Flip pickaxe sprite horizontally when on left side
+    this.pickaxeSprite.setFlipY(isMouseOnLeft);
+    // Set origin to the handle correctly on both sides
+    this.pickaxeSprite.setOrigin(-0.2, isMouseOnLeft ? 0.1 : 0.9); // Origin near the handle
+
     // Set position relative to player
     this.x = this.player.x + handOffsetX;
     this.y = this.player.y + handOffsetY;
     this.setDepth(this.player.depth + 1); // In front of player
     
-    // Invert pickaxe sprite when on left side (flip both X and Y)
     // Calculate angle to mouse (default target)
     const dx = mouseWorldX - this.x;
     const dy = mouseWorldY - this.y;

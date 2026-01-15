@@ -1,0 +1,1 @@
+export { Hotbar } from './Hotbar';

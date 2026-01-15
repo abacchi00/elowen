@@ -51,6 +51,22 @@ export interface IUpdatable {
 }
 
 // ============================================================================
+// Inventory Types
+// ============================================================================
+
+export type ItemType = BlockType | 'wood'; // Blocks + other items like wood from trees
+
+export interface InventoryItem {
+  type: ItemType;
+  quantity: number;
+  maxStack: number;
+}
+
+export interface InventorySlot {
+  item: InventoryItem | null;
+}
+
+// ============================================================================
 // Block Configuration
 // ============================================================================
 
@@ -78,4 +94,15 @@ export const BLOCK_CONFIGS: Record<BlockType, BlockConfig> = {
     hasLifeTextures: true,
     miningSound: 'pickaxeHitStone',
   },
+};
+
+// ============================================================================
+// Item Configuration
+// ============================================================================
+
+export const ITEM_CONFIGS: Record<ItemType, { maxStack: number; texture: string }> = {
+  grass_block: { maxStack: 64, texture: 'grass_block' },
+  dirt_block: { maxStack: 64, texture: 'dirt_block' },
+  stone_block: { maxStack: 64, texture: 'stone_block' },
+  wood: { maxStack: 64, texture: 'tree' },
 };

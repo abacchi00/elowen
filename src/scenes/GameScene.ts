@@ -10,8 +10,9 @@ import { BlockType, BlockMatrix, GameSounds } from '../types';
 import { Player, Pickaxe, Tree } from '../entities';
 import { Block, BlockFactory } from '../blocks';
 import { AssetsManager, SoundManager, BackgroundManager } from '../managers';
-import { CameraSystem, MiningSystem } from '../systems';
+import { CameraSystem, MiningSystem, InventorySystem, PlacementSystem } from '../systems';
 import { TerrainGenerator } from '../terrain';
+import { Hotbar } from '../ui';
 
 /**
  * Main game scene that orchestrates all game systems.
@@ -32,10 +33,16 @@ export class GameScene extends Phaser.Scene {
   // Systems
   private cameraSystem!: CameraSystem;
   private miningSystem!: MiningSystem;
+  private inventorySystem!: InventorySystem;
+  private placementSystem!: PlacementSystem;
+
+  // UI
+  private hotbar!: Hotbar;
 
   // Terrain
   private terrainGenerator!: TerrainGenerator;
   private mapMatrix!: BlockMatrix;
+  private maxHeight!: number;
 
   // Sounds reference for blocks
   private sounds!: GameSounds;
@@ -50,23 +57,35 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     this.initializeManagers();
+    this.initializeInventory();
     this.createPlayer();
     this.generateTerrain();
     this.createBlocks();
     this.setupCollisions();
     this.initializeSystems();
+    this.createUI();
+    this.setupResizeHandler();
   }
 
   update(_time: number, delta: number): void {
     this.player.update();
     this.pickaxe.update();
     this.miningSystem.update(delta);
+    this.placementSystem.update();
   }
 
   private initializeManagers(): void {
     this.backgroundManager = new BackgroundManager(this);
     this.soundManager = new SoundManager(this.sound);
     this.sounds = this.soundManager.getSounds();
+  }
+
+  private initializeInventory(): void {
+    this.inventorySystem = new InventorySystem(9);
+    
+    // Give player some starting items for testing
+    this.inventorySystem.addItem('dirt_block', 10);
+    this.inventorySystem.addItem('stone_block', 5);
   }
 
   private createPlayer(): void {
@@ -79,6 +98,7 @@ export class GameScene extends Phaser.Scene {
   private generateTerrain(): void {
     this.terrainGenerator = new TerrainGenerator();
     this.mapMatrix = this.terrainGenerator.generate();
+    this.maxHeight = Math.max(...this.terrainGenerator.heightMap);
   }
 
   private createBlocks(): void {
@@ -86,14 +106,13 @@ export class GameScene extends Phaser.Scene {
     this.trees = this.add.group();
 
     const blockFactory = new BlockFactory(this, this.sounds);
-    const maxHeight = Math.max(...this.terrainGenerator.heightMap);
 
     for (let matrixX = 0; matrixX < this.mapMatrix.length; matrixX++) {
       for (let matrixY = 0; matrixY < this.mapMatrix[matrixX].length; matrixY++) {
         const blockType = this.mapMatrix[matrixX][matrixY];
         if (!blockType) continue;
 
-        const worldPos = this.matrixToWorld(matrixX, matrixY, maxHeight);
+        const worldPos = this.matrixToWorld(matrixX, matrixY, this.maxHeight);
         const block = this.createBlock(blockFactory, worldPos.x, worldPos.y, blockType);
         
         block.matrixX = matrixX;
@@ -141,7 +160,28 @@ export class GameScene extends Phaser.Scene {
       this.pickaxe,
       this.cameraSystem,
       this.sounds,
-      this.mapMatrix
+      this.mapMatrix,
+      this.inventorySystem
     );
+
+    this.placementSystem = new PlacementSystem(
+      this,
+      this.blocks,
+      this.inventorySystem,
+      this.cameraSystem,
+      this.mapMatrix,
+      this.sounds,
+      this.maxHeight
+    );
+  }
+
+  private createUI(): void {
+    this.hotbar = new Hotbar(this, this.inventorySystem);
+  }
+
+  private setupResizeHandler(): void {
+    this.scale.on('resize', () => {
+      this.hotbar.onResize();
+    });
   }
 }

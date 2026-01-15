@@ -4,12 +4,14 @@ import { Block } from '../blocks/Block';
 import { Tree } from '../entities/Tree';
 import { Pickaxe } from '../entities/Pickaxe';
 import { CameraSystem } from './CameraSystem';
-import { GameSounds, BlockMatrix, IMineable } from '../types';
+import { InventorySystem } from './InventorySystem';
+import { GameSounds, BlockMatrix, IMineable, BlockType } from '../types';
 
 type MineableTarget = Block | Tree;
 
 /**
  * Handles mining logic for blocks and trees.
+ * Adds gathered items to inventory.
  */
 export class MiningSystem {
   private scene: Phaser.Scene;
@@ -19,6 +21,7 @@ export class MiningSystem {
   private cameraSystem: CameraSystem;
   private sounds: GameSounds | null;
   private mapMatrix: BlockMatrix;
+  private inventory: InventorySystem;
 
   private currentTarget: MineableTarget | null = null;
   private miningTimer: number = 0;
@@ -30,7 +33,8 @@ export class MiningSystem {
     pickaxe: Pickaxe,
     cameraSystem: CameraSystem,
     sounds: GameSounds | null,
-    mapMatrix: BlockMatrix
+    mapMatrix: BlockMatrix,
+    inventory: InventorySystem
   ) {
     this.scene = scene;
     this.blocks = blocks;
@@ -39,6 +43,7 @@ export class MiningSystem {
     this.cameraSystem = cameraSystem;
     this.sounds = sounds;
     this.mapMatrix = mapMatrix;
+    this.inventory = inventory;
   }
 
   update(delta: number): void {
@@ -174,6 +179,9 @@ export class MiningSystem {
   }
 
   private destroyBlock(block: Block): void {
+    // Get block type before destruction for inventory
+    const blockType = this.getBlockType(block);
+
     // Update matrix
     if (block.matrixX !== undefined && block.matrixY !== undefined) {
       this.mapMatrix[block.matrixX][block.matrixY] = null;
@@ -184,6 +192,11 @@ export class MiningSystem {
 
     // Mine the block
     block.mine();
+
+    // Add to inventory
+    if (blockType) {
+      this.inventory.addItem(blockType, 1);
+    }
   }
 
   private destroyTree(tree: Tree): void {
@@ -192,6 +205,18 @@ export class MiningSystem {
 
     // Mine the tree
     tree.mine();
+
+    // Add wood to inventory
+    this.inventory.addItem('wood', 1);
+  }
+
+  private getBlockType(block: Block): BlockType | null {
+    // Determine block type from texture key
+    const textureKey = block.texture.key;
+    if (textureKey.startsWith('grass_block')) return 'grass_block';
+    if (textureKey.startsWith('dirt_block')) return 'dirt_block';
+    if (textureKey.startsWith('stone_block')) return 'stone_block';
+    return null;
   }
 
   private stopMining(): void {

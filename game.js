@@ -194,6 +194,29 @@ class GameScene extends Phaser.Scene {
     // Make camera follow the player
     this.cameras.main.startFollow(this.player);
     this.cameras.main.setDeadzone(0, 0); // Camera follows immediately (no deadzone)
+    
+    // Set initial zoom
+    this.cameras.main.setZoom(1);
+    
+    // Add zoom on mouse wheel
+    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+      const currentZoom = this.cameras.main.zoom;
+      const zoomSpeed = 0.1;
+      const minZoom = 0.5;
+      const maxZoom = 2.0;
+      
+      // deltaY > 0 means scrolling down (zoom out), deltaY < 0 means scrolling up (zoom in)
+      let newZoom = currentZoom;
+      if (deltaY > 0) {
+        // Zoom out
+        newZoom = Math.max(minZoom, currentZoom - zoomSpeed);
+      } else if (deltaY < 0) {
+        // Zoom in
+        newZoom = Math.min(maxZoom, currentZoom + zoomSpeed);
+      }
+      
+      this.cameras.main.setZoom(newZoom);
+    });
   }
 
   update(time, delta) {
@@ -216,9 +239,15 @@ class GameScene extends Phaser.Scene {
     const mousePointer = this.input.mousePointer;
     const isMouseDown = mousePointer.isDown;
     
-    // Get mouse position in world coordinates
-    const mouseWorldX = this.cameras.main.scrollX + mousePointer.x;
-    const mouseWorldY = this.cameras.main.scrollY + mousePointer.y;
+    // Get mouse position in world coordinates (accounting for zoom)
+    const camera = this.cameras.main;
+    const zoom = camera.zoom;
+    const centerX = camera.centerX;
+    const centerY = camera.centerY;
+    
+    // Convert screen coordinates to world coordinates with zoom
+    const mouseWorldX = camera.scrollX + (mousePointer.x - centerX) / zoom + centerX;
+    const mouseWorldY = camera.scrollY + (mousePointer.y - centerY) / zoom + centerY;
     
     if (isMouseDown) {
       // Always keep pickaxe animating when mouse is down

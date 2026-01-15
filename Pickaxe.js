@@ -29,9 +29,16 @@ export class Pickaxe extends Phaser.GameObjects.Image {
     const playerX = this.player.body ? this.player.body.center.x : this.player.x;
     const playerY = this.player.body ? this.player.body.center.y : this.player.y;
     
-    // Get mouse position in world coordinates
-    const mouseWorldX = this.scene.cameras.main.scrollX + this.scene.input.mousePointer.x;
-    const mouseWorldY = this.scene.cameras.main.scrollY + this.scene.input.mousePointer.y;
+    // Get mouse position in world coordinates (accounting for zoom)
+    const camera = this.scene.cameras.main;
+    const zoom = camera.zoom;
+    const centerX = camera.centerX;
+    const centerY = camera.centerY;
+    const mousePointer = this.scene.input.mousePointer;
+    
+    // Convert screen coordinates to world coordinates with zoom
+    const mouseWorldX = camera.scrollX + (mousePointer.x - centerX) / zoom + centerX;
+    const mouseWorldY = camera.scrollY + (mousePointer.y - centerY) / zoom + centerY;
     
     // Determine which side of the player the mouse is on
     const mouseRelativeToPlayer = mouseWorldX - playerX;

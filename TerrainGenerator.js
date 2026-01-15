@@ -24,30 +24,30 @@ export class TerrainGenerator {
     // Generate height for each x position (simple noise/random)
     const heightMap = [];
     const baseHeight = 3; // Base ground height (blocks deep)
-    const maxMountainHeight = 25; // Maximum mountain height above base
+    const maxMountainHeight = 80; // Maximum mountain height above base (increased from 50)
     
     // Generate height using simple noise algorithm
     for (let x = 0; x < this.width; x++) {
       // Use multiple octaves for smoother terrain
       let heightAboveBase = 0;
       
-      // Large scale variation (mountains) - bigger mountains
+      // Large scale variation (mountains) - enhanced mountains
       const mountainNoise = Math.sin(x * 0.08) * 0.6 + Math.sin(x * 0.04) * 0.4;
-      heightAboveBase += mountainNoise * 10;
+      heightAboveBase += mountainNoise * 18; // Increased from 10 to 18
       
-      // Add some peaks (mountains) - more frequent and bigger
-      const peakChance = 0.03; // 3% chance of a peak
+      // Add some peaks (mountains) - bigger and more impressive
+      const peakChance = 0.04; // 4% chance of a peak (slightly increased)
       if (Math.random() < peakChance) {
-        const peakHeight = 8 + Math.random() * 15; // Bigger peaks
+        const peakHeight = 12 + Math.random() * 25; // Increased from 8-23 to 12-37
         heightAboveBase += peakHeight;
       }
       
       // Medium scale variation (hills)
       const hillNoise = Math.sin(x * 0.2) * 0.4 + Math.sin(x * 0.15) * 0.3;
-      heightAboveBase += hillNoise * 3;
+      heightAboveBase += hillNoise * 5; // Increased from 3 to 5
       
       // Small scale variation (roughness)
-      const roughness = (Math.random() - 0.5) * 0.8;
+      const roughness = (Math.random() - 0.5) * 1.2; // Slightly increased variation
       heightAboveBase += roughness;
       
       // Clamp height
@@ -80,7 +80,7 @@ export class TerrainGenerator {
 
   generateBlockMatrix(heightMap) {
     // Initialize matrix with empty/null values
-    const baseDepth = 23; // Base ground depth (blocks below surface) - 3 original + 20 more
+    const baseDepth = 43; // Base ground depth (blocks below surface) - increased by 20 layers
     
     for (let x = 0; x < this.width; x++) {
       this.mapMatrix[x] = [];

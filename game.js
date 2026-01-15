@@ -14,8 +14,17 @@ import { createBlockByTexture } from './BlockConfig.js';
 class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('grass_block', './assets/grass_block.png');
+    this.load.image('grass_block_high_life', './assets/grass_block_high_life.png');
+    this.load.image('grass_block_med_life', './assets/grass_block_med_life.png');
+    this.load.image('grass_block_low_life', './assets/grass_block_low_life.png');
     this.load.image('dirt_block', './assets/dirt_block.png');
+    this.load.image('dirt_block_high_life', './assets/dirt_block_high_life.png');
+    this.load.image('dirt_block_med_life', './assets/dirt_block_med_life.png');
+    this.load.image('dirt_block_low_life', './assets/dirt_block_low_life.png');
     this.load.image('stone_block', './assets/stone_block.png');
+    this.load.image('stone_block_high_life', './assets/stone_block_high_life.png');
+    this.load.image('stone_block_med_life', './assets/stone_block_med_life.png');
+    this.load.image('stone_block_low_life', './assets/stone_block_low_life.png');
     this.load.image('pickaxe', './assets/pickaxe.png');
     this.load.image('player_sprite_right', './assets/player_sprite_right.png');
     this.load.image('player_sprite_left', './assets/player_sprite_left.png');

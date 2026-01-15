@@ -7,14 +7,15 @@ import {
   MINING_DAMAGE
 } from './constants.js';
 import { Player } from './Player.js';
-import { Block } from './Block.js';
 import { Pickaxe } from './Pickaxe.js';
 import { TerrainGenerator } from './TerrainGenerator.js';
+import { createBlockByTexture } from './BlockConfig.js';
 
 class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('grass_block', './assets/grass_block.png');
     this.load.image('dirt_block', './assets/dirt_block.png');
+    this.load.image('stone_block', './assets/stone_block.png');
     this.load.image('pickaxe', './assets/pickaxe.png');
     this.load.image('player_sprite_right', './assets/player_sprite_right.png');
     this.load.image('player_sprite_left', './assets/player_sprite_left.png');
@@ -23,16 +24,36 @@ class GameScene extends Phaser.Scene {
     this.load.audio('running', './assets/running.mp3');
     this.load.audio('jump', './assets/jump.mp3');
     this.load.audio('pickaxe_hit', './assets/pickaxe_hit.mp3');
+    this.load.audio('pickaxe_hit_stone', './assets/pickaxe_hit_stone.mp3');
   }
 
   create() {
     this.createSkyBackground();
     this.createPlayer();
+    this.setupSounds(); // Setup sounds before creating blocks so stone blocks can use the sound
     this.generateTerrain();
     this.createBlocks();
     this.setupCollisions();
     this.createCamera();
-    this.setupSounds();
+  }
+  
+  createSkyBackground() {
+    // Create a simple sky blue background
+    const skyHeight = screenHeight * 20; // Very tall to cover everything
+    const skyWidth = blocksCount * blockSize * 4; // Very wide to cover everything
+    
+    // Create sky using graphics
+    const graphics = this.add.graphics();
+    graphics.fillStyle(0x87CEEB); // Sky blue color
+    graphics.fillRect(-skyWidth / 2, -skyHeight / 2, skyWidth, skyHeight);
+    
+    // Position at world origin
+    graphics.x = 0;
+    graphics.y = 0;
+    graphics.setDepth(-1000); // Behind everything
+    graphics.setScrollFactor(1, 1); // No parallax - moves with camera normally
+    
+    this.sky = graphics;
   }
   
   setupSounds() {
@@ -41,6 +62,7 @@ class GameScene extends Phaser.Scene {
       running: this.sound.add('running', { loop: true, volume: 2 }),
       jump: this.sound.add('jump', { volume: 0.6 }),
       pickaxeHit: this.sound.add('pickaxe_hit', { volume: 0.4 }),
+      pickaxeHitStone: this.sound.add('pickaxe_hit_stone', { volume: 0.5 }),
     };
     
     // Pass sounds to player
@@ -49,37 +71,6 @@ class GameScene extends Phaser.Scene {
     }
   }
   
-  createSkyBackground() {
-    // Create a simple sky background - use a large rectangle
-    const skyHeight = screenHeight * 20; // Very tall to cover everything
-    const skyWidth = blocksCount * blockSize * 4; // Very wide to cover everything
-    
-    // Create sky using graphics directly (simpler and more reliable)
-    const graphics = this.add.graphics();
-    
-    // Start drawing from top
-    graphics.clear();
-    
-    // Fill with sky blue gradient
-    for (let i = 0; i < skyHeight; i++) {
-      const ratio = i / skyHeight;
-      // Gradient from darker blue at bottom to lighter blue at top
-      const r = Math.floor(135 + (40 * ratio)); // 135 to 175
-      const g = Math.floor(206 + (30 * ratio)); // 206 to 236
-      const b = Math.floor(250 + (5 * ratio));  // 250 to 255
-      
-      graphics.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
-      graphics.fillRect(-skyWidth / 2, -skyHeight / 2 + i, skyWidth, 1);
-    }
-    
-    // Position the graphics object at world origin
-    graphics.x = 0;
-    graphics.y = 0;
-    graphics.setDepth(-1000); // Behind everything
-    graphics.setScrollFactor(1, 1); // No parallax - moves with camera normally
-    
-    this.sky = graphics;
-  }
   
   generateTerrain() {
     // Generate terrain matrix
@@ -123,8 +114,8 @@ class GameScene extends Phaser.Scene {
         // Invert: matrixY 0 (top of mountain) → negative worldY (higher up)
         const worldY = groundY - (maxHeight - matrixY) * blockSize + (blockSize / 2);
         
-        // Create block instance
-        const block = new Block(this, worldX, worldY, blockType);
+        // Create block instance using factory function (uses inheritance)
+        const block = createBlockByTexture(this, worldX, worldY, blockType);
         
         // Store matrix coordinates in block for later reference
         block.matrixX = matrixX;
@@ -244,8 +235,8 @@ class GameScene extends Phaser.Scene {
         
         // Damage block after interval
         if (this.miningTimer >= this.miningInterval) {
-          // Play random pickaxe hit sound
-          if (this.sounds && this.sounds.pickaxeHit) {
+          // Play default pickaxe hit sound (block will play its own sound if it has one)
+          if (this.sounds && this.sounds.pickaxeHit && !blockUnderMouse.miningSound) {
             this.sounds.pickaxeHit.play();
           }
           this.damageBlock(blockUnderMouse);

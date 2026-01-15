@@ -105,8 +105,30 @@ export class TerrainGenerator {
       for (let y = 0; y < totalBlocks && (surfaceMatrixY + y) < this.depth; y++) {
         const matrixY = surfaceMatrixY + y;
         if (matrixY >= 0) {
-          // Surface layer (y=0 relative to surface) is grass, rest is dirt
-          const blockType = y === 0 ? 'grass_block' : 'dirt_block';
+          let blockType;
+          
+          // Surface layer is grass
+          if (y === 0) {
+            blockType = 'grass_block';
+          }
+          // First few layers below surface are dirt
+          else if (y <= 3) {
+            blockType = 'dirt_block';
+          }
+          // Deeper layers: mix of dirt and stone, with more stone deeper down
+          else {
+            const depthRatio = y / totalBlocks;
+            // Deeper = more chance of stone
+            const stoneChance = Math.min(0.7, depthRatio * 1.5);
+            
+            // Add some randomness for natural stone deposits
+            if (Math.random() < stoneChance) {
+              blockType = 'stone_block';
+            } else {
+              blockType = 'dirt_block';
+            }
+          }
+          
           this.mapMatrix[x][matrixY] = blockType;
         }
       }

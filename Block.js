@@ -1,4 +1,4 @@
-import { blockSize, HOVER_TINT, BLOCK_MAX_LIFE } from './constants.js';
+import { blockSize, HOVER_TINT } from './constants.js';
 
 export class Block extends Phaser.GameObjects.Image {
   constructor(scene, x, y, texture) {
@@ -13,10 +13,13 @@ export class Block extends Phaser.GameObjects.Image {
     // Set display properties
     this.setDisplaySize(blockSize, blockSize);
     
-    // Block life system
-    this.maxLife = BLOCK_MAX_LIFE;
-    this.life = BLOCK_MAX_LIFE;
+    // Block life system - subclasses should override maxLife
+    this.maxLife = 100; // Default, override in subclasses
+    this.life = this.maxLife;
     this.updateOpacity();
+    
+    // Mining sound - subclasses should override
+    this.miningSound = null;
     
     // Make block interactive for mouse events
     this.setInteractive({ useHandCursor: true });
@@ -32,6 +35,11 @@ export class Block extends Phaser.GameObjects.Image {
   }
   
   takeDamage(damage) {
+    // Play mining sound if this block has a custom sound
+    if (this.miningSound) {
+      this.miningSound.play();
+    }
+    
     // Reduce life
     this.life = Math.max(0, this.life - damage);
     

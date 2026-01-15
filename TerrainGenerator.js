@@ -43,7 +43,7 @@ export class TerrainGenerator {
       }
       
       // Medium scale variation (hills)
-      const hillNoise = Math.sin(x * 0.2) * 0.4 + Math.sin(x * 0.15) * 0.3;
+      const hillNoise = Math.sin(x * 0.2) * 0.4 + Math.sin(x * 0.9) * 0.3;
       heightAboveBase += hillNoise * 5; // Increased from 3 to 5
       
       // Small scale variation (roughness)

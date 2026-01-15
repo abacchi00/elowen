@@ -10,6 +10,7 @@ import { Player } from './Player.js';
 import { Pickaxe } from './Pickaxe.js';
 import { TerrainGenerator } from './TerrainGenerator.js';
 import { createBlockByTexture } from './BlockConfig.js';
+import { Tree } from './Tree.js';
 
 class GameScene extends Phaser.Scene {
   preload() {
@@ -26,6 +27,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('stone_block_med_life', './assets/stone_block_med_life.png');
     this.load.image('stone_block_low_life', './assets/stone_block_low_life.png');
     this.load.image('pickaxe', './assets/pickaxe.png');
+    this.load.image('tree', './assets/tree.png');
     this.load.image('player_sprite_right', './assets/player_sprite_right.png');
     this.load.image('player_sprite_left', './assets/player_sprite_left.png');
     
@@ -106,6 +108,9 @@ class GameScene extends Phaser.Scene {
     // Create a group for blocks with physics
     this.blocks = this.physics.add.staticGroup();
     
+    // Create a group for trees (no physics - passable)
+    this.trees = this.add.group();
+    
     // Create blocks from matrix
     for (let matrixX = 0; matrixX < this.mapMatrix.length; matrixX++) {
       for (let matrixY = 0; matrixY < this.mapMatrix[matrixX].length; matrixY++) {
@@ -135,6 +140,13 @@ class GameScene extends Phaser.Scene {
         
         // Setup physics body after adding to group
         block.setupPhysics();
+        
+        // Place trees on grass blocks (surface layer)
+        if (blockType === 'grass_block' && Math.random() < 0.10) { // 15% chance
+          const tree = new Tree(this, worldX, worldY - blockSize / 2);
+          tree.setDepth(block.depth - 1); // Above grass block
+          this.trees.add(tree);
+        }
       }
     }
     
@@ -214,50 +226,72 @@ class GameScene extends Phaser.Scene {
         this.pickaxe.startMining(null);
       }
       
-      // Find block under mouse cursor
-      let blockUnderMouse = null;
+      // Find block or tree under mouse cursor (check trees first since they're on top)
+      let targetUnderMouse = null;
+      let isTree = false;
       
-      // Check all blocks to see if mouse is over one
-      this.blocks.children.entries.forEach(block => {
-        if (block && block.active) {
-          const blockBounds = block.getBounds();
-          if (blockBounds.contains(mouseWorldX, mouseWorldY)) {
-            blockUnderMouse = block;
+      // Check trees first (they're on top)
+      if (this.trees) {
+        this.trees.children.entries.forEach(tree => {
+          if (tree && tree.active) {
+            const treeBounds = tree.getBounds();
+            if (treeBounds.contains(mouseWorldX, mouseWorldY)) {
+              targetUnderMouse = tree;
+              isTree = true;
+            }
           }
-        }
-      });
+        });
+      }
       
-      if (blockUnderMouse) {
-        // If we're mining a different block, reset timer
-        if (this.currentMiningBlock !== blockUnderMouse) {
-          this.currentMiningBlock = blockUnderMouse;
+      // If no tree, check blocks
+      if (!targetUnderMouse) {
+        this.blocks.children.entries.forEach(block => {
+          if (block && block.active) {
+            const blockBounds = block.getBounds();
+            if (blockBounds.contains(mouseWorldX, mouseWorldY)) {
+              targetUnderMouse = block;
+              isTree = false;
+            }
+          }
+        });
+      }
+      
+      if (targetUnderMouse) {
+        // If we're mining a different target, reset timer
+        if (this.currentMiningBlock !== targetUnderMouse) {
+          this.currentMiningBlock = targetUnderMouse;
           this.miningTimer = 0;
         }
         
-        // Update pickaxe to point at block
+        // Update pickaxe to point at target
         if (this.pickaxe) {
-          this.pickaxe.startMining(blockUnderMouse);
+          this.pickaxe.startMining(targetUnderMouse);
         }
         
         // Update mining timer
         this.miningTimer += delta;
         
-        // Damage block after interval
+        // Damage target after interval
         if (this.miningTimer >= this.miningInterval) {
-          // Play default pickaxe hit sound (block will play its own sound if it has one)
-          if (this.sounds && this.sounds.pickaxeHit && !blockUnderMouse.miningSound) {
+          // Play default pickaxe hit sound (target will play its own sound if it has one)
+          if (this.sounds && this.sounds.pickaxeHit && !targetUnderMouse.miningSound) {
             this.sounds.pickaxeHit.play();
           }
-          this.damageBlock(blockUnderMouse);
+          
+          if (isTree) {
+            this.damageTree(targetUnderMouse);
+          } else {
+            this.damageBlock(targetUnderMouse);
+          }
           this.miningTimer = 0;
         }
       } else {
-        // No block under mouse, but keep pickaxe animating
+        // No target under mouse, but keep pickaxe animating
         // Update pickaxe to point at mouse instead
         if (this.pickaxe) {
           this.pickaxe.startMining(null);
         }
-        // Clear current mining block
+        // Clear current mining target
         this.currentMiningBlock = null;
         this.miningTimer = 0;
       }
@@ -267,6 +301,47 @@ class GameScene extends Phaser.Scene {
         this.currentMiningBlock = null;
         this.miningTimer = 0;
       }
+      if (this.pickaxe) {
+        this.pickaxe.stopMining();
+      }
+    }
+  }
+  
+  damageTree(tree) {
+    // Check if tree still exists and is active
+    if (!tree || !tree.active) {
+      this.currentMiningBlock = null;
+      this.miningTimer = 0;
+      return;
+    }
+    
+    // Damage the tree
+    const isDestroyed = tree.takeDamage(MINING_DAMAGE);
+    
+    // If tree is destroyed, remove it
+    if (isDestroyed) {
+      this.mineTree(tree);
+    }
+  }
+  
+  mineTree(tree) {
+    // Check if tree still exists and is active
+    if (!tree || !tree.active) {
+      this.currentMiningBlock = null;
+      this.miningTimer = 0;
+      return;
+    }
+    
+    // Remove tree from group
+    this.trees.remove(tree, true, true);
+    
+    // Mine the tree (triggers destruction)
+    tree.mine();
+    
+    // Clear mining state if this was the tree we were mining
+    if (this.currentMiningBlock === tree) {
+      this.currentMiningBlock = null;
+      this.miningTimer = 0;
       if (this.pickaxe) {
         this.pickaxe.stopMining();
       }

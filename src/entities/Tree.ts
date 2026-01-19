@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BLOCK_SIZE, TREE_MAX_LIFE, TREE_DARK_TINT_CHANCE } from '../config/constants';
 import { IMineable, IHoverable } from '../types';
+import { ignoreOnUICameras } from '../utils';
 
 const TREE_DISPLAY_SIZE = BLOCK_SIZE * 12;
 const DARK_TINT = 0xcccccc;
@@ -66,6 +67,7 @@ export class Tree extends Phaser.GameObjects.Image implements IMineable, IHovera
     this.hoverOutline.setPosition(this.x, this.y);
     this.hoverOutline.setDepth(this.depth + 1);
     this.hoverOutline.setScrollFactor(1, 1);
+    ignoreOnUICameras(this.scene, this.hoverOutline);
   }
 
   private hideOutline(): void {

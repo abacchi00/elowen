@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BLOCK_SIZE } from '../config/constants';
 import { IMineable, IHoverable, MatrixPosition } from '../types';
+import { ignoreOnUICameras } from '../utils';
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
@@ -61,6 +62,7 @@ export abstract class Block extends Phaser.GameObjects.Image implements IMineabl
     this.hoverOutline.setPosition(this.x, this.y);
     this.hoverOutline.setDepth(this.depth + 1);
     this.hoverOutline.setScrollFactor(1, 1);
+    ignoreOnUICameras(this.scene, this.hoverOutline);
   }
 
   private hideOutline(): void {

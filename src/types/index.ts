@@ -106,3 +106,6 @@ export const ITEM_CONFIGS: Record<ItemType, { maxStack: number; texture: string 
   stone_block: { maxStack: 64, texture: 'stone_block' },
   wood: { maxStack: 64, texture: 'tree' },
 };
+
+// Re-export GameContext
+export type { GameContext } from './GameContext';

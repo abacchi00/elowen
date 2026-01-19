@@ -39,7 +39,7 @@ export class Hotbar {
     this.uiCamera.setScroll(0, 0);
     this.uiCamera.setBackgroundColor('rgba(0,0,0,0)'); // Transparent
     
-    // Main camera ignores the hotbar, UI camera only sees the hotbar
+    // Main camera ignores the hotbar
     scene.cameras.main.ignore(this.container);
     
     // Make UI camera ignore all existing game objects (except hotbar)
@@ -194,14 +194,6 @@ export class Hotbar {
     this.updatePosition();
     // Resize the UI camera too
     this.uiCamera.setSize(this.scene.scale.width, this.scene.scale.height);
-  }
-
-  /**
-   * Call this when new game objects are added to the scene
-   * so the UI camera ignores them.
-   */
-  ignoreOnUiCamera(gameObject: Phaser.GameObjects.GameObject): void {
-    this.uiCamera.ignore(gameObject);
   }
 
   destroy(): void {

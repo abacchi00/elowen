@@ -28,7 +28,7 @@ export class GameScene extends Phaser.Scene {
 
   // Managers
   private soundManager!: SoundManager;
-  private backgroundManager!: BackgroundManager;
+  backgroundManager!: BackgroundManager;
 
   // Systems
   private cameraSystem!: CameraSystem;

@@ -125,8 +125,10 @@ export class Hotbar {
         this.container.add(image);
         this.itemImages[i] = image;
 
-        // Update quantity text
-        this.quantityTexts[i]!.setText(slot.item.quantity > 1 ? slot.item.quantity.toString() : '');
+        // Update quantity text and bring to front
+        const quantityText = this.quantityTexts[i]!;
+        quantityText.setText(slot.item.quantity > 1 ? slot.item.quantity.toString() : '');
+        this.container.bringToTop(quantityText);
       } else {
         this.quantityTexts[i]!.setText('');
       }

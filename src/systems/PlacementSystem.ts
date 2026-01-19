@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { BLOCK_SIZE, BLOCKS_COUNT, GROUND_Y } from '../config/constants';
-import { Block, BlockFactory } from '../blocks';
+import { BlockFactory } from '../blocks';
 import { InventorySystem } from './InventorySystem';
 import { CameraSystem } from './CameraSystem';
 import { BlockType, BlockMatrix, GameSounds } from '../types';
@@ -153,8 +153,15 @@ export class PlacementSystem {
   }
 
   private worldToGrid(worldX: number, worldY: number): { matrixX: number; matrixY: number } {
-    const matrixX = Math.floor((worldX + BLOCK_SIZE / 2) / BLOCK_SIZE) + Math.floor(BLOCKS_COUNT / 2);
-    const matrixY = this.maxHeight - Math.floor((GROUND_Y - worldY + BLOCK_SIZE / 2) / BLOCK_SIZE);
+    // Convert world coordinates to matrix coordinates
+    // Block left edges are at (matrixX - offset) * BLOCK_SIZE
+    // So matrixX = floor(worldX / BLOCK_SIZE) + offset
+    const matrixX = Math.floor(worldX / BLOCK_SIZE) + Math.floor(BLOCKS_COUNT / 2);
+    
+    // For Y: block top edges are at GROUND_Y - (maxHeight - matrixY + 1) * BLOCK_SIZE + BLOCK_SIZE
+    // Simplified: matrixY = maxHeight + floor((worldY - GROUND_Y) / BLOCK_SIZE)
+    const matrixY = this.maxHeight + Math.floor((worldY - GROUND_Y) / BLOCK_SIZE);
+    
     return { matrixX, matrixY };
   }
 

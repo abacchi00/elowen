@@ -5,7 +5,7 @@ import { ITEM_CONFIGS } from '../types';
 const SLOT_SIZE = 50;
 const SLOT_PADDING = 4;
 const SLOT_BORDER_WIDTH = 2;
-const HOTBAR_PADDING = 10;
+const HOTBAR_PADDING = 16;
 const FONT_SIZE = 14;
 
 const COLORS = {
@@ -24,6 +24,7 @@ export class Hotbar {
   private scene: Phaser.Scene;
   private inventory: InventorySystem;
   private container: Phaser.GameObjects.Container;
+  private uiCamera: Phaser.Cameras.Scene2D.Camera;
   private slotGraphics: Phaser.GameObjects.Graphics[] = [];
   private itemImages: (Phaser.GameObjects.Image | null)[] = [];
   private quantityTexts: (Phaser.GameObjects.Text | null)[] = [];
@@ -33,16 +34,29 @@ export class Hotbar {
     this.inventory = inventory;
     this.container = scene.add.container(0, 0);
     
+    // Create a separate UI camera that doesn't zoom and has transparent background
+    this.uiCamera = scene.cameras.add(0, 0, scene.scale.width, scene.scale.height);
+    this.uiCamera.setScroll(0, 0);
+    this.uiCamera.setBackgroundColor('rgba(0,0,0,0)'); // Transparent
+    
+    // Main camera ignores the hotbar, UI camera only sees the hotbar
+    scene.cameras.main.ignore(this.container);
+    
+    // Make UI camera ignore all existing game objects (except hotbar)
+    scene.children.list.forEach(child => {
+      if (child !== this.container) {
+        this.uiCamera.ignore(child);
+      }
+    });
+    
     this.createHotbar();
     this.setupKeyboardInput();
     this.inventory.onChange(() => this.updateDisplay());
     
-    // Position at bottom center
-    this.updatePosition();
-    
-    // Keep UI fixed on screen
-    this.container.setScrollFactor(0);
     this.container.setDepth(1000);
+    
+    // Initial position
+    this.updatePosition();
   }
 
   private createHotbar(): void {
@@ -154,7 +168,9 @@ export class Hotbar {
   }
 
   private updatePosition(): void {
-    const { width, height } = this.scene.cameras.main;
+    const { width, height } = this.scene.scale;
+    
+    // Simple fixed position - UI camera doesn't zoom
     this.container.setPosition(width / 2, height - SLOT_SIZE - HOTBAR_PADDING);
   }
 
@@ -163,9 +179,20 @@ export class Hotbar {
    */
   onResize(): void {
     this.updatePosition();
+    // Resize the UI camera too
+    this.uiCamera.setSize(this.scene.scale.width, this.scene.scale.height);
+  }
+
+  /**
+   * Call this when new game objects are added to the scene
+   * so the UI camera ignores them.
+   */
+  ignoreOnUiCamera(gameObject: Phaser.GameObjects.GameObject): void {
+    this.uiCamera.ignore(gameObject);
   }
 
   destroy(): void {
+    this.scene.cameras.remove(this.uiCamera);
     this.container.destroy();
   }
 }

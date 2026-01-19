@@ -13,7 +13,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
     S: Phaser.Input.Keyboard.Key;
     D: Phaser.Input.Keyboard.Key;
   };
-  
+
   private isOnGround: boolean = false;
   private wasMoving: boolean = false;
   

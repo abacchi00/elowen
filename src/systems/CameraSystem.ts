@@ -11,10 +11,15 @@ import {
 export class CameraSystem {
   private scene: Phaser.Scene;
   private camera: Phaser.Cameras.Scene2D.Camera;
+  private wheelHandler: (event: WheelEvent) => void;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.camera = scene.cameras.main;
+    
+    // Bind the handler so we can remove it later
+    this.wheelHandler = this.handleWheel.bind(this);
+    
     this.setupZoomControls();
   }
 
@@ -34,27 +39,39 @@ export class CameraSystem {
   }
 
   private setupZoomControls(): void {
-    this.scene.input.on('wheel', this.handleZoom, this);
+    // Use native DOM event to reliably detect shift key
+    // { passive: false } is required to call preventDefault()
+    this.scene.game.canvas.addEventListener('wheel', this.wheelHandler, { passive: false });
   }
 
-  private handleZoom(
-    _pointer: Phaser.Input.Pointer,
-    _gameObjects: Phaser.GameObjects.GameObject[],
-    _deltaX: number,
-    deltaY: number
-  ): void {
+  private handleWheel(event: WheelEvent): void {
+    // Only zoom when shift is held
+    if (!event.shiftKey) return;
+    
+    // Prevent page scroll
+    event.preventDefault();
+    
+    // On macOS, shift+scroll converts deltaY to deltaX, so use whichever has a value
+    const delta = event.deltaY !== 0 ? event.deltaY : event.deltaX;
+    this.handleZoom(delta);
+  }
+
+  private handleZoom(delta: number): void {
     const currentZoom = this.camera.zoom;
     let newZoom = currentZoom;
 
-    if (deltaY > 0) {
+    if (delta > 0) {
       // Zoom out
       newZoom = Math.max(CAMERA_MIN_ZOOM, currentZoom - CAMERA_ZOOM_SPEED);
-    } else if (deltaY < 0) {
+    } else if (delta < 0) {
       // Zoom in
       newZoom = Math.min(CAMERA_MAX_ZOOM, currentZoom + CAMERA_ZOOM_SPEED);
     }
 
-    this.camera.setZoom(newZoom);
+    if (newZoom !== currentZoom) {
+      this.camera.setZoom(newZoom);
+      this.scene.events.emit('zoomChange', newZoom);
+    }
   }
 
   /**
@@ -76,11 +93,16 @@ export class CameraSystem {
   }
 
   setZoom(zoom: number): void {
+    this.onZoomChange(zoom);
     const clampedZoom = Math.max(CAMERA_MIN_ZOOM, Math.min(CAMERA_MAX_ZOOM, zoom));
     this.camera.setZoom(clampedZoom);
   }
 
+  onZoomChange(zoom: number): void {
+    this.scene.events.emit('zoomChange', zoom);
+  }
+
   destroy(): void {
-    this.scene.input.off('wheel', this.handleZoom, this);
+    this.scene.game.canvas.removeEventListener('wheel', this.wheelHandler);
   }
 }

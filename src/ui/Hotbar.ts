@@ -165,13 +165,26 @@ export class Hotbar {
         this.inventory.selectSlot(i - 1);
       });
     }
+
+    this.scene.input.on('wheel', (pointer: Phaser.Input.Pointer, _gameObjects: any, _deltaX: number, deltaY: number) => {
+      // Only change slots when shift is NOT held (shift+scroll is for zoom)
+      if (pointer.event.shiftKey) return;
+
+      const slotsLength = this.inventory.getSlots().length;
+      const currentSlotIndex = this.inventory.getSelectedSlotIndex();
+      const newSlotIndex = (currentSlotIndex + slotsLength + (deltaY > 0 ? 1 : -1)) % slotsLength;
+
+      this.inventory.selectSlot(newSlotIndex);
+    });
   }
 
   private updatePosition(): void {
-    const { width, height } = this.scene.scale;
-    
-    // Simple fixed position - UI camera doesn't zoom
-    this.container.setPosition(width / 2, height - SLOT_SIZE - HOTBAR_PADDING);
+    const slots = this.inventory.getSlots();
+
+    const containerPositionY = HOTBAR_PADDING;
+    const containerPositionX = HOTBAR_PADDING + (SLOT_SIZE + SLOT_PADDING) * 0.5 * slots.length;
+
+    this.container.setPosition(containerPositionX, containerPositionY);
   }
 
   /**

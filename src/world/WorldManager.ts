@@ -11,7 +11,6 @@ import { TerrainGenerator } from '../terrain';
  */
 export class WorldManager {
   private scene: Phaser.Scene;
-  private sounds: GameSounds | null;
   
   // Block data
   private mapMatrix: BlockMatrix = [];
@@ -24,7 +23,6 @@ export class WorldManager {
 
   constructor(scene: Phaser.Scene, sounds: GameSounds | null) {
     this.scene = scene;
-    this.sounds = sounds;
     this.blocks = scene.physics.add.staticGroup();
     this.trees = scene.add.group();
     this.blockFactory = new BlockFactory(scene, sounds);

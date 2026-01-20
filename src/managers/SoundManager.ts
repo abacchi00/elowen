@@ -9,8 +9,8 @@ interface SoundConfig {
 const SOUND_CONFIGS: Record<keyof GameSounds, SoundConfig> = {
   running: { loop: true, volume: 2 },
   jump: { volume: 0.6 },
-  pickaxeHit: { volume: 0.4 },
-  pickaxeHitStone: { volume: 0.5 },
+  pickaxeHit: { volume: 0.2 },
+  pickaxeHitStone: { volume: 0.2 },
 };
 
 /**

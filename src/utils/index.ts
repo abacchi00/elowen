@@ -1,1 +1,1 @@
-export { ignoreOnUICameras } from './camera';
+export { ignoreOnUICameras } from "./camera";

@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import { GameSounds } from '../types';
+import Phaser from "phaser";
+import { GameSounds } from "../types";
 
 interface SoundConfig {
   loop?: boolean;
@@ -28,10 +28,16 @@ export class SoundManager {
 
   private createSounds(): GameSounds {
     return {
-      running: this.soundManager.add('running', SOUND_CONFIGS.running),
-      jump: this.soundManager.add('jump', SOUND_CONFIGS.jump),
-      pickaxeHit: this.soundManager.add('pickaxe_hit', SOUND_CONFIGS.pickaxeHit),
-      pickaxeHitStone: this.soundManager.add('pickaxe_hit_stone', SOUND_CONFIGS.pickaxeHitStone),
+      running: this.soundManager.add("running", SOUND_CONFIGS.running),
+      jump: this.soundManager.add("jump", SOUND_CONFIGS.jump),
+      pickaxeHit: this.soundManager.add(
+        "pickaxe_hit",
+        SOUND_CONFIGS.pickaxeHit,
+      ),
+      pickaxeHitStone: this.soundManager.add(
+        "pickaxe_hit_stone",
+        SOUND_CONFIGS.pickaxeHitStone,
+      ),
     };
   }
 

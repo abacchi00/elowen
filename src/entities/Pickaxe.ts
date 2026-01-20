@@ -1,7 +1,7 @@
-import Phaser from 'phaser';
-import { BLOCK_SIZE } from '../config/constants';
-import { Player } from './Player';
-import { IUpdatable } from '../types';
+import Phaser from "phaser";
+import { BLOCK_SIZE } from "../config/constants";
+import { Player } from "./Player";
+import { IUpdatable } from "../types";
 
 const SWING_SPEED = 0.03;
 const SWING_AMPLITUDE = 0.6;
@@ -17,16 +17,16 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
   private currentTargetBlock: Phaser.GameObjects.GameObject | null = null;
 
   constructor(scene: Phaser.Scene, player: Player) {
-    super(scene, 0, 0, 'pickaxe');
+    super(scene, 0, 0, "pickaxe");
 
     this.player = player;
-    
+
     // Set display size
     this.setDisplaySize(BLOCK_SIZE, BLOCK_SIZE);
-    
+
     // Set pivot point at the handle
     this.setOrigin(-0.2, 0.9);
-    
+
     // Add to scene
     scene.add.existing(this);
   }
@@ -34,9 +34,9 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
   update(): void {
     const { x: playerX, y: playerY } = this.player.getBodyCenter();
     const mouseWorld = this.getMouseWorldPosition();
-    
+
     const isMouseOnLeft = mouseWorld.x < playerX;
-    
+
     this.updateFlipAndOrigin(isMouseOnLeft);
     this.updatePosition(playerX, playerY, isMouseOnLeft);
     this.updateRotation(mouseWorld);
@@ -61,7 +61,11 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
     this.setOrigin(-0.2, isMouseOnLeft ? 0.1 : 0.9);
   }
 
-  private updatePosition(playerX: number, playerY: number, isMouseOnLeft: boolean): void {
+  private updatePosition(
+    playerX: number,
+    playerY: number,
+    isMouseOnLeft: boolean,
+  ): void {
     const handOffsetX = isMouseOnLeft ? -BLOCK_SIZE * 0.3 : BLOCK_SIZE * 0.3;
     const handOffsetY = BLOCK_SIZE * 0.4;
 
@@ -76,7 +80,10 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
     let targetRotation = Math.atan2(dy, dx);
 
     // Point toward target block if mining
-    if (this.currentTargetBlock && (this.currentTargetBlock as Phaser.GameObjects.Image).active) {
+    if (
+      this.currentTargetBlock &&
+      (this.currentTargetBlock as Phaser.GameObjects.Image).active
+    ) {
       const target = this.currentTargetBlock as Phaser.GameObjects.Image;
       const blockDx = target.x - this.x;
       const blockDy = target.y - this.y;
@@ -110,7 +117,8 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
       this.mineAnimationProgress = 0;
     }
 
-    const swingAngle = Math.sin(this.mineAnimationProgress * Math.PI * 2) * SWING_AMPLITUDE;
+    const swingAngle =
+      Math.sin(this.mineAnimationProgress * Math.PI * 2) * SWING_AMPLITUDE;
     this.rotation = this.targetRotation + swingAngle;
   }
 

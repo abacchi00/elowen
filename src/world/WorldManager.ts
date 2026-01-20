@@ -1,9 +1,20 @@
-import Phaser from 'phaser';
-import { BLOCK_SIZE, BLOCKS_COUNT, GROUND_Y, TREE_SPAWN_CHANCE } from '../config/constants';
-import { BlockType, BlockMatrix, GameSounds, Position, MatrixPosition } from '../types';
-import { Block, BlockFactory } from '../blocks';
-import { Tree } from '../entities';
-import { TerrainGenerator } from '../terrain';
+import Phaser from "phaser";
+import {
+  BLOCK_SIZE,
+  BLOCKS_COUNT,
+  GROUND_Y,
+  TREE_SPAWN_CHANCE,
+} from "../config/constants";
+import {
+  BlockType,
+  BlockMatrix,
+  GameSounds,
+  Position,
+  MatrixPosition,
+} from "../types";
+import { Block, BlockFactory } from "../blocks";
+import { Tree } from "../entities";
+import { TerrainGenerator } from "../terrain";
 
 /**
  * Manages the game world: terrain, blocks, and coordinate conversions.
@@ -11,13 +22,13 @@ import { TerrainGenerator } from '../terrain';
  */
 export class WorldManager {
   private scene: Phaser.Scene;
-  
+
   // Block data
   private mapMatrix: BlockMatrix = [];
   private blocks: Phaser.Physics.Arcade.StaticGroup;
   private trees: Phaser.GameObjects.Group;
   private blockFactory: BlockFactory;
-  
+
   // Terrain info
   private maxHeight: number = 0;
 
@@ -25,6 +36,7 @@ export class WorldManager {
     this.scene = scene;
     this.blocks = scene.physics.add.staticGroup();
     this.trees = scene.add.group();
+
     this.blockFactory = new BlockFactory(scene, sounds);
   }
 
@@ -35,19 +47,23 @@ export class WorldManager {
     const generator = new TerrainGenerator();
     this.mapMatrix = generator.generate();
     this.maxHeight = Math.max(...generator.heightMap);
-    
+
     this.createBlocksFromMatrix();
   }
 
   private createBlocksFromMatrix(): void {
     for (let matrixX = 0; matrixX < this.mapMatrix.length; matrixX++) {
-      for (let matrixY = 0; matrixY < this.mapMatrix[matrixX].length; matrixY++) {
+      for (
+        let matrixY = 0;
+        matrixY < this.mapMatrix[matrixX].length;
+        matrixY++
+      ) {
         const blockType = this.mapMatrix[matrixX][matrixY];
         if (!blockType) continue;
 
         const worldPos = this.matrixToWorld(matrixX, matrixY);
         const block = this.createBlock(worldPos.x, worldPos.y, blockType);
-        
+
         block.matrixX = matrixX;
         block.matrixY = matrixY;
 
@@ -55,7 +71,7 @@ export class WorldManager {
         block.setupPhysics();
 
         // Spawn trees on grass blocks
-        if (blockType === 'grass_block' && Math.random() < TREE_SPAWN_CHANCE) {
+        if (blockType === "grass_block" && Math.random() < TREE_SPAWN_CHANCE) {
           this.createTree(worldPos.x, worldPos.y, block.depth);
         }
       }
@@ -80,8 +96,10 @@ export class WorldManager {
    * Converts matrix coordinates to world coordinates.
    */
   matrixToWorld(matrixX: number, matrixY: number): Position {
-    const worldX = (matrixX - Math.floor(BLOCKS_COUNT / 2)) * BLOCK_SIZE + (BLOCK_SIZE / 2);
-    const worldY = GROUND_Y - (this.maxHeight - matrixY) * BLOCK_SIZE + (BLOCK_SIZE / 2);
+    const worldX =
+      (matrixX - Math.floor(BLOCKS_COUNT / 2)) * BLOCK_SIZE + BLOCK_SIZE / 2;
+    const worldY =
+      GROUND_Y - (this.maxHeight - matrixY) * BLOCK_SIZE + BLOCK_SIZE / 2;
     return { x: worldX, y: worldY };
   }
 
@@ -89,8 +107,10 @@ export class WorldManager {
    * Converts world coordinates to matrix coordinates.
    */
   worldToMatrix(worldX: number, worldY: number): MatrixPosition {
-    const matrixX = Math.floor(worldX / BLOCK_SIZE) + Math.floor(BLOCKS_COUNT / 2);
-    const matrixY = this.maxHeight + Math.floor((worldY - GROUND_Y) / BLOCK_SIZE);
+    const matrixX =
+      Math.floor(worldX / BLOCK_SIZE) + Math.floor(BLOCKS_COUNT / 2);
+    const matrixY =
+      this.maxHeight + Math.floor((worldY - GROUND_Y) / BLOCK_SIZE);
     return { matrixX, matrixY };
   }
 
@@ -103,7 +123,9 @@ export class WorldManager {
    */
   getBlockAt(matrixX: number, matrixY: number): Block | null {
     const children = this.blocks.getChildren() as Block[];
-    return children.find(b => b.matrixX === matrixX && b.matrixY === matrixY) || null;
+    return (
+      children.find(b => b.matrixX === matrixX && b.matrixY === matrixY) || null
+    );
   }
 
   /**
@@ -121,7 +143,7 @@ export class WorldManager {
   findBlockAtWorld(worldX: number, worldY: number): Block | null {
     let foundBlock: Block | null = null;
 
-    this.blocks.children.each((child) => {
+    this.blocks.children.each(child => {
       const block = child as Block;
       if (block.active) {
         const bounds = block.getBounds();
@@ -141,7 +163,7 @@ export class WorldManager {
   findTreeAtWorld(worldX: number, worldY: number): Tree | null {
     let foundTree: Tree | null = null;
 
-    this.trees.children.each((child) => {
+    this.trees.children.each(child => {
       const tree = child as Tree;
       if (tree.active) {
         const bounds = tree.getBounds();
@@ -167,7 +189,7 @@ export class WorldManager {
 
     const worldPos = this.matrixToWorld(matrixX, matrixY);
     const block = this.createBlock(worldPos.x, worldPos.y, type);
-    
+
     block.matrixX = matrixX;
     block.matrixY = matrixY;
 
@@ -177,7 +199,7 @@ export class WorldManager {
     this.mapMatrix[matrixX][matrixY] = type;
 
     // Emit event
-    this.scene.events.emit('block:placed', block);
+    this.scene.events.emit("block:placed", block);
 
     return block;
   }
@@ -189,9 +211,9 @@ export class WorldManager {
     const textureKey = block.texture.key;
     let blockType: BlockType | null = null;
 
-    if (textureKey.startsWith('grass_block')) blockType = 'grass_block';
-    else if (textureKey.startsWith('dirt_block')) blockType = 'dirt_block';
-    else if (textureKey.startsWith('stone_block')) blockType = 'stone_block';
+    if (textureKey.startsWith("grass_block")) blockType = "grass_block";
+    else if (textureKey.startsWith("dirt_block")) blockType = "dirt_block";
+    else if (textureKey.startsWith("stone_block")) blockType = "stone_block";
 
     // Update matrix
     this.mapMatrix[block.matrixX][block.matrixY] = null;
@@ -203,7 +225,7 @@ export class WorldManager {
     block.mine();
 
     // Emit event
-    this.scene.events.emit('block:mined', block, blockType);
+    this.scene.events.emit("block:mined", block, blockType);
 
     return blockType;
   }
@@ -216,7 +238,7 @@ export class WorldManager {
     tree.mine();
 
     // Emit event
-    this.scene.events.emit('tree:mined', tree);
+    this.scene.events.emit("tree:mined", tree);
   }
 
   /**

@@ -1,7 +1,7 @@
-import Phaser from 'phaser';
-import { BLOCK_SIZE } from '../config/constants';
-import { GameContext, BlockType } from '../types';
-import { ignoreOnUICameras } from '../utils';
+import Phaser from "phaser";
+import { BLOCK_SIZE } from "../config/constants";
+import { GameContext, BlockType } from "../types";
+import { ignoreOnUICameras } from "../utils";
 
 /**
  * Handles block placement from inventory.
@@ -16,20 +16,20 @@ export class PlacementSystem {
     this.previewGraphics = ctx.scene.add.graphics();
     this.previewGraphics.setDepth(100);
     ignoreOnUICameras(ctx.scene, this.previewGraphics);
-    
+
     this.setupInput();
   }
 
   private setupInput(): void {
     // Right-click to place
-    this.ctx.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    this.ctx.scene.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (pointer.rightButtonDown()) {
         this.tryPlaceBlock(pointer);
       }
     });
 
     // Disable context menu
-    this.ctx.scene.game.canvas.addEventListener('contextmenu', (e) => {
+    this.ctx.scene.game.canvas.addEventListener("contextmenu", e => {
       e.preventDefault();
     });
   }
@@ -45,27 +45,33 @@ export class PlacementSystem {
     if (!selectedType || !this.isBlockType(selectedType)) return;
 
     const mousePointer = this.ctx.scene.input.mousePointer;
-    const worldPos = this.ctx.camera.screenToWorld(mousePointer.x, mousePointer.y);
+    const worldPos = this.ctx.camera.screenToWorld(
+      mousePointer.x,
+      mousePointer.y,
+    );
     const gridPos = this.ctx.world.worldToMatrix(worldPos.x, worldPos.y);
-    
+
     if (!this.ctx.world.canPlaceAt(gridPos.matrixX, gridPos.matrixY)) return;
 
-    const worldGridPos = this.ctx.world.matrixToWorld(gridPos.matrixX, gridPos.matrixY);
-    
+    const worldGridPos = this.ctx.world.matrixToWorld(
+      gridPos.matrixX,
+      gridPos.matrixY,
+    );
+
     // Draw semi-transparent preview
     this.previewGraphics.fillStyle(0xffffff, 0.3);
     this.previewGraphics.fillRect(
       worldGridPos.x - BLOCK_SIZE / 2,
       worldGridPos.y - BLOCK_SIZE / 2,
       BLOCK_SIZE,
-      BLOCK_SIZE
+      BLOCK_SIZE,
     );
     this.previewGraphics.lineStyle(2, 0xffffff, 0.5);
     this.previewGraphics.strokeRect(
       worldGridPos.x - BLOCK_SIZE / 2,
       worldGridPos.y - BLOCK_SIZE / 2,
       BLOCK_SIZE,
-      BLOCK_SIZE
+      BLOCK_SIZE,
     );
   }
 
@@ -83,11 +89,15 @@ export class PlacementSystem {
     if (!usedType) return;
 
     // Place the block (WorldManager handles the event)
-    this.ctx.world.placeBlock(gridPos.matrixX, gridPos.matrixY, usedType as BlockType);
+    this.ctx.world.placeBlock(
+      gridPos.matrixX,
+      gridPos.matrixY,
+      usedType as BlockType,
+    );
   }
 
   private isBlockType(type: string): type is BlockType {
-    return ['grass_block', 'dirt_block', 'stone_block'].includes(type);
+    return ["grass_block", "dirt_block", "stone_block"].includes(type);
   }
 
   destroy(): void {

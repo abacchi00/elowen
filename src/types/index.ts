@@ -1,10 +1,10 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
 
 // ============================================================================
 // Game Types
 // ============================================================================
 
-export type BlockType = 'grass_block' | 'dirt_block' | 'stone_block';
+export type BlockType = "grass_block" | "dirt_block" | "stone_block";
 
 export type BlockMatrix = (BlockType | null)[][];
 
@@ -54,7 +54,7 @@ export interface IUpdatable {
 // Inventory Types
 // ============================================================================
 
-export type ItemType = BlockType | 'wood'; // Blocks + other items like wood from trees
+export type ItemType = BlockType | "wood"; // Blocks + other items like wood from trees
 
 export interface InventoryItem {
   type: ItemType;
@@ -79,20 +79,20 @@ export interface BlockConfig {
 
 export const BLOCK_CONFIGS: Record<BlockType, BlockConfig> = {
   grass_block: {
-    texture: 'grass_block',
+    texture: "grass_block",
     maxLife: 100,
     hasLifeTextures: true,
   },
   dirt_block: {
-    texture: 'dirt_block',
+    texture: "dirt_block",
     maxLife: 100,
     hasLifeTextures: true,
   },
   stone_block: {
-    texture: 'stone_block',
+    texture: "stone_block",
     maxLife: 200,
     hasLifeTextures: true,
-    miningSound: 'pickaxeHitStone',
+    miningSound: "pickaxeHitStone",
   },
 };
 
@@ -100,12 +100,15 @@ export const BLOCK_CONFIGS: Record<BlockType, BlockConfig> = {
 // Item Configuration
 // ============================================================================
 
-export const ITEM_CONFIGS: Record<ItemType, { maxStack: number; texture: string }> = {
-  grass_block: { maxStack: 64, texture: 'grass_block' },
-  dirt_block: { maxStack: 64, texture: 'dirt_block' },
-  stone_block: { maxStack: 64, texture: 'stone_block' },
-  wood: { maxStack: 64, texture: 'tree' },
+export const ITEM_CONFIGS: Record<
+  ItemType,
+  { maxStack: number; texture: string }
+> = {
+  grass_block: { maxStack: 64, texture: "grass_block" },
+  dirt_block: { maxStack: 64, texture: "dirt_block" },
+  stone_block: { maxStack: 64, texture: "stone_block" },
+  wood: { maxStack: 64, texture: "tree" },
 };
 
 // Re-export GameContext
-export type { GameContext } from './GameContext';
+export type { GameContext } from "./GameContext";

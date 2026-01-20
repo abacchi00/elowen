@@ -1,8 +1,8 @@
-import { MINING_DAMAGE, MINING_INTERVAL } from '../config/constants';
-import { Block } from '../blocks/Block';
-import { Tree } from '../entities/Tree';
-import { Pickaxe } from '../entities/Pickaxe';
-import { GameContext, IMineable } from '../types';
+import { MINING_DAMAGE, MINING_INTERVAL } from "../config/constants";
+import { Block } from "../blocks/Block";
+import { Tree } from "../entities/Tree";
+import { Pickaxe } from "../entities/Pickaxe";
+import { GameContext, IMineable } from "../types";
 
 type MineableTarget = Block | Tree;
 
@@ -32,11 +32,17 @@ export class MiningSystem {
     }
   }
 
-  private handleMining(delta: number, mousePointer: Phaser.Input.Pointer): void {
+  private handleMining(
+    delta: number,
+    mousePointer: Phaser.Input.Pointer,
+  ): void {
     if (!this.pickaxe.active) return;
     this.pickaxe.startMining(null);
 
-    const worldPos = this.ctx.camera.screenToWorld(mousePointer.x, mousePointer.y);
+    const worldPos = this.ctx.camera.screenToWorld(
+      mousePointer.x,
+      mousePointer.y,
+    );
     const target = this.findTargetAt(worldPos.x, worldPos.y);
 
     if (target) {
@@ -99,7 +105,7 @@ export class MiningSystem {
       }
     } else if (target instanceof Tree) {
       this.ctx.world.removeTree(target);
-      this.ctx.inventory.addItem('wood', 1);
+      this.ctx.inventory.addItem("wood", 1);
     }
 
     this.resetMining();

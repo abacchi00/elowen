@@ -1,7 +1,7 @@
-import Phaser from 'phaser';
-import { BLOCK_SIZE } from '../config/constants';
-import { IMineable, IHoverable, MatrixPosition } from '../types';
-import { ignoreOnUICameras } from '../utils';
+import Phaser from "phaser";
+import { BLOCK_SIZE } from "../config/constants";
+import { IMineable, IHoverable, MatrixPosition } from "../types";
+import { ignoreOnUICameras } from "../utils";
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
@@ -10,7 +10,10 @@ const OUTLINE_WIDTH = 2;
  * Base Block class with common functionality.
  * Implements IMineable and IHoverable interfaces.
  */
-export abstract class Block extends Phaser.GameObjects.Image implements IMineable, IHoverable, MatrixPosition {
+export abstract class Block
+  extends Phaser.GameObjects.Image
+  implements IMineable, IHoverable, MatrixPosition
+{
   public life: number;
   public maxLife: number;
   public miningSound: Phaser.Sound.BaseSound | null = null;
@@ -18,7 +21,13 @@ export abstract class Block extends Phaser.GameObjects.Image implements IMineabl
   public matrixX: number = 0;
   public matrixY: number = 0;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, texture: string, maxLife: number = 100) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    texture: string,
+    maxLife: number = 100,
+  ) {
     super(scene, x, y, texture);
 
     this.maxLife = maxLife;
@@ -49,8 +58,8 @@ export abstract class Block extends Phaser.GameObjects.Image implements IMineabl
   }
 
   setupHoverEffects(): void {
-    this.on('pointerover', this.showOutline, this);
-    this.on('pointerout', this.hideOutline, this);
+    this.on("pointerover", this.showOutline, this);
+    this.on("pointerout", this.hideOutline, this);
   }
 
   private showOutline(): void {
@@ -58,7 +67,12 @@ export abstract class Block extends Phaser.GameObjects.Image implements IMineabl
 
     this.hoverOutline = this.scene.add.graphics();
     this.hoverOutline.lineStyle(OUTLINE_WIDTH, OUTLINE_COLOR, 1);
-    this.hoverOutline.strokeRect(-BLOCK_SIZE / 2, -BLOCK_SIZE / 2, BLOCK_SIZE, BLOCK_SIZE);
+    this.hoverOutline.strokeRect(
+      -BLOCK_SIZE / 2,
+      -BLOCK_SIZE / 2,
+      BLOCK_SIZE,
+      BLOCK_SIZE,
+    );
     this.hoverOutline.setPosition(this.x, this.y);
     this.hoverOutline.setDepth(this.depth + 1);
     this.hoverOutline.setScrollFactor(1, 1);
@@ -87,7 +101,7 @@ export abstract class Block extends Phaser.GameObjects.Image implements IMineabl
     this.hideOutline();
     // Emit event if scene is still available
     if (this.scene?.events) {
-      this.scene.events.emit('blockMined', this);
+      this.scene.events.emit("blockMined", this);
     }
     this.destroy();
   }

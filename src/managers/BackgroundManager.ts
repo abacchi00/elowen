@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import { SCREEN_HEIGHT, BLOCKS_COUNT, BLOCK_SIZE } from '../config/constants';
+import Phaser from "phaser";
+import { SCREEN_HEIGHT, BLOCKS_COUNT, BLOCK_SIZE } from "../config/constants";
 
 const SKY_COLOR = 0x87ceeb;
 const SKY_DEPTH = -1000;
@@ -14,7 +14,9 @@ export class BackgroundManager {
     this.graphics = this.createSkyBackground(scene);
   }
 
-  private createSkyBackground(scene: Phaser.Scene): Phaser.GameObjects.Graphics {
+  private createSkyBackground(
+    scene: Phaser.Scene,
+  ): Phaser.GameObjects.Graphics {
     const skyHeight = SCREEN_HEIGHT * 20;
     const skyWidth = BLOCKS_COUNT * BLOCK_SIZE * 4;
 

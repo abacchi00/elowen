@@ -1,9 +1,9 @@
-import Phaser from 'phaser';
-import { Block } from './Block';
-import { GrassBlock } from './GrassBlock';
-import { DirtBlock } from './DirtBlock';
-import { StoneBlock } from './StoneBlock';
-import { BlockType, GameSounds } from '../types';
+import Phaser from "phaser";
+import { Block } from "./Block";
+import { GrassBlock } from "./GrassBlock";
+import { DirtBlock } from "./DirtBlock";
+import { StoneBlock } from "./StoneBlock";
+import { BlockType, GameSounds } from "../types";
 
 /**
  * Factory for creating block instances based on block type.
@@ -23,11 +23,11 @@ export class BlockFactory {
    */
   create(x: number, y: number, type: BlockType): Block {
     switch (type) {
-      case 'grass_block':
+      case "grass_block":
         return new GrassBlock(this.scene, x, y);
-      case 'dirt_block':
+      case "dirt_block":
         return new DirtBlock(this.scene, x, y);
-      case 'stone_block':
+      case "stone_block":
         return new StoneBlock(this.scene, x, y, this.sounds);
       default:
         // TypeScript ensures exhaustive check
@@ -44,7 +44,7 @@ export class BlockFactory {
     x: number,
     y: number,
     type: BlockType,
-    sounds?: GameSounds | null
+    sounds?: GameSounds | null,
   ): Block {
     const factory = new BlockFactory(scene, sounds);
     return factory.create(x, y, type);

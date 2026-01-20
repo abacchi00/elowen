@@ -1,7 +1,11 @@
-import Phaser from 'phaser';
-import { BLOCK_SIZE, TREE_MAX_LIFE, TREE_DARK_TINT_CHANCE } from '../config/constants';
-import { IMineable, IHoverable } from '../types';
-import { ignoreOnUICameras } from '../utils';
+import Phaser from "phaser";
+import {
+  BLOCK_SIZE,
+  TREE_MAX_LIFE,
+  TREE_DARK_TINT_CHANCE,
+} from "../config/constants";
+import { IMineable, IHoverable } from "../types";
+import { ignoreOnUICameras } from "../utils";
 
 const TREE_DISPLAY_SIZE = BLOCK_SIZE * 12;
 const DARK_TINT = 0xcccccc;
@@ -11,14 +15,17 @@ const OUTLINE_WIDTH = 2;
 /**
  * Tree entity - passable but minable.
  */
-export class Tree extends Phaser.GameObjects.Image implements IMineable, IHoverable {
+export class Tree
+  extends Phaser.GameObjects.Image
+  implements IMineable, IHoverable
+{
   public life: number;
   public maxLife: number;
   public miningSound: Phaser.Sound.BaseSound | null = null;
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 'tree');
+    super(scene, x, y, "tree");
 
     this.maxLife = TREE_MAX_LIFE;
     this.life = this.maxLife;
@@ -54,8 +61,8 @@ export class Tree extends Phaser.GameObjects.Image implements IMineable, IHovera
   }
 
   setupHoverEffects(): void {
-    this.on('pointerover', this.showOutline, this);
-    this.on('pointerout', this.hideOutline, this);
+    this.on("pointerover", this.showOutline, this);
+    this.on("pointerout", this.hideOutline, this);
   }
 
   private showOutline(): void {
@@ -63,7 +70,12 @@ export class Tree extends Phaser.GameObjects.Image implements IMineable, IHovera
 
     this.hoverOutline = this.scene.add.graphics();
     this.hoverOutline.lineStyle(OUTLINE_WIDTH, OUTLINE_COLOR, 1);
-    this.hoverOutline.strokeRect(-BLOCK_SIZE / 2, -BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    this.hoverOutline.strokeRect(
+      -BLOCK_SIZE / 2,
+      -BLOCK_SIZE,
+      BLOCK_SIZE,
+      BLOCK_SIZE,
+    );
     this.hoverOutline.setPosition(this.x, this.y);
     this.hoverOutline.setDepth(this.depth + 1);
     this.hoverOutline.setScrollFactor(1, 1);
@@ -81,7 +93,7 @@ export class Tree extends Phaser.GameObjects.Image implements IMineable, IHovera
     this.hideOutline();
     // Emit event if scene is still available
     if (this.scene?.events) {
-      this.scene.events.emit('treeMined', this);
+      this.scene.events.emit("treeMined", this);
     }
     this.destroy();
   }

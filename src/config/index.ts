@@ -1,2 +1,2 @@
-export * from './constants';
-export { createGameConfig } from './GameConfig';
+export * from "./constants";
+export { createGameConfig } from "./GameConfig";

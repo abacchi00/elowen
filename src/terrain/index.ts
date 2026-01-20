@@ -1,1 +1,1 @@
-export { TerrainGenerator } from './TerrainGenerator';
+export { TerrainGenerator } from "./TerrainGenerator";

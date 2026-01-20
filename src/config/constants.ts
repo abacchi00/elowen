@@ -53,5 +53,5 @@ export const BASE_DEPTH = 43;
 // ============================================================================
 
 export const TREE_MAX_LIFE = 80;
-export const TREE_SPAWN_CHANCE = 0.10; // 10%
-export const TREE_DARK_TINT_CHANCE = 0.30; // 30%
+export const TREE_SPAWN_CHANCE = 0.1; // 10%
+export const TREE_DARK_TINT_CHANCE = 0.3; // 30%

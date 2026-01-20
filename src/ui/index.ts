@@ -1,1 +1,1 @@
-export { Hotbar } from './Hotbar';
+export { Hotbar } from "./Hotbar";

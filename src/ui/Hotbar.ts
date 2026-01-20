@@ -1,6 +1,6 @@
-import Phaser from 'phaser';
-import { InventorySystem } from '../systems/InventorySystem';
-import { ITEM_CONFIGS } from '../types';
+import Phaser from "phaser";
+import { InventorySystem } from "../systems/InventorySystem";
+import { ITEM_CONFIGS } from "../types";
 
 const SLOT_SIZE = 50;
 const SLOT_PADDING = 4;
@@ -12,8 +12,8 @@ const COLORS = {
   slotBackground: 0x333333,
   slotBorder: 0x666666,
   selectedBorder: 0xffcc00,
-  textColor: '#ffffff',
-  textStroke: '#000000',
+  textColor: "#ffffff",
+  textStroke: "#000000",
 };
 
 /**
@@ -33,28 +33,33 @@ export class Hotbar {
     this.scene = scene;
     this.inventory = inventory;
     this.container = scene.add.container(0, 0);
-    
+
     // Create a separate UI camera that doesn't zoom and has transparent background
-    this.uiCamera = scene.cameras.add(0, 0, scene.scale.width, scene.scale.height);
+    this.uiCamera = scene.cameras.add(
+      0,
+      0,
+      scene.scale.width,
+      scene.scale.height,
+    );
     this.uiCamera.setScroll(0, 0);
-    this.uiCamera.setBackgroundColor('rgba(0,0,0,0)'); // Transparent
-    
+    this.uiCamera.setBackgroundColor("rgba(0,0,0,0)"); // Transparent
+
     // Main camera ignores the hotbar
     scene.cameras.main.ignore(this.container);
-    
+
     // Make UI camera ignore all existing game objects (except hotbar)
     scene.children.list.forEach(child => {
       if (child !== this.container) {
         this.uiCamera.ignore(child);
       }
     });
-    
+
     this.createHotbar();
     this.setupKeyboardInput();
     this.inventory.onChange(() => this.updateDisplay());
-    
+
     this.container.setDepth(1000);
-    
+
     // Initial position
     this.updatePosition();
   }
@@ -66,10 +71,15 @@ export class Hotbar {
 
     for (let i = 0; i < slots.length; i++) {
       const x = startX + i * (SLOT_SIZE + SLOT_PADDING);
-      
+
       // Slot background
       const graphics = this.scene.add.graphics();
-      this.drawSlot(graphics, x, 0, i === this.inventory.getSelectedSlotIndex());
+      this.drawSlot(
+        graphics,
+        x,
+        0,
+        i === this.inventory.getSelectedSlotIndex(),
+      );
       this.container.add(graphics);
       this.slotGraphics.push(graphics);
 
@@ -77,17 +87,12 @@ export class Hotbar {
       this.itemImages.push(null);
 
       // Quantity text
-      const text = this.scene.add.text(
-        x + SLOT_SIZE - 5,
-        SLOT_SIZE - 5,
-        '',
-        {
-          fontSize: `${FONT_SIZE}px`,
-          color: COLORS.textColor,
-          stroke: COLORS.textStroke,
-          strokeThickness: 2,
-        }
-      );
+      const text = this.scene.add.text(x + SLOT_SIZE - 5, SLOT_SIZE - 5, "", {
+        fontSize: `${FONT_SIZE}px`,
+        color: COLORS.textColor,
+        stroke: COLORS.textStroke,
+        strokeThickness: 2,
+      });
       text.setOrigin(1, 1);
       this.container.add(text);
       this.quantityTexts.push(text);
@@ -96,13 +101,18 @@ export class Hotbar {
     this.updateDisplay();
   }
 
-  private drawSlot(graphics: Phaser.GameObjects.Graphics, x: number, y: number, isSelected: boolean): void {
+  private drawSlot(
+    graphics: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    isSelected: boolean,
+  ): void {
     graphics.clear();
-    
+
     // Background
     graphics.fillStyle(COLORS.slotBackground, 0.8);
     graphics.fillRect(x, y, SLOT_SIZE, SLOT_SIZE);
-    
+
     // Border
     const borderColor = isSelected ? COLORS.selectedBorder : COLORS.slotBorder;
     graphics.lineStyle(isSelected ? 3 : SLOT_BORDER_WIDTH, borderColor);
@@ -133,7 +143,7 @@ export class Hotbar {
         const image = this.scene.add.image(
           x + SLOT_SIZE / 2,
           SLOT_SIZE / 2,
-          config.texture
+          config.texture,
         );
         image.setDisplaySize(SLOT_SIZE - 10, SLOT_SIZE - 10);
         this.container.add(image);
@@ -141,18 +151,30 @@ export class Hotbar {
 
         // Update quantity text and bring to front
         const quantityText = this.quantityTexts[i]!;
-        quantityText.setText(slot.item.quantity > 1 ? slot.item.quantity.toString() : '');
+        quantityText.setText(
+          slot.item.quantity > 1 ? slot.item.quantity.toString() : "",
+        );
         this.container.bringToTop(quantityText);
       } else {
-        this.quantityTexts[i]!.setText('');
+        this.quantityTexts[i]!.setText("");
       }
     }
   }
 
   private setupKeyboardInput(): void {
     // Number keys 1-9 to select slots
-    const keyNames = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
-    
+    const keyNames = [
+      "ONE",
+      "TWO",
+      "THREE",
+      "FOUR",
+      "FIVE",
+      "SIX",
+      "SEVEN",
+      "EIGHT",
+      "NINE",
+    ];
+
     keyNames.forEach((keyName, index) => {
       this.scene.input.keyboard?.on(`keydown-${keyName}`, () => {
         this.inventory.selectSlot(index);
@@ -166,23 +188,34 @@ export class Hotbar {
       });
     }
 
-    this.scene.input.on('wheel', (pointer: Phaser.Input.Pointer, _gameObjects: any, _deltaX: number, deltaY: number) => {
-      // Only change slots when shift is NOT held (shift+scroll is for zoom)
-      if (pointer.event.shiftKey) return;
+    this.scene.input.on(
+      "wheel",
+      (
+        pointer: Phaser.Input.Pointer,
+        _gameObjects: unknown,
+        _deltaX: number,
+        deltaY: number,
+      ) => {
+        // Only change slots when shift is NOT held (shift+scroll is for zoom)
+        if (pointer.event.shiftKey) return;
 
-      const slotsLength = this.inventory.getSlots().length;
-      const currentSlotIndex = this.inventory.getSelectedSlotIndex();
-      const newSlotIndex = (currentSlotIndex + slotsLength + (deltaY > 0 ? 1 : -1)) % slotsLength;
+        const slotsLength = this.inventory.getSlots().length;
+        const currentSlotIndex = this.inventory.getSelectedSlotIndex();
+        const newSlotIndex =
+          (currentSlotIndex + slotsLength + (deltaY > 0 ? 1 : -1)) %
+          slotsLength;
 
-      this.inventory.selectSlot(newSlotIndex);
-    });
+        this.inventory.selectSlot(newSlotIndex);
+      },
+    );
   }
 
   private updatePosition(): void {
     const slots = this.inventory.getSlots();
 
     const containerPositionY = HOTBAR_PADDING;
-    const containerPositionX = HOTBAR_PADDING + (SLOT_SIZE + SLOT_PADDING) * 0.5 * slots.length;
+    const containerPositionX =
+      HOTBAR_PADDING + (SLOT_SIZE + SLOT_PADDING) * 0.5 * slots.length;
 
     this.container.setPosition(containerPositionX, containerPositionY);
   }

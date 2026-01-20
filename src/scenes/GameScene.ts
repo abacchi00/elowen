@@ -1,11 +1,16 @@
-import Phaser from 'phaser';
-import { SCREEN_HEIGHT } from '../config/constants';
-import { GameContext, GameSounds } from '../types';
-import { Player, Pickaxe } from '../entities';
-import { AssetsManager, SoundManager, BackgroundManager } from '../managers';
-import { CameraSystem, MiningSystem, InventorySystem, PlacementSystem } from '../systems';
-import { WorldManager } from '../world';
-import { Hotbar } from '../ui';
+import Phaser from "phaser";
+import { SCREEN_HEIGHT } from "../config/constants";
+import { GameContext, GameSounds } from "../types";
+import { Player, Pickaxe } from "../entities";
+import { AssetsManager, SoundManager, BackgroundManager } from "../managers";
+import {
+  CameraSystem,
+  MiningSystem,
+  InventorySystem,
+  PlacementSystem,
+} from "../systems";
+import { WorldManager } from "../world";
+import { Hotbar } from "../ui";
 
 /**
  * Main game scene - simplified using WorldManager and GameContext.
@@ -30,7 +35,7 @@ export class GameScene extends Phaser.Scene {
   private hotbar!: Hotbar;
 
   constructor() {
-    super({ key: 'GameScene' });
+    super({ key: "GameScene" });
   }
 
   preload(): void {
@@ -45,8 +50,8 @@ export class GameScene extends Phaser.Scene {
 
     // 2. Create inventory
     const inventory = new InventorySystem(9);
-    inventory.addItem('dirt_block', 10);
-    inventory.addItem('stone_block', 5);
+    inventory.addItem("dirt_block", 10);
+    inventory.addItem("stone_block", 5);
 
     // 3. Create world
     const world = new WorldManager(this, sounds);
@@ -81,7 +86,7 @@ export class GameScene extends Phaser.Scene {
     this.hotbar = new Hotbar(this, inventory);
 
     // 11. Handle resize
-    this.scale.on('resize', () => this.hotbar.onResize());
+    this.scale.on("resize", () => this.hotbar.onResize());
   }
 
   update(_time: number, delta: number): void {

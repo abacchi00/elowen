@@ -1,4 +1,4 @@
-import { ItemType, InventorySlot, ITEM_CONFIGS } from '../types';
+import { ItemType, InventorySlot, ITEM_CONFIGS } from "../types";
 
 const DEFAULT_HOTBAR_SIZE = 9;
 
@@ -12,7 +12,9 @@ export class InventorySystem {
   private onChangeCallbacks: (() => void)[] = [];
 
   constructor(size: number = DEFAULT_HOTBAR_SIZE) {
-    this.slots = Array(size).fill(null).map(() => ({ item: null }));
+    this.slots = Array(size)
+      .fill(null)
+      .map(() => ({ item: null }));
   }
 
   /**
@@ -27,7 +29,7 @@ export class InventorySystem {
     // First, try to stack with existing items of same type
     for (const slot of this.slots) {
       if (remaining <= 0) break;
-      
+
       if (slot.item && slot.item.type === type) {
         const spaceInStack = slot.item.maxStack - slot.item.quantity;
         const toAdd = Math.min(remaining, spaceInStack);
@@ -39,7 +41,7 @@ export class InventorySystem {
     // Then, use empty slots
     for (const slot of this.slots) {
       if (remaining <= 0) break;
-      
+
       if (!slot.item) {
         const toAdd = Math.min(remaining, config.maxStack);
         slot.item = {
@@ -64,7 +66,7 @@ export class InventorySystem {
     if (!slot?.item) return false;
 
     slot.item.quantity -= quantity;
-    
+
     if (slot.item.quantity <= 0) {
       slot.item = null;
     }

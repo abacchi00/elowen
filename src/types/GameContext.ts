@@ -1,7 +1,7 @@
-import Phaser from 'phaser';
-import { WorldManager } from '../world';
-import { InventorySystem, CameraSystem } from '../systems';
-import { GameSounds } from './index';
+import Phaser from "phaser";
+import { WorldManager } from "../world";
+import { InventorySystem, CameraSystem } from "../systems";
+import { GameSounds } from "./index";
 
 /**
  * Context object passed to all game systems.

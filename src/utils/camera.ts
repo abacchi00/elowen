@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser from "phaser";
 
 /**
  * Makes all non-main cameras ignore a game object.
@@ -6,7 +6,7 @@ import Phaser from 'phaser';
  */
 export function ignoreOnUICameras(
   scene: Phaser.Scene,
-  gameObject: Phaser.GameObjects.GameObject
+  gameObject: Phaser.GameObjects.GameObject,
 ): void {
   scene.cameras.cameras.forEach(camera => {
     if (camera !== scene.cameras.main) {

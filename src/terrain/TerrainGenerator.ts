@@ -1,11 +1,11 @@
-import { 
-  BLOCKS_COUNT, 
-  LAYERS, 
+import {
+  BLOCKS_COUNT,
+  LAYERS,
   BLOCK_SIZE,
   MAX_MOUNTAIN_HEIGHT,
-  BASE_DEPTH
-} from '../config/constants';
-import { BlockType, BlockMatrix } from '../types';
+  BASE_DEPTH,
+} from "../config/constants";
+import { BlockType, BlockMatrix } from "../types";
 
 /**
  * Generates procedural terrain using height maps and block matrices.
@@ -13,7 +13,7 @@ import { BlockType, BlockMatrix } from '../types';
 export class TerrainGenerator {
   private readonly width: number;
   private readonly depth: number;
-  
+
   public mapMatrix: BlockMatrix = [];
   public heightMap: number[] = [];
 
@@ -65,7 +65,10 @@ export class TerrainGenerator {
       heightAboveBase += roughness;
 
       // Clamp height
-      heightAboveBase = Math.max(0, Math.min(MAX_MOUNTAIN_HEIGHT, Math.floor(heightAboveBase)));
+      heightAboveBase = Math.max(
+        0,
+        Math.min(MAX_MOUNTAIN_HEIGHT, Math.floor(heightAboveBase)),
+      );
       heightMap[x] = heightAboveBase;
     }
 
@@ -98,7 +101,7 @@ export class TerrainGenerator {
       const surfaceMatrixY = maxHeight - mountainHeight;
       const totalBlocks = mountainHeight + BASE_DEPTH;
 
-      for (let y = 0; y < totalBlocks && (surfaceMatrixY + y) < this.depth; y++) {
+      for (let y = 0; y < totalBlocks && surfaceMatrixY + y < this.depth; y++) {
         const matrixY = surfaceMatrixY + y;
         if (matrixY >= 0) {
           this.mapMatrix[x][matrixY] = this.determineBlockType(y, totalBlocks);
@@ -107,15 +110,18 @@ export class TerrainGenerator {
     }
   }
 
-  private determineBlockType(depthFromSurface: number, totalBlocks: number): BlockType {
+  private determineBlockType(
+    depthFromSurface: number,
+    totalBlocks: number,
+  ): BlockType {
     // Surface layer is grass
     if (depthFromSurface === 0) {
-      return 'grass_block';
+      return "grass_block";
     }
 
     // First few layers below surface are dirt
     if (depthFromSurface <= 3) {
-      return 'dirt_block';
+      return "dirt_block";
     }
 
     // Deeper layers: mix of dirt and stone, more stone deeper down
@@ -123,20 +129,26 @@ export class TerrainGenerator {
     const stoneChance = Math.min(0.7, depthRatio * 1.5);
 
     if (Math.random() < stoneChance) {
-      return 'stone_block';
+      return "stone_block";
     }
 
-    return 'dirt_block';
+    return "dirt_block";
   }
 
   /**
    * Gets the block type at world coordinates.
    */
   getBlockType(worldX: number, worldY: number): BlockType | null {
-    const matrixX = Math.floor(worldX / BLOCK_SIZE) + Math.floor(this.width / 2);
+    const matrixX =
+      Math.floor(worldX / BLOCK_SIZE) + Math.floor(this.width / 2);
     const matrixY = worldY;
 
-    if (matrixX < 0 || matrixX >= this.width || matrixY < 0 || matrixY >= this.depth) {
+    if (
+      matrixX < 0 ||
+      matrixX >= this.width ||
+      matrixY < 0 ||
+      matrixY >= this.depth
+    ) {
       return null;
     }
 
@@ -146,11 +158,21 @@ export class TerrainGenerator {
   /**
    * Sets the block type at world coordinates.
    */
-  setBlockType(worldX: number, worldY: number, blockType: BlockType | null): void {
-    const matrixX = Math.floor(worldX / BLOCK_SIZE) + Math.floor(this.width / 2);
+  setBlockType(
+    worldX: number,
+    worldY: number,
+    blockType: BlockType | null,
+  ): void {
+    const matrixX =
+      Math.floor(worldX / BLOCK_SIZE) + Math.floor(this.width / 2);
     const matrixY = worldY;
 
-    if (matrixX >= 0 && matrixX < this.width && matrixY >= 0 && matrixY < this.depth) {
+    if (
+      matrixX >= 0 &&
+      matrixX < this.width &&
+      matrixY >= 0 &&
+      matrixY < this.depth
+    ) {
       if (!this.mapMatrix[matrixX]) {
         this.mapMatrix[matrixX] = [];
       }

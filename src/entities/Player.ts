@@ -1,6 +1,6 @@
-import Phaser from 'phaser';
-import { BLOCK_SIZE, PLAYER_SPEED, JUMP_SPEED } from '../config/constants';
-import { GameSounds, IUpdatable } from '../types';
+import Phaser from "phaser";
+import { BLOCK_SIZE, PLAYER_SPEED, JUMP_SPEED } from "../config/constants";
+import { GameSounds, IUpdatable } from "../types";
 
 /**
  * Player entity with movement, jumping, and sound integration.
@@ -16,11 +16,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
   private isOnGround: boolean = false;
   private wasMoving: boolean = false;
-  
+
   public sounds: GameSounds | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 'player_sprite_right');
+    super(scene, x, y, "player_sprite_right");
 
     // Add to scene and enable physics
     scene.add.existing(this);
@@ -33,7 +33,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
     // Setup input controls
     this.cursors = scene.input.keyboard!.createCursorKeys();
-    this.wasd = scene.input.keyboard!.addKeys('W,S,A,D') as typeof this.wasd;
+    this.wasd = scene.input.keyboard!.addKeys("W,S,A,D") as typeof this.wasd;
   }
 
   update(): void {
@@ -56,10 +56,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
     if (isMovingLeft) {
       this.setVelocityX(-PLAYER_SPEED);
-      this.setTexture('player_sprite_left');
+      this.setTexture("player_sprite_left");
     } else if (isMovingRight) {
       this.setVelocityX(PLAYER_SPEED);
-      this.setTexture('player_sprite_right');
+      this.setTexture("player_sprite_right");
     }
 
     this.handleWalkingSound(isMoving);
@@ -80,9 +80,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   }
 
   private handleJump(): void {
-    const isJumpPressed = 
-      this.cursors.up.isDown || 
-      this.wasd.W.isDown || 
+    const isJumpPressed =
+      this.cursors.up.isDown ||
+      this.wasd.W.isDown ||
       this.cursors.space?.isDown;
 
     if (isJumpPressed && this.isOnGround) {

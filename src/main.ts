@@ -1,6 +1,6 @@
-import Phaser from 'phaser';
-import { createGameConfig } from './config/GameConfig';
-import { GameScene } from './scenes';
+import Phaser from "phaser";
+import { createGameConfig } from "./config/GameConfig";
+import { GameScene } from "./scenes";
 
 /**
  * Main entry point for the Elowen game.
@@ -12,7 +12,7 @@ const config = createGameConfig([GameScene]);
 const game = new Phaser.Game(config);
 
 // Handle window resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   game.scale.resize(window.innerWidth, window.innerHeight);
 });
 

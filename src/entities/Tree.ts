@@ -7,8 +7,9 @@ import {
 import { IMineable, IHoverable } from "../types";
 import { ignoreOnUICameras } from "../utils";
 
-const TREE_DISPLAY_SIZE = BLOCK_SIZE * 12;
-const DARK_TINT = 0xcccccc;
+const TREE_DISPLAY_WIDTH = BLOCK_SIZE * 6;
+const TREE_DISPLAY_HEIGHT = BLOCK_SIZE * 10;
+const DARK_TINT = 0xbbbbbb;
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
 
@@ -34,15 +35,32 @@ export class Tree
     scene.add.existing(this);
 
     // Set display properties
-    this.setDisplaySize(TREE_DISPLAY_SIZE, TREE_DISPLAY_SIZE);
-    this.setOrigin(0.5, 0.85);
+    this.setDisplaySize(TREE_DISPLAY_WIDTH, TREE_DISPLAY_HEIGHT);
+    this.setOrigin(0.5, 0.95);
 
     // Make interactive
     this.setInteractive({ useHandCursor: true });
     this.setupHoverEffects();
 
     // Add visual variance
+    this.applyRandomVariant();
     this.applyRandomTint();
+    this.applyRandomScale();
+  }
+
+  private applyRandomVariant(): void {
+    // 70% chance for variant 2, 30% for variant 1
+    if (Math.random() < 0.7) {
+      this.setTexture("tree_variant_2");
+    } else {
+      this.setTexture("tree_variant_1");
+    }
+  }
+
+  private applyRandomScale(): void {
+    // Random scale between 0.9 and 1.1
+    const scale = 2.5 + Math.random() * 1.5;
+    this.setScale(scale);
   }
 
   private applyRandomTint(): void {

@@ -25,7 +25,14 @@ export abstract class LifeBasedBlock extends Block {
     const lifePercentage = this.life / this.maxLife;
 
     if (lifePercentage > 0.75) {
-      this.setTexture(this.baseTexture);
+      if (this.baseTexture === "grass_block") {
+        this.setTexture(
+          `${this.baseTexture}_variant_${Math.floor(Math.random() * 3) + 1}`,
+        );
+        this.setScale(1.5);
+      } else {
+        this.setTexture(this.baseTexture);
+      }
     } else if (lifePercentage > 0.5) {
       this.setTexture(`${this.baseTexture}_high_life`);
     } else if (lifePercentage > 0.25) {

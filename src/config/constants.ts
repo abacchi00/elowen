@@ -13,7 +13,7 @@ export const SCREEN_HEIGHT = window.innerHeight;
 // ============================================================================
 
 export const BLOCKS_COUNT = 300; // Number of blocks horizontally
-export const LAYERS = 50; // Number of vertical layers
+export const LAYERS = 100; // Number of vertical layers
 export const GROUND_Y = 0;
 
 // ============================================================================
@@ -53,5 +53,5 @@ export const BASE_DEPTH = 43;
 // ============================================================================
 
 export const TREE_MAX_LIFE = 80;
-export const TREE_SPAWN_CHANCE = 0.1; // 10%
+export const TREE_SPAWN_CHANCE = 0.2; // 15%
 export const TREE_DARK_TINT_CHANCE = 0.3; // 30%

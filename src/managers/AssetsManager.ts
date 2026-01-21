@@ -7,7 +7,9 @@ interface AssetConfig {
 
 const IMAGE_ASSETS: AssetConfig[] = [
   // Grass block textures
-  { key: "grass_block", path: "./assets/grass_block.png" },
+  { key: "grass_block_variant_1", path: "./assets/grass_block_variant_1.png" },
+  { key: "grass_block_variant_2", path: "./assets/grass_block_variant_2.png" },
+  { key: "grass_block_variant_3", path: "./assets/grass_block_variant_3.png" },
   { key: "grass_block_high_life", path: "./assets/grass_block_high_life.png" },
   { key: "grass_block_med_life", path: "./assets/grass_block_med_life.png" },
   { key: "grass_block_low_life", path: "./assets/grass_block_low_life.png" },
@@ -24,6 +26,8 @@ const IMAGE_ASSETS: AssetConfig[] = [
   // Other textures
   { key: "pickaxe", path: "./assets/pickaxe.png" },
   { key: "tree", path: "./assets/tree.png" },
+  { key: "tree_variant_1", path: "./assets/tree_variant_1.png" },
+  { key: "tree_variant_2", path: "./assets/tree_variant_2.png" },
   { key: "player_sprite_right", path: "./assets/player_sprite_right.png" },
   { key: "player_sprite_left", path: "./assets/player_sprite_left.png" },
 ];

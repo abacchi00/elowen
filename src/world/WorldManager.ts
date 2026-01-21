@@ -31,6 +31,7 @@ export class WorldManager {
 
   // Terrain info
   private maxHeight: number = 0;
+  private heightMap: number[] = [];
 
   constructor(scene: Phaser.Scene, sounds: GameSounds | null) {
     this.scene = scene;
@@ -46,6 +47,7 @@ export class WorldManager {
   generate(): void {
     const generator = new TerrainGenerator();
     this.mapMatrix = generator.generate();
+    this.heightMap = generator.heightMap;
     this.maxHeight = Math.max(...generator.heightMap);
 
     this.createBlocksFromMatrix();
@@ -67,6 +69,9 @@ export class WorldManager {
         block.matrixX = matrixX;
         block.matrixY = matrixY;
 
+        // Apply darkening based on distance from ground
+        this.applyDistanceDarkening(block, matrixX, matrixY);
+
         this.blocks.add(block);
         block.setupPhysics();
 
@@ -86,6 +91,139 @@ export class WorldManager {
     const tree = new Tree(this.scene, worldX, worldY - BLOCK_SIZE / 2);
     tree.setDepth(blockDepth - 1);
     this.trees.add(tree);
+  }
+
+  /**
+   * Updates darkening for blocks in a column after a block change (mine or place).
+   */
+  private updateDarkeningAfterBlockChange(
+    matrixX: number,
+    matrixY: number,
+  ): void {
+    // Update all blocks within the search range since darkening considers neighbors
+    // The search range is 10 blocks, so update all blocks within that range
+    const searchRange = 10;
+
+    for (let x = matrixX - searchRange; x <= matrixX + searchRange; x++) {
+      // Check if position is valid
+      if (x < 0 || x >= this.mapMatrix.length || !this.mapMatrix[x]) {
+        continue;
+      }
+
+      // Update all blocks in this column that are below the changed position
+      // Only check blocks that could be affected (around the change point and below)
+      const startY = Math.max(0, matrixY - 5);
+      const endY = this.mapMatrix[x].length;
+
+      for (let y = startY; y < endY; y++) {
+        const blockAtPos = this.getBlockAt(x, y);
+        if (blockAtPos) {
+          // Recalculate and apply darkening
+          this.applyDistanceDarkening(blockAtPos, x, y);
+        }
+      }
+    }
+  }
+
+  /**
+   * Gets the current surface level (topmost block) for a given x position.
+   */
+  private getSurfaceLevel(matrixX: number): number {
+    // Find the topmost block at this x position
+    if (
+      matrixX < 0 ||
+      matrixX >= this.mapMatrix.length ||
+      !this.mapMatrix[matrixX]
+    ) {
+      return -1;
+    }
+
+    for (let y = 0; y < this.mapMatrix[matrixX].length; y++) {
+      if (this.mapMatrix[matrixX][y] !== null) {
+        return y;
+      }
+    }
+
+    // No blocks found, use original height map
+    const mountainHeight = this.heightMap[matrixX] || 0;
+    return this.maxHeight - mountainHeight;
+  }
+
+  /**
+   * Finds the nearest surface block considering both X and Y distance.
+   */
+  private getNearestSurfaceDistance(
+    matrixX: number,
+    matrixY: number,
+    searchRange: number = 10,
+  ): number {
+    // First check: if this block is at or above the surface in its own column, distance is 0
+    const ownSurfaceY = this.getSurfaceLevel(matrixX);
+    if (ownSurfaceY !== -1 && matrixY <= ownSurfaceY) {
+      return 0;
+    }
+
+    let minDistance = Infinity;
+
+    // Search nearby columns for the closest surface
+    for (let x = matrixX - searchRange; x <= matrixX + searchRange; x++) {
+      if (x < 0 || x >= this.mapMatrix.length || !this.mapMatrix[x]) {
+        continue;
+      }
+
+      const surfaceY = this.getSurfaceLevel(x);
+      if (surfaceY === -1) continue;
+
+      // Calculate distance for semi-circular light pattern (light comes from above)
+      // Use weighted distance: horizontal distance contributes more, creating semi-circle
+      const deltaX = Math.abs(x - matrixX);
+      const deltaY = matrixY - surfaceY;
+
+      // Only consider blocks below the surface (light travels downward)
+      if (deltaY > 0) {
+        // Weighted distance: horizontal distance has more weight to create semi-circular pattern
+        // Formula: sqrt(deltaX^2 * 1.5 + deltaY^2) creates a semi-elliptical pattern
+        const distance = Math.sqrt(deltaX * deltaX * 1.5 + deltaY * deltaY);
+        minDistance = Math.min(minDistance, distance);
+      }
+    }
+
+    return minDistance === Infinity ? 0 : minDistance;
+  }
+
+  /**
+   * Applies darkening to blocks based on their distance from the nearest surface.
+   */
+  private applyDistanceDarkening(
+    block: Block,
+    matrixX: number,
+    matrixY: number,
+  ): void {
+    // Calculate distance to nearest surface considering both X and Y
+    const distanceFromGround = this.getNearestSurfaceDistance(matrixX, matrixY);
+
+    // Clear any existing tint first
+    block.clearTint();
+
+    // No darkening for blocks within 3 blocks of the ground
+    if (distanceFromGround > 3) {
+      // Normalize distance starting from 3 (range: 0 to 1)
+      const normalizedDistance = Math.min((distanceFromGround - 3) / 20, 1);
+
+      // Smooth easing curve using smoothstep function for smoother transition
+      // smoothstep: 3t^2 - 2t^3
+      const smoothFactor =
+        3 * normalizedDistance * normalizedDistance -
+        2 * normalizedDistance * normalizedDistance * normalizedDistance;
+
+      // Darken from 100% brightness (0xffffff) to 0% brightness (0x000000 - completely black)
+      const brightness = 1 - smoothFactor;
+      const tint = Math.floor(brightness * 255);
+
+      // Apply tint: 0xRRGGBB where all components are the same for grayscale
+      const tintColor = (tint << 16) | (tint << 8) | tint; // Convert to RGB
+      block.setTint(tintColor);
+    }
   }
 
   // ============================================================================
@@ -198,6 +336,12 @@ export class WorldManager {
 
     this.mapMatrix[matrixX][matrixY] = type;
 
+    // Apply darkening to the newly placed block
+    this.applyDistanceDarkening(block, matrixX, matrixY);
+
+    // Update darkening for all blocks in the same column
+    this.updateDarkeningAfterBlockChange(matrixX, matrixY);
+
     // Emit event
     this.scene.events.emit("block:placed", block);
 
@@ -215,14 +359,20 @@ export class WorldManager {
     else if (textureKey.startsWith("dirt_block")) blockType = "dirt_block";
     else if (textureKey.startsWith("stone_block")) blockType = "stone_block";
 
+    const minedMatrixX = block.matrixX;
+    const minedMatrixY = block.matrixY;
+
     // Update matrix
-    this.mapMatrix[block.matrixX][block.matrixY] = null;
+    this.mapMatrix[minedMatrixX][minedMatrixY] = null;
 
     // Remove from physics group
     this.blocks.remove(block, true, true);
 
     // Destroy the block
     block.mine();
+
+    // Update darkening for nearby blocks after mining
+    this.updateDarkeningAfterBlockChange(minedMatrixX, minedMatrixY);
 
     // Emit event
     this.scene.events.emit("block:mined", block, blockType);

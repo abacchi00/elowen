@@ -46,6 +46,9 @@ export class Tree
     this.applyRandomVariant();
     this.applyRandomTint();
     this.applyRandomScale();
+
+    // Add wobble animation (wind effect)
+    this.startWobbleAnimation();
   }
 
   private applyRandomVariant(): void {
@@ -107,8 +110,36 @@ export class Tree
     }
   }
 
+  private startWobbleAnimation(): void {
+    if (!this.scene) return;
+
+    // Random wobble intensity and speed for variety
+    const wobbleAngle = 1 + Math.random() * 1; // 1-2 degrees
+    const wobbleDuration = 2000 + Math.random() * 1000; // 2-3 seconds
+    const wobbleDelay = Math.random() * 1000; // Random delay to start
+
+    // Create a repeating tween for gentle swaying motion
+    this.scene.tweens.add({
+      targets: this,
+      angle: wobbleAngle,
+      duration: wobbleDuration,
+      ease: "Sine.easeInOut",
+      yoyo: true,
+      repeat: -1, // Repeat infinitely
+      delay: wobbleDelay,
+      onUpdate: () => {
+        // Reset origin to keep wobble from bottom (tree base)
+        this.setOrigin(0.5, 0.95);
+      },
+    });
+  }
+
   mine(): void {
     this.hideOutline();
+    // Stop any active tweens before destroying
+    if (this.scene?.tweens) {
+      this.scene.tweens.killTweensOf(this);
+    }
     // Emit event if scene is still available
     if (this.scene?.events) {
       this.scene.events.emit("treeMined", this);

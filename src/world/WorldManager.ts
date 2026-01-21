@@ -89,7 +89,9 @@ export class WorldManager {
 
   private createTree(worldX: number, worldY: number, blockDepth: number): void {
     const tree = new Tree(this.scene, worldX, worldY - BLOCK_SIZE / 2);
-    tree.setDepth(blockDepth - 1);
+    // Add random Z position variation (-0.5 to 0.5) for depth layering
+    const randomZOffset = (Math.random() - 0.5) * 1;
+    tree.setDepth(blockDepth - 1 + randomZOffset);
     this.trees.add(tree);
   }
 

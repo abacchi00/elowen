@@ -144,6 +144,7 @@ export class Hotbar {
           x + SLOT_SIZE / 2,
           SLOT_SIZE / 2,
           config.texture,
+          config.frame,
         );
         image.setDisplaySize(SLOT_SIZE - 10, SLOT_SIZE - 10);
         this.container.add(image);

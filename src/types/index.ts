@@ -100,14 +100,17 @@ export const BLOCK_CONFIGS: Record<BlockType, BlockConfig> = {
 // Item Configuration
 // ============================================================================
 
-export const ITEM_CONFIGS: Record<
-  ItemType,
-  { maxStack: number; texture: string }
-> = {
-  grass_block: { maxStack: 64, texture: "grass_block" },
-  dirt_block: { maxStack: 64, texture: "dirt_block" },
+export interface ItemConfig {
+  maxStack: number;
+  texture: string;
+  frame?: number; // Optional frame index for spritesheet textures
+}
+
+export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
+  grass_block: { maxStack: 64, texture: "grass_dirt_sheet", frame: 0 },
+  dirt_block: { maxStack: 64, texture: "grass_dirt_sheet", frame: 3 },
   stone_block: { maxStack: 64, texture: "stone_block" },
-  wood: { maxStack: 64, texture: "tree" },
+  wood: { maxStack: 64, texture: "tree_variant_1" },
 };
 
 // Re-export GameContext

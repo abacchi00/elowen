@@ -5,16 +5,29 @@ interface AssetConfig {
   path: string;
 }
 
+interface SpritesheetConfig {
+  key: string;
+  path: string;
+  frameWidth: number;
+  frameHeight: number;
+}
+
+const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
+  // Grass and dirt blocks spritesheet (3 grass variants + 1 dirt)
+  {
+    key: "grass_dirt_sheet",
+    path: "./assets/grass_dirt_test.png",
+    frameWidth: 16,
+    frameHeight: 16,
+  },
+];
+
 const IMAGE_ASSETS: AssetConfig[] = [
-  // Grass block textures
-  { key: "grass_block_variant_1", path: "./assets/grass_block_variant_1.png" },
-  { key: "grass_block_variant_2", path: "./assets/grass_block_variant_2.png" },
-  { key: "grass_block_variant_3", path: "./assets/grass_block_variant_3.png" },
+  // Grass block damage textures
   { key: "grass_block_high_life", path: "./assets/grass_block_high_life.png" },
   { key: "grass_block_med_life", path: "./assets/grass_block_med_life.png" },
   { key: "grass_block_low_life", path: "./assets/grass_block_low_life.png" },
-  // Dirt block textures
-  { key: "dirt_block", path: "./assets/dirt_block.png" },
+  // Dirt block damage textures
   { key: "dirt_block_high_life", path: "./assets/dirt_block_high_life.png" },
   { key: "dirt_block_med_life", path: "./assets/dirt_block_med_life.png" },
   { key: "dirt_block_low_life", path: "./assets/dirt_block_low_life.png" },
@@ -25,7 +38,6 @@ const IMAGE_ASSETS: AssetConfig[] = [
   { key: "stone_block_low_life", path: "./assets/stone_block_low_life.png" },
   // Other textures
   { key: "pickaxe", path: "./assets/pickaxe.png" },
-  { key: "tree", path: "./assets/tree.png" },
   { key: "tree_variant_1", path: "./assets/tree_variant_1.png" },
   { key: "tree_variant_2", path: "./assets/tree_variant_2.png" },
   { key: "player_sprite_right", path: "./assets/player_sprite_right.png" },
@@ -47,12 +59,19 @@ const AUDIO_ASSETS: AssetConfig[] = [
 export class AssetsManager {
   static loadAll(loader: Phaser.Loader.LoaderPlugin): void {
     this.loadImages(loader);
+    this.loadSpritesheets(loader);
     this.loadAudio(loader);
   }
 
   private static loadImages(loader: Phaser.Loader.LoaderPlugin): void {
     IMAGE_ASSETS.forEach(({ key, path }) => {
       loader.image(key, path);
+    });
+  }
+
+  private static loadSpritesheets(loader: Phaser.Loader.LoaderPlugin): void {
+    SPRITESHEET_ASSETS.forEach(({ key, path, frameWidth, frameHeight }) => {
+      loader.spritesheet(key, path, { frameWidth, frameHeight });
     });
   }
 

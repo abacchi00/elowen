@@ -20,6 +20,13 @@ const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
     frameWidth: 16,
     frameHeight: 16,
   },
+  // Player spritesheet (2 frames for walking animation)
+  {
+    key: "player_spritesheet",
+    path: "./assets/player_spritesheet.png",
+    frameWidth: 16,
+    frameHeight: 24,
+  },
 ];
 
 const IMAGE_ASSETS: AssetConfig[] = [
@@ -40,8 +47,6 @@ const IMAGE_ASSETS: AssetConfig[] = [
   { key: "pickaxe", path: "./assets/pickaxe.png" },
   { key: "tree_variant_1", path: "./assets/tree_variant_1.png" },
   { key: "tree_variant_2", path: "./assets/tree_variant_2.png" },
-  { key: "player_sprite_right", path: "./assets/player_sprite_right.png" },
-  { key: "player_sprite_left", path: "./assets/player_sprite_left.png" },
 ];
 
 const AUDIO_ASSETS: AssetConfig[] = [

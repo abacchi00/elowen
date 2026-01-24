@@ -66,8 +66,8 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
     playerY: number,
     isMouseOnLeft: boolean,
   ): void {
-    const handOffsetX = isMouseOnLeft ? -BLOCK_SIZE * 0.3 : BLOCK_SIZE * 0.3;
-    const handOffsetY = BLOCK_SIZE * 0.4;
+    const handOffsetX = isMouseOnLeft ? -BLOCK_SIZE * 0.5 : BLOCK_SIZE * 0.5;
+    const handOffsetY = BLOCK_SIZE * 0.6;
 
     this.x = playerX + handOffsetX;
     this.y = playerY + handOffsetY;

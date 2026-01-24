@@ -16,15 +16,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
   private isOnGround: boolean = false;
   private wasMoving: boolean = false;
+  private facingRight: boolean = true;
 
   public sounds: GameSounds | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, "player_sprite_right");
+    super(scene, x, y, "player_spritesheet");
 
     // Add to scene and enable physics
     scene.add.existing(this);
     scene.physics.add.existing(this);
+
+    // Create walking animation
+    this.createAnimations(scene);
 
     // Set display properties
     this.setDisplaySize(BLOCK_SIZE * 2, BLOCK_SIZE * 3);
@@ -34,6 +38,29 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
     // Setup input controls
     this.cursors = scene.input.keyboard!.createCursorKeys();
     this.wasd = scene.input.keyboard!.addKeys("W,S,A,D") as typeof this.wasd;
+  }
+
+  private createAnimations(scene: Phaser.Scene): void {
+    // Only create animation if it doesn't exist
+    if (!scene.anims.exists("player_walk")) {
+      scene.anims.create({
+        key: "player_walk",
+        frames: scene.anims.generateFrameNumbers("player_spritesheet", {
+          start: 0,
+          end: 1,
+        }),
+        frameRate: 8,
+        repeat: -1,
+      });
+    }
+
+    if (!scene.anims.exists("player_idle")) {
+      scene.anims.create({
+        key: "player_idle",
+        frames: [{ key: "player_spritesheet", frame: 0 }],
+        frameRate: 1,
+      });
+    }
   }
 
   update(): void {
@@ -56,10 +83,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
     if (isMovingLeft) {
       this.setVelocityX(-PLAYER_SPEED);
-      this.setTexture("player_sprite_left");
+      this.facingRight = false;
+      this.setFlipX(true);
     } else if (isMovingRight) {
       this.setVelocityX(PLAYER_SPEED);
-      this.setTexture("player_sprite_right");
+      this.facingRight = true;
+      this.setFlipX(false);
+    }
+
+    // Play walk animation when moving on ground, idle otherwise
+    if (isMoving) {
+      this.play("player_walk", true);
+    } else {
+      this.play("player_idle", true);
     }
 
     this.handleWalkingSound(isMoving);

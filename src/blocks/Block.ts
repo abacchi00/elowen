@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { BLOCK_SIZE } from "../config/constants";
 import { IMineable, IHoverable, MatrixPosition } from "../types";
 import { ignoreOnUICameras } from "../utils";
+import { BlockVariants } from "./LifeBasedBlock";
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
@@ -63,6 +64,16 @@ export abstract class Block
    * Override in subclasses that support slope variants.
    */
   isSlope(): boolean {
+    return false;
+  }
+
+  /**
+   * Returns whether this block has slope variants.
+   * Override in subclasses that support slope variants.
+   */
+  hasSlopeVariants(): this is this & {
+    variants: Extract<BlockVariants, { spritesheet: string }>;
+  } {
     return false;
   }
 

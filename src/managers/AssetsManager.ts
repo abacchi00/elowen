@@ -13,17 +13,15 @@ interface SpritesheetConfig {
 }
 
 const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
-  // Grass and dirt blocks spritesheet (3 grass variants + 1 dirt)
   {
     key: "grass_dirt_sheet",
-    path: "./assets/grass_dirt_test.png",
+    path: "/assets/grass_block_spritesheet.png",
     frameWidth: 16,
     frameHeight: 16,
   },
-  // Player spritesheet (2 frames for walking animation)
   {
     key: "player_spritesheet",
-    path: "./assets/player_spritesheet.png",
+    path: "/assets/player_spritesheet.png",
     frameWidth: 16,
     frameHeight: 24,
   },

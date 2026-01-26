@@ -45,6 +45,26 @@ export abstract class Block
   }
 
   abstract updateVisuals(): void;
+  /**
+   * Updates the block's slope variant based on neighboring blocks.
+   * Override in subclasses that support slope variants (e.g., grass blocks).
+   */
+  updateSlopeVariant(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _hasBlockLeft: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _hasBlockRight: boolean,
+  ): void {
+    // No-op in base class - override in subclasses that support slope variants
+  }
+
+  /**
+   * Returns whether this block is using a slope variant texture.
+   * Override in subclasses that support slope variants.
+   */
+  isSlope(): boolean {
+    return false;
+  }
 
   takeDamage(damage: number): boolean {
     if (this.miningSound) {

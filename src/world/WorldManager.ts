@@ -69,18 +69,41 @@ export class WorldManager {
         block.matrixX = matrixX;
         block.matrixY = matrixY;
 
+        // Update slope variant for grass blocks and dirt blocks
+        if (blockType === "grass_block" || blockType === "dirt_block") {
+          this.updateBlockSlopeVariant(block, matrixX, matrixY);
+        }
+
         // Apply darkening based on distance from ground
         this.applyDistanceDarkening(block, matrixX, matrixY);
 
         this.blocks.add(block);
         block.setupPhysics();
 
-        // Spawn trees on grass blocks
-        if (blockType === "grass_block" && Math.random() < TREE_SPAWN_CHANCE) {
+        // Spawn trees on grass blocks (only on non-slope grass)
+        if (
+          blockType === "grass_block" &&
+          !block.isSlope() &&
+          Math.random() < TREE_SPAWN_CHANCE
+        ) {
           this.createTree(worldPos.x, worldPos.y, block.depth);
         }
       }
     }
+  }
+
+  /**
+   * Updates a block's slope variant based on neighboring blocks.
+   */
+  private updateBlockSlopeVariant(
+    block: Block,
+    matrixX: number,
+    matrixY: number,
+  ): void {
+    const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
+    const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
+
+    block.updateSlopeVariant(hasBlockLeft, hasBlockRight);
   }
 
   private createBlock(x: number, y: number, type: BlockType): Block {

@@ -16,7 +16,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
   private isOnGround: boolean = false;
   private wasMoving: boolean = false;
-  private facingRight: boolean = true;
 
   public sounds: GameSounds | null = null;
 
@@ -83,11 +82,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
     if (isMovingLeft) {
       this.setVelocityX(-PLAYER_SPEED);
-      this.facingRight = false;
       this.setFlipX(true);
     } else if (isMovingRight) {
       this.setVelocityX(PLAYER_SPEED);
-      this.facingRight = true;
       this.setFlipX(false);
     }
 

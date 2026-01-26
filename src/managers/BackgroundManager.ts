@@ -1,7 +1,8 @@
 import Phaser from "phaser";
 import { SCREEN_HEIGHT, BLOCKS_COUNT, BLOCK_SIZE } from "../config/constants";
 
-const SKY_COLOR = 0x87ceeb;
+const SKY_COLOR_LIGHT = 0x86f9ff; // Light sky blue (bottom/middle)
+const SKY_COLOR_DARK = 0x2196f3; // Dark blue (top)
 const SKY_DEPTH = -1000;
 
 /**
@@ -21,7 +22,15 @@ export class BackgroundManager {
     const skyWidth = BLOCKS_COUNT * BLOCK_SIZE * 4;
 
     const graphics = scene.add.graphics();
-    graphics.fillStyle(SKY_COLOR);
+
+    // Create gradient from dark blue (top) to light sky blue (middle/bottom)
+    graphics.fillGradientStyle(
+      SKY_COLOR_DARK,
+      SKY_COLOR_DARK,
+      SKY_COLOR_LIGHT,
+      SKY_COLOR_LIGHT,
+      1,
+    );
     graphics.fillRect(-skyWidth / 2, -skyHeight / 2, skyWidth, skyHeight);
 
     graphics.setPosition(0, 0);

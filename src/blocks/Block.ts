@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import { BLOCK_SIZE } from "../config/constants";
 import { IMineable, IHoverable, MatrixPosition } from "../types";
 import { ignoreOnUICameras } from "../utils";
-import { BlockVariants } from "./LifeBasedBlock";
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
@@ -27,9 +26,10 @@ export abstract class Block
     x: number,
     y: number,
     texture: string,
-    maxLife: number = 100,
+    frame: number | undefined,
+    maxLife: number,
   ) {
-    super(scene, x, y, texture);
+    super(scene, x, y, texture, frame);
 
     this.maxLife = maxLife;
     this.life = this.maxLife;
@@ -46,22 +46,18 @@ export abstract class Block
   }
 
   abstract updateVisuals(): void;
+
   /**
    * Updates the block's slope variant based on neighboring blocks.
-   * Override in subclasses that support slope variants (e.g., grass blocks).
+   * Override in subclasses that support slope variants.
    */
-  updateSlopeVariant(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _hasBlockLeft: boolean,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _hasBlockRight: boolean,
-  ): void {
-    // No-op in base class - override in subclasses that support slope variants
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateSlopeVariant(_hasBlockLeft: boolean, _hasBlockRight: boolean): void {
+    // No-op in base class
   }
 
   /**
    * Returns whether this block is using a slope variant texture.
-   * Override in subclasses that support slope variants.
    */
   isSlope(): boolean {
     return false;
@@ -69,11 +65,8 @@ export abstract class Block
 
   /**
    * Returns whether this block has slope variants.
-   * Override in subclasses that support slope variants.
    */
-  hasSlopeVariants(): this is this & {
-    variants: Extract<BlockVariants, { spritesheet: string }>;
-  } {
+  hasSlopeVariants(): boolean {
     return false;
   }
 
@@ -130,7 +123,6 @@ export abstract class Block
 
   mine(): void {
     this.hideOutline();
-    // Emit event if scene is still available
     if (this.scene?.events) {
       this.scene.events.emit("blockMined", this);
     }

@@ -1,21 +1,25 @@
 import Phaser from "phaser";
-import { LifeBasedBlock } from "./LifeBasedBlock";
+import { LifeBasedBlock, SpritesheetBlockConfig } from "./LifeBasedBlock";
 
-const GRASS_MAX_LIFE = 100;
+const GRASS_CONFIG: SpritesheetBlockConfig = {
+  type: "spritesheet",
+  spritesheet: "grass_dirt_sheet",
+  fullFrames: [0, 1, 2],
+  borderLeftFrame: 4,
+  borderRightFrame: 5,
+  borderBothFrame: 6,
+  highLifeTexture: "grass_block_high_life",
+  medLifeTexture: "grass_block_med_life",
+  lowLifeTexture: "grass_block_low_life",
+  maxLife: 100,
+};
 
 export class GrassBlock extends LifeBasedBlock {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, GRASS_MAX_LIFE, "grass_block", {
-      spritesheet: "grass_dirt_sheet",
-      frames: {
-        full: [0, 1, 2],
-        high: "grass_high_life",
-        med: "grass_med_life",
-        low: "grass_low_life",
-        borderLeft: 4,
-        borderRight: 5,
-        borderLeftAndRight: 6,
-      },
-    });
+    super(scene, x, y);
+  }
+
+  static override getConfig(): SpritesheetBlockConfig {
+    return GRASS_CONFIG;
   }
 }

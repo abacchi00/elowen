@@ -1,5 +1,10 @@
 export { Block } from "./Block";
-export { LifeBasedBlock } from "./LifeBasedBlock";
+export {
+  LifeBasedBlock,
+  type BlockConfig,
+  type SpritesheetBlockConfig,
+  type SimpleBlockConfig,
+} from "./LifeBasedBlock";
 export { GrassBlock } from "./GrassBlock";
 export { DirtBlock } from "./DirtBlock";
 export { StoneBlock } from "./StoneBlock";

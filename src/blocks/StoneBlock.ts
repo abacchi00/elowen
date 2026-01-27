@@ -1,8 +1,15 @@
 import Phaser from "phaser";
-import { LifeBasedBlock } from "./LifeBasedBlock";
+import { LifeBasedBlock, SimpleBlockConfig } from "./LifeBasedBlock";
 import { GameSounds } from "../types";
 
-const STONE_MAX_LIFE = 200;
+const STONE_CONFIG: SimpleBlockConfig = {
+  type: "simple",
+  baseTexture: "stone_block",
+  highLifeTexture: "stone_block_high_life",
+  medLifeTexture: "stone_block_med_life",
+  lowLifeTexture: "stone_block_low_life",
+  maxLife: 200,
+};
 
 export class StoneBlock extends LifeBasedBlock {
   constructor(
@@ -11,19 +18,15 @@ export class StoneBlock extends LifeBasedBlock {
     y: number,
     sounds?: GameSounds | null,
   ) {
-    super(scene, x, y, STONE_MAX_LIFE, "stone_block", {
-      spritesheet: null,
-      frames: {
-        full: "stone_full_life",
-        high: "stone_high_life",
-        med: "stone_med_life",
-        low: "stone_low_life",
-      },
-    });
+    super(scene, x, y);
 
     // Use stone-specific mining sound
     if (sounds?.pickaxeHitStone) {
       this.miningSound = sounds.pickaxeHitStone;
     }
+  }
+
+  static override getConfig(): SimpleBlockConfig {
+    return STONE_CONFIG;
   }
 }

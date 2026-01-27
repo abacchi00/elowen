@@ -12,9 +12,10 @@ import {
   Position,
   MatrixPosition,
 } from "../types";
-import { Block, BlockFactory } from "../blocks";
+import { BlockFactory } from "../blocks";
 import { Tree } from "../entities";
 import { TerrainGenerator } from "../terrain";
+import { Block } from "@/blocks/Block";
 
 /**
  * Manages the game world: terrain, blocks, and coordinate conversions.
@@ -26,19 +27,21 @@ export class WorldManager {
   // Block data
   private mapMatrix: BlockMatrix = [];
   private blocks: Phaser.Physics.Arcade.StaticGroup;
+  private blockMap: Map<string, Block> = new Map(); // matrixX,matrixY -> Block
   private trees: Phaser.GameObjects.Group;
   private blockFactory: BlockFactory;
 
   // Terrain info
   private maxHeight: number = 0;
-  private heightMap: number[] = [];
 
-  constructor(scene: Phaser.Scene, sounds: GameSounds | null) {
+  // TODO: Use sounds for stone blocks
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  constructor(scene: Phaser.Scene, _sounds: GameSounds | null) {
     this.scene = scene;
     this.blocks = scene.physics.add.staticGroup();
     this.trees = scene.add.group();
 
-    this.blockFactory = new BlockFactory(scene, sounds);
+    this.blockFactory = new BlockFactory(scene);
   }
 
   /**
@@ -47,7 +50,6 @@ export class WorldManager {
   generate(): void {
     const generator = new TerrainGenerator();
     this.mapMatrix = generator.generate();
-    this.heightMap = generator.heightMap;
     this.maxHeight = Math.max(...generator.heightMap);
 
     this.createBlocksFromMatrix();
@@ -63,50 +65,56 @@ export class WorldManager {
         const blockType = this.mapMatrix[matrixX][matrixY];
         if (!blockType) continue;
 
+        const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
+        const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
+
         const worldPos = this.matrixToWorld(matrixX, matrixY);
-        const block = this.createBlock(worldPos.x, worldPos.y, blockType);
+        const slope = this.getSlopeType(hasBlockLeft, hasBlockRight);
+        const block = this.blockFactory.create(
+          worldPos,
+          { x: matrixX, y: matrixY },
+          blockType,
+          slope,
+        );
 
-        block.matrixX = matrixX;
-        block.matrixY = matrixY;
+        this.addBlock(block);
 
-        // Update slope variant for blocks that have slope variants
-        this.updateBlockSlopeVariant(block, matrixX, matrixY);
-
-        // Apply darkening based on distance from ground
-        this.applyDistanceDarkening(block, matrixX, matrixY);
-
-        this.blocks.add(block);
-        block.setupPhysics();
-
-        if (
-          blockType === "grass_block" &&
-          !block.isSlope() &&
-          Math.random() < TREE_SPAWN_CHANCE
-        ) {
+        if (blockType === "grass_block" && Math.random() < TREE_SPAWN_CHANCE) {
           this.createTree(worldPos.x, worldPos.y, block.depth);
         }
       }
     }
   }
 
-  /**
-   * Updates a block's slope variant based on neighboring blocks.
-   */
-  private updateBlockSlopeVariant(
-    block: Block,
-    matrixX: number,
-    matrixY: number,
-  ): void {
-    if (!block.hasSlopeVariants()) return;
-
-    const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
-    const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
-
-    block.updateSlopeVariant(hasBlockLeft, hasBlockRight);
+  private getSlopeType(
+    hasBlockLeft: boolean,
+    hasBlockRight: boolean,
+  ): "left" | "right" | "both" | "none" {
+    if (hasBlockLeft && hasBlockRight) return "none";
+    if (hasBlockLeft) return "right";
+    if (hasBlockRight) return "left";
+    return "both";
   }
 
-  private createBlock(x: number, y: number, type: BlockType): Block {
-    return this.blockFactory.create(x, y, type);
+  private addBlock(block: Block): void {
+    this.blocks.add(block);
+    this.blockMap.set(
+      `${block.matrixPosition.x},${block.matrixPosition.y}`,
+      block,
+    );
+  }
+
+  private removeBlockFromMap(block: Block): void {
+    this.blockMap.delete(`${block.matrixPosition.x},${block.matrixPosition.y}`);
+  }
+
+  private createBlock(
+    position: { x: number; y: number },
+    matrixPosition: { x: number; y: number },
+    type: BlockType,
+    slope: "left" | "right" | "both" | "none",
+  ): Block {
+    return this.blockFactory.create(position, matrixPosition, type, slope);
   }
 
   private createTree(worldX: number, worldY: number, blockDepth: number): void {
@@ -115,139 +123,6 @@ export class WorldManager {
     const randomZOffset = (Math.random() - 0.5) * 1;
     tree.setDepth(blockDepth - 1 + randomZOffset);
     this.trees.add(tree);
-  }
-
-  /**
-   * Updates darkening for blocks in a column after a block change (mine or place).
-   */
-  private updateDarkeningAfterBlockChange(
-    matrixX: number,
-    matrixY: number,
-  ): void {
-    // Update all blocks within the search range since darkening considers neighbors
-    // The search range is 10 blocks, so update all blocks within that range
-    const searchRange = 10;
-
-    for (let x = matrixX - searchRange; x <= matrixX + searchRange; x++) {
-      // Check if position is valid
-      if (x < 0 || x >= this.mapMatrix.length || !this.mapMatrix[x]) {
-        continue;
-      }
-
-      // Update all blocks in this column that are below the changed position
-      // Only check blocks that could be affected (around the change point and below)
-      const startY = Math.max(0, matrixY - 5);
-      const endY = this.mapMatrix[x].length;
-
-      for (let y = startY; y < endY; y++) {
-        const blockAtPos = this.getBlockAt(x, y);
-        if (blockAtPos) {
-          // Recalculate and apply darkening
-          this.applyDistanceDarkening(blockAtPos, x, y);
-        }
-      }
-    }
-  }
-
-  /**
-   * Gets the current surface level (topmost block) for a given x position.
-   */
-  private getSurfaceLevel(matrixX: number): number {
-    // Find the topmost block at this x position
-    if (
-      matrixX < 0 ||
-      matrixX >= this.mapMatrix.length ||
-      !this.mapMatrix[matrixX]
-    ) {
-      return -1;
-    }
-
-    for (let y = 0; y < this.mapMatrix[matrixX].length; y++) {
-      if (this.mapMatrix[matrixX][y] !== null) {
-        return y;
-      }
-    }
-
-    // No blocks found, use original height map
-    const mountainHeight = this.heightMap[matrixX] || 0;
-    return this.maxHeight - mountainHeight;
-  }
-
-  /**
-   * Finds the nearest surface block considering both X and Y distance.
-   */
-  private getNearestSurfaceDistance(
-    matrixX: number,
-    matrixY: number,
-    searchRange: number = 10,
-  ): number {
-    // First check: if this block is at or above the surface in its own column, distance is 0
-    const ownSurfaceY = this.getSurfaceLevel(matrixX);
-    if (ownSurfaceY !== -1 && matrixY <= ownSurfaceY) {
-      return 0;
-    }
-
-    let minDistance = Infinity;
-
-    // Search nearby columns for the closest surface
-    for (let x = matrixX - searchRange; x <= matrixX + searchRange; x++) {
-      if (x < 0 || x >= this.mapMatrix.length || !this.mapMatrix[x]) {
-        continue;
-      }
-
-      const surfaceY = this.getSurfaceLevel(x);
-      if (surfaceY === -1) continue;
-
-      // Calculate distance for semi-circular light pattern (light comes from above)
-      // Use weighted distance: horizontal distance contributes more, creating semi-circle
-      const deltaX = Math.abs(x - matrixX);
-      const deltaY = matrixY - surfaceY;
-
-      // Only consider blocks below the surface (light travels downward)
-      if (deltaY > 0) {
-        // Weighted distance: horizontal distance has more weight to create semi-circular pattern
-        // Formula: sqrt(deltaX^2 * 1.5 + deltaY^2) creates a semi-elliptical pattern
-        const distance = Math.sqrt(deltaX * deltaX * 1.5 + deltaY * deltaY);
-        minDistance = Math.min(minDistance, distance);
-      }
-    }
-
-    return minDistance === Infinity ? 0 : minDistance;
-  }
-
-  /**
-   * Applies darkening to blocks based on their distance from the nearest surface.
-   */
-  private applyDistanceDarkening(
-    block: Block,
-    matrixX: number,
-    matrixY: number,
-  ): void {
-    // Calculate distance to nearest surface considering both X and Y
-    const distanceFromGround = this.getNearestSurfaceDistance(matrixX, matrixY);
-
-    // Clear any existing tint first
-    block.clearTint();
-
-    // No darkening for blocks within 3 blocks of the ground
-    if (distanceFromGround > 3) {
-      // Normalize distance starting from 3 (range: 0 to 1)
-      const normalizedDistance = Math.min((distanceFromGround - 3) / 20, 1);
-
-      // Smooth easing curve using smoothstep function for smoother transition
-      // smoothstep: 3t^2 - 2t^3
-      const smoothFactor =
-        3 * normalizedDistance * normalizedDistance -
-        2 * normalizedDistance * normalizedDistance * normalizedDistance;
-
-      // Darken from 100% brightness (0xffffff) to 0% brightness (0x000000 - completely black)
-      const brightness = 1 - smoothFactor;
-      const tint = Math.floor(brightness * 255);
-
-      // Apply tint: 0xRRGGBB where all components are the same for grayscale
-      const tintColor = (tint << 16) | (tint << 8) | tint; // Convert to RGB
-      block.setTint(tintColor);
-    }
   }
 
   // ============================================================================
@@ -284,10 +159,7 @@ export class WorldManager {
    * Gets the block at the given matrix position.
    */
   getBlockAt(matrixX: number, matrixY: number): Block | null {
-    const children = this.blocks.getChildren() as Block[];
-    return (
-      children.find(b => b.matrixX === matrixX && b.matrixY === matrixY) || null
-    );
+    return this.blockMap.get(`${matrixX},${matrixY}`) ?? null;
   }
 
   /**
@@ -303,20 +175,15 @@ export class WorldManager {
    * Finds a block at world coordinates.
    */
   findBlockAtWorld(worldX: number, worldY: number): Block | null {
-    let foundBlock: Block | null = null;
-
-    this.blocks.children.each(child => {
-      const block = child as Block;
+    for (const block of this.blockMap.values()) {
       if (block.active) {
         const bounds = block.getBounds();
         if (bounds.contains(worldX, worldY)) {
-          foundBlock = block;
+          return block;
         }
       }
-      return true;
-    });
-
-    return foundBlock;
+    }
+    return null;
   }
 
   /**
@@ -350,24 +217,21 @@ export class WorldManager {
     if (!this.canPlaceAt(matrixX, matrixY)) return null;
 
     const worldPos = this.matrixToWorld(matrixX, matrixY);
-    const block = this.createBlock(worldPos.x, worldPos.y, type);
+    const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
+    const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
+    const slope = this.getSlopeType(hasBlockLeft, hasBlockRight);
 
-    block.matrixX = matrixX;
-    block.matrixY = matrixY;
+    const block = this.createBlock(
+      { x: worldPos.x, y: worldPos.y },
+      { x: matrixX, y: matrixY },
+      type,
+      slope,
+    );
 
-    this.blocks.add(block);
+    this.addBlock(block);
     block.setupPhysics();
 
     this.mapMatrix[matrixX][matrixY] = type;
-
-    // Apply darkening to the newly placed block
-    this.applyDistanceDarkening(block, matrixX, matrixY);
-
-    // Update darkening for all blocks in the same column
-    this.updateDarkeningAfterBlockChange(matrixX, matrixY);
-
-    // Emit event
-    this.scene.events.emit("block:placed", block);
 
     return block;
   }
@@ -376,30 +240,25 @@ export class WorldManager {
    * Removes a block from the world.
    */
   removeBlock(block: Block): BlockType | null {
-    const textureKey = block.texture.key;
-    let blockType: BlockType | null = null;
+    const blockType = block.config.type;
 
-    if (textureKey.startsWith("grass_block")) blockType = "grass_block";
-    else if (textureKey.startsWith("dirt_block")) blockType = "dirt_block";
-    else if (textureKey.startsWith("stone_block")) blockType = "stone_block";
+    console.log("block", block);
+    console.log("blockType", blockType);
 
-    const minedMatrixX = block.matrixX;
-    const minedMatrixY = block.matrixY;
+    const minedMatrixX = block.matrixPosition.x;
+    const minedMatrixY = block.matrixPosition.y;
 
     // Update matrix
     this.mapMatrix[minedMatrixX][minedMatrixY] = null;
 
-    // Remove from physics group
+    // Remove from physics group and block map
     this.blocks.remove(block, true, true);
+    this.removeBlockFromMap(block);
 
     // Destroy the block
     block.mine();
 
-    // Update darkening for nearby blocks after mining
-    this.updateDarkeningAfterBlockChange(minedMatrixX, minedMatrixY);
-
-    // Emit event
-    this.scene.events.emit("block:mined", block, blockType);
+    console.log("blockType after", blockType);
 
     return blockType;
   }
@@ -410,9 +269,6 @@ export class WorldManager {
   removeTree(tree: Tree): void {
     this.trees.remove(tree, true, true);
     tree.mine();
-
-    // Emit event
-    this.scene.events.emit("tree:mined", tree);
   }
 
   /**

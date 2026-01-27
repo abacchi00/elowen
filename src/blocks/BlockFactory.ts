@@ -3,7 +3,7 @@ import { Block } from "./Block";
 import { GrassBlock } from "./GrassBlock";
 import { DirtBlock } from "./DirtBlock";
 import { StoneBlock } from "./StoneBlock";
-import { BlockType, GameSounds } from "../types";
+import { BlockType } from "../types";
 
 /**
  * Factory for creating block instances based on block type.
@@ -11,24 +11,27 @@ import { BlockType, GameSounds } from "../types";
  */
 export class BlockFactory {
   private scene: Phaser.Scene;
-  private sounds: GameSounds | null;
 
-  constructor(scene: Phaser.Scene, sounds: GameSounds | null = null) {
+  constructor(scene: Phaser.Scene) {
     this.scene = scene;
-    this.sounds = sounds;
   }
 
   /**
    * Creates a block instance based on the block type.
    */
-  create(x: number, y: number, type: BlockType): Block {
+  create(
+    position: { x: number; y: number },
+    matrixPosition: { x: number; y: number },
+    type: BlockType,
+    slope: "left" | "right" | "both" | "none",
+  ): Block {
     switch (type) {
       case "grass_block":
-        return new GrassBlock(this.scene, x, y);
+        return new GrassBlock(this.scene, position, matrixPosition, slope);
       case "dirt_block":
-        return new DirtBlock(this.scene, x, y);
+        return new DirtBlock(this.scene, position, matrixPosition, slope);
       case "stone_block":
-        return new StoneBlock(this.scene, x, y, this.sounds);
+        return new StoneBlock(this.scene, position, matrixPosition, slope);
       default:
         // TypeScript ensures exhaustive check
         const _exhaustiveCheck: never = type;
@@ -41,12 +44,12 @@ export class BlockFactory {
    */
   static createBlock(
     scene: Phaser.Scene,
-    x: number,
-    y: number,
+    position: { x: number; y: number },
+    matrixPosition: { x: number; y: number },
     type: BlockType,
-    sounds?: GameSounds | null,
+    slope: "left" | "right" | "both" | "none",
   ): Block {
-    const factory = new BlockFactory(scene, sounds);
-    return factory.create(x, y, type);
+    const factory = new BlockFactory(scene);
+    return factory.create(position, matrixPosition, type, slope);
   }
 }

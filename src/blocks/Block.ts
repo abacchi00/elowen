@@ -1,40 +1,41 @@
-import Phaser from "phaser";
-import { BLOCK_SIZE } from "../config/constants";
-import { IMineable, IHoverable, MatrixPosition } from "../types";
-import { ignoreOnUICameras } from "../utils";
+import { BLOCK_SIZE } from "@/config/constants";
+import { ignoreOnUICameras } from "@/utils";
+import { BlockConfig, IHoverable, IMineable } from "@/types";
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
 
-/**
- * Base Block class with common functionality.
- * Implements IMineable and IHoverable interfaces.
- */
 export abstract class Block
   extends Phaser.GameObjects.Image
-  implements IMineable, IHoverable, MatrixPosition
+  implements IMineable, IHoverable
 {
-  public life: number;
-  public maxLife: number;
+  public position: { x: number; y: number };
+  public maxLife: number = 100;
+  public life: number = 100;
   public miningSound: Phaser.Sound.BaseSound | null = null;
+  public config: BlockConfig;
+  public matrixPosition: { x: number; y: number };
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
-  public matrixX: number = 0;
-  public matrixY: number = 0;
 
   constructor(
     scene: Phaser.Scene,
-    x: number,
-    y: number,
-    texture: string,
-    frame: number | undefined,
-    maxLife: number,
+    position: { x: number; y: number },
+    matrixPosition: { x: number; y: number },
+    config: BlockConfig,
+    slope: "left" | "right" | "both" | "none",
   ) {
-    super(scene, x, y, texture, frame);
+    super(
+      scene,
+      position.x,
+      position.y,
+      config.spritesheet,
+      Block.getInitialFrame(config, slope),
+    );
 
-    this.maxLife = maxLife;
-    this.life = this.maxLife;
+    this.config = config;
+    this.position = position;
+    this.matrixPosition = matrixPosition;
 
-    // Add to scene
     scene.add.existing(this);
 
     // Set display properties
@@ -45,40 +46,23 @@ export abstract class Block
     this.setupHoverEffects();
   }
 
-  abstract updateVisuals(): void;
-
-  /**
-   * Updates the block's slope variant based on neighboring blocks.
-   * Override in subclasses that support slope variants.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateSlopeVariant(_hasBlockLeft: boolean, _hasBlockRight: boolean): void {
-    // No-op in base class
-  }
-
-  /**
-   * Returns whether this block is using a slope variant texture.
-   */
-  isSlope(): boolean {
-    return false;
-  }
-
-  /**
-   * Returns whether this block has slope variants.
-   */
-  hasSlopeVariants(): boolean {
-    return false;
+  mine(): void {
+    this.hideOutline();
+    this.destroy();
   }
 
   takeDamage(damage: number): boolean {
-    if (this.miningSound) {
-      this.miningSound.play();
-    }
-
     this.life = Math.max(0, this.life - damage);
-    this.updateVisuals();
 
-    return this.life <= 0;
+    if (this.life <= 0) return true;
+
+    return false; // Block is not destroyed
+  }
+
+  setupPhysics(): void {
+    if (this.body) {
+      (this.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
+    }
   }
 
   setupHoverEffects(): void {
@@ -110,22 +94,18 @@ export abstract class Block
     }
   }
 
-  setupPhysics(): void {
-    if (this.body) {
-      (this.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
-    }
-  }
+  static getInitialFrame(
+    config: BlockConfig,
+    slope: "left" | "right" | "both" | "none",
+  ): number {
+    if (slope === "left") return config.borderLeftFrame;
 
-  resetLife(): void {
-    this.life = this.maxLife;
-    this.updateVisuals();
-  }
+    if (slope === "right") return config.borderRightFrame;
 
-  mine(): void {
-    this.hideOutline();
-    if (this.scene?.events) {
-      this.scene.events.emit("blockMined", this);
-    }
-    this.destroy();
+    if (slope === "both") return config.borderBothFrame;
+
+    return config.fullFrames[
+      Math.floor(Math.random() * config.fullFrames.length)
+    ];
   }
 }

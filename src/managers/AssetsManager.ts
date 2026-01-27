@@ -20,6 +20,12 @@ const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
     frameHeight: 16,
   },
   {
+    key: "stone_block_spritesheet",
+    path: "/assets/stone_block.png",
+    frameWidth: 240,
+    frameHeight: 240,
+  },
+  {
     key: "player_spritesheet",
     path: "/assets/player_spritesheet.png",
     frameWidth: 16,

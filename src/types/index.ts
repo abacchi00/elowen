@@ -67,36 +67,6 @@ export interface InventorySlot {
 }
 
 // ============================================================================
-// Block Configuration
-// ============================================================================
-
-export interface BlockConfig {
-  texture: string;
-  maxLife: number;
-  hasLifeTextures: boolean;
-  miningSound?: string;
-}
-
-export const BLOCK_CONFIGS: Record<BlockType, BlockConfig> = {
-  grass_block: {
-    texture: "grass_block",
-    maxLife: 100,
-    hasLifeTextures: true,
-  },
-  dirt_block: {
-    texture: "dirt_block",
-    maxLife: 100,
-    hasLifeTextures: true,
-  },
-  stone_block: {
-    texture: "stone_block",
-    maxLife: 200,
-    hasLifeTextures: true,
-    miningSound: "pickaxeHitStone",
-  },
-};
-
-// ============================================================================
 // Item Configuration
 // ============================================================================
 
@@ -115,3 +85,16 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
 
 // Re-export GameContext
 export type { GameContext } from "./GameContext";
+
+export type BlockConfig = {
+  type: BlockType;
+  spritesheet: string;
+  fullFrames: number[];
+  borderLeftFrame: number;
+  borderRightFrame: number;
+  borderBothFrame: number;
+  highLifeTexture: string;
+  medLifeTexture: string;
+  lowLifeTexture: string;
+  maxLife: number;
+};

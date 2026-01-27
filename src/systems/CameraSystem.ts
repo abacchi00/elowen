@@ -72,7 +72,6 @@ export class CameraSystem {
 
     if (newZoom !== currentZoom) {
       this.camera.setZoom(newZoom);
-      this.scene.events.emit("zoomChange", newZoom);
     }
   }
 
@@ -95,16 +94,11 @@ export class CameraSystem {
   }
 
   setZoom(zoom: number): void {
-    this.onZoomChange(zoom);
     const clampedZoom = Math.max(
       CAMERA_MIN_ZOOM,
       Math.min(CAMERA_MAX_ZOOM, zoom),
     );
     this.camera.setZoom(clampedZoom);
-  }
-
-  onZoomChange(zoom: number): void {
-    this.scene.events.emit("zoomChange", zoom);
   }
 
   destroy(): void {

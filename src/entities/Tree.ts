@@ -140,10 +140,6 @@ export class Tree
     if (this.scene?.tweens) {
       this.scene.tweens.killTweensOf(this);
     }
-    // Emit event if scene is still available
-    if (this.scene?.events) {
-      this.scene.events.emit("treeMined", this);
-    }
     this.destroy();
   }
 }

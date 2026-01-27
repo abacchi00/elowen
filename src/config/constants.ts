@@ -28,7 +28,6 @@ export const GRAVITY = TILE_SIZE * 800;
 // Mining Constants
 // ============================================================================
 
-export const BLOCK_MAX_LIFE = 100;
 export const MINING_DAMAGE = 25;
 export const MINING_INTERVAL = 200; // ms between mining attempts
 
@@ -44,7 +43,6 @@ export const CAMERA_ZOOM_SPEED = 0.1;
 // Terrain Constants
 // ============================================================================
 
-export const BASE_HEIGHT = 3;
 export const MAX_MOUNTAIN_HEIGHT = 80;
 export const BASE_DEPTH = 43;
 

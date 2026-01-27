@@ -1,8 +1,9 @@
 import Phaser from "phaser";
-import { LifeBasedBlock, SpritesheetBlockConfig } from "./LifeBasedBlock";
+import { BlockConfig } from "@/types";
+import { Block } from "./Block";
 
-const GRASS_CONFIG: SpritesheetBlockConfig = {
-  type: "spritesheet",
+const GRASS_CONFIG: BlockConfig = {
+  type: "grass_block",
   spritesheet: "grass_dirt_sheet",
   fullFrames: [0, 1, 2],
   borderLeftFrame: 4,
@@ -14,12 +15,13 @@ const GRASS_CONFIG: SpritesheetBlockConfig = {
   maxLife: 100,
 };
 
-export class GrassBlock extends LifeBasedBlock {
-  constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y);
-  }
-
-  static override getConfig(): SpritesheetBlockConfig {
-    return GRASS_CONFIG;
+export class GrassBlock extends Block {
+  constructor(
+    scene: Phaser.Scene,
+    position: { x: number; y: number },
+    matrixPosition: { x: number; y: number },
+    slope: "left" | "right" | "both" | "none",
+  ) {
+    super(scene, position, matrixPosition, GRASS_CONFIG, slope);
   }
 }

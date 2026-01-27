@@ -68,7 +68,9 @@ export class MiningSystem {
       this.miningTimer = 0;
     }
 
-    this.pickaxe.startMining(target);
+    // Get the Phaser game object for pickaxe targeting
+    const gameObject = target;
+    this.pickaxe.startMining(gameObject);
     this.miningTimer += delta;
 
     if (this.miningTimer >= MINING_INTERVAL) {
@@ -78,7 +80,10 @@ export class MiningSystem {
   }
 
   private damageTarget(target: MineableTarget): void {
-    if (!target.active) {
+    // Check if target is still active
+    const isActive = target.active;
+
+    if (!isActive) {
       this.resetMining();
       return;
     }

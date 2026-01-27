@@ -242,9 +242,6 @@ export class WorldManager {
   removeBlock(block: Block): BlockType | null {
     const blockType = block.config.type;
 
-    console.log("block", block);
-    console.log("blockType", blockType);
-
     const minedMatrixX = block.matrixPosition.x;
     const minedMatrixY = block.matrixPosition.y;
 
@@ -257,8 +254,6 @@ export class WorldManager {
 
     // Destroy the block
     block.mine();
-
-    console.log("blockType after", blockType);
 
     return blockType;
   }

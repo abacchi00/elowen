@@ -77,9 +77,9 @@ export interface ItemConfig {
 }
 
 export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
-  grass_block: { maxStack: 64, texture: "grass_dirt_sheet", frame: 0 },
-  dirt_block: { maxStack: 64, texture: "grass_dirt_sheet", frame: 3 },
-  stone_block: { maxStack: 64, texture: "stone_block" },
+  grass_block: { maxStack: 64, texture: "grass_block_spritesheet", frame: 0 },
+  dirt_block: { maxStack: 64, texture: "dirt_block_spritesheet", frame: 0 },
+  stone_block: { maxStack: 64, texture: "stone_block_spritesheet", frame: 0 },
   wood: { maxStack: 64, texture: "tree_variant_1" },
 };
 

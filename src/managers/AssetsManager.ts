@@ -15,55 +15,41 @@ interface SpritesheetConfig {
 const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
   {
     key: "dirt_block_spritesheet",
-    path: "/assets/dirt_block_spritesheet.png",
+    path: "/assets/spritesheets/dirt_block_spritesheet.png",
     frameWidth: 16,
     frameHeight: 16,
   },
   {
     key: "grass_block_spritesheet",
-    path: "/assets/grass_block_spritesheet.png",
+    path: "/assets/spritesheets/grass_block_spritesheet.png",
     frameWidth: 16,
     frameHeight: 16,
   },
   {
     key: "stone_block_spritesheet",
-    path: "/assets/stone_block_spritesheet.png",
+    path: "/assets/spritesheets/stone_block_spritesheet.png",
     frameWidth: 16,
     frameHeight: 16,
   },
   {
     key: "player_spritesheet",
-    path: "/assets/player_spritesheet.png",
+    path: "/assets/spritesheets/player_spritesheet.png",
     frameWidth: 16,
     frameHeight: 24,
   },
 ];
 
 const IMAGE_ASSETS: AssetConfig[] = [
-  // Grass block damage textures
-  { key: "grass_block_high_life", path: "./assets/grass_block_high_life.png" },
-  { key: "grass_block_med_life", path: "./assets/grass_block_med_life.png" },
-  { key: "grass_block_low_life", path: "./assets/grass_block_low_life.png" },
-  // Dirt block damage textures
-  { key: "dirt_block_high_life", path: "./assets/dirt_block_high_life.png" },
-  { key: "dirt_block_med_life", path: "./assets/dirt_block_med_life.png" },
-  { key: "dirt_block_low_life", path: "./assets/dirt_block_low_life.png" },
-  // Stone block textures
-  { key: "stone_block", path: "./assets/stone_block.png" },
-  { key: "stone_block_high_life", path: "./assets/stone_block_high_life.png" },
-  { key: "stone_block_med_life", path: "./assets/stone_block_med_life.png" },
-  { key: "stone_block_low_life", path: "./assets/stone_block_low_life.png" },
-  // Other textures
-  { key: "pickaxe", path: "./assets/pickaxe.png" },
-  { key: "tree_variant_1", path: "./assets/tree_variant_1.png" },
-  { key: "tree_variant_2", path: "./assets/tree_variant_2.png" },
+  { key: "pickaxe", path: "./assets/images/pickaxe.png" },
+  { key: "tree_variant_1", path: "./assets/images/tree_variant_1.png" },
+  { key: "tree_variant_2", path: "./assets/images/tree_variant_2.png" },
 ];
 
 const AUDIO_ASSETS: AssetConfig[] = [
-  { key: "running", path: "./assets/running.mp3" },
-  { key: "jump", path: "./assets/jump.mp3" },
-  { key: "pickaxe_hit", path: "./assets/pickaxe_hit.mp3" },
-  { key: "pickaxe_hit_stone", path: "./assets/pickaxe_hit_stone.mp3" },
+  { key: "running", path: "./assets/audio/running.mp3" },
+  { key: "jump", path: "./assets/audio/jump.mp3" },
+  { key: "pickaxe_hit", path: "./assets/audio/pickaxe_hit.mp3" },
+  { key: "pickaxe_hit_stone", path: "./assets/audio/pickaxe_hit_stone.mp3" },
 ];
 
 /**

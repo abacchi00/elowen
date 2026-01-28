@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { BLOCK_SIZE } from "../config/constants";
 import { Player } from "./Player";
 import { IUpdatable } from "../types";
+import { getMouseWorldPosition } from "../utils";
 
 const SWING_SPEED = 0.03;
 const SWING_AMPLITUDE = 0.6;
@@ -33,7 +34,7 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
 
   update(): void {
     const { x: playerX, y: playerY } = this.player.getBodyCenter();
-    const mouseWorld = this.getMouseWorldPosition();
+    const mouseWorld = getMouseWorldPosition(this.scene);
 
     const isMouseOnLeft = mouseWorld.x < playerX;
 
@@ -41,19 +42,6 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
     this.updatePosition(playerX, playerY, isMouseOnLeft);
     this.updateRotation(mouseWorld);
     this.updateAnimation();
-  }
-
-  private getMouseWorldPosition(): { x: number; y: number } {
-    const camera = this.scene.cameras.main;
-    const zoom = camera.zoom;
-    const centerX = camera.centerX;
-    const centerY = camera.centerY;
-    const mousePointer = this.scene.input.mousePointer;
-
-    return {
-      x: camera.scrollX + (mousePointer.x - centerX) / zoom + centerX,
-      y: camera.scrollY + (mousePointer.y - centerY) / zoom + centerY,
-    };
   }
 
   private updateFlipAndOrigin(isMouseOnLeft: boolean): void {

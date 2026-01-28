@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { BLOCK_SIZE, PLAYER_SPEED, JUMP_SPEED } from "../config/constants";
 import { GameSounds, IUpdatable } from "../types";
+import { getMouseWorldPosition } from "../utils";
 
 /**
  * Player entity with movement, jumping, and sound integration.
@@ -65,7 +66,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   update(): void {
     this.updateGroundState();
     this.handleHorizontalMovement();
+    this.handleMousePosition();
     this.handleJump();
+  }
+
+  private handleMousePosition(): void {
+    const { x: playerX } = this.getBodyCenter();
+    const mouseWorld = getMouseWorldPosition(this.scene);
+    const isMouseOnLeft = mouseWorld.x < playerX;
+
+    if (isMouseOnLeft) {
+      this.setFlipX(true);
+    } else {
+      this.setFlipX(false);
+    }
   }
 
   private updateGroundState(): void {

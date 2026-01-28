@@ -49,7 +49,7 @@ export abstract class Block
     this.setDisplaySize(BLOCK_SIZE, BLOCK_SIZE);
 
     // Make interactive
-    this.setInteractive();
+    this.setInteractive({ useHandCursor: true });
     this.setupHoverEffects();
   }
 
@@ -61,11 +61,56 @@ export abstract class Block
   takeDamage(damage: number): "destroyed" | "not_destroyed" {
     this.life = Math.max(0, this.life - damage);
 
+    this.playMiningAnimation();
+
     if (this.life <= 0) return "destroyed";
 
     this.updateFrameAfterDamage();
 
     return "not_destroyed";
+  }
+
+  // TODO refactor and refactor block base scale
+  private playMiningAnimation(): void {
+    // Stop any existing mining animation
+    this.scene.tweens.killTweensOf(this);
+
+    const originalDepth = this.depth;
+
+    this.setDepth(1000);
+
+    this.scene.tweens.add({
+      targets: this,
+      scaleX: 2,
+      scaleY: 2,
+      duration: 50,
+      ease: "Power2",
+      yoyo: true,
+      repeat: 0,
+      onComplete: () => {
+        this.setScale(1.5);
+        this.setDepth(originalDepth);
+      },
+    });
+    if (this.hoverOutline) {
+      const originalHoverOutlineDepth = this.hoverOutline?.depth ?? 0;
+
+      this.hoverOutline?.setDepth(1001);
+
+      this.scene.tweens.add({
+        targets: this.hoverOutline,
+        scaleX: 1.33,
+        scaleY: 1.33,
+        duration: 50,
+        ease: "Power2",
+        yoyo: true,
+        repeat: 0,
+        onComplete: () => {
+          this.hoverOutline?.setScale(1);
+          this.hoverOutline?.setDepth(originalHoverOutlineDepth);
+        },
+      });
+    }
   }
 
   setupPhysics(): void {

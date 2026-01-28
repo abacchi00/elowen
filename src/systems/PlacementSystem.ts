@@ -88,6 +88,9 @@ export class PlacementSystem {
     const usedType = this.ctx.inventory.useSelectedItem();
     if (!usedType) return;
 
+    // TODO create a sound for placement
+    this.ctx.sounds?.pickaxeHit.play();
+
     // Place the block (WorldManager handles the event)
     this.ctx.world.placeBlock(
       gridPos.matrixX,

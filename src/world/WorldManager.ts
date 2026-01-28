@@ -11,6 +11,8 @@ import {
   GameSounds,
   Position,
   MatrixPosition,
+  BlockSlope,
+  BlockVariant,
 } from "../types";
 import { BlockFactory } from "../blocks";
 import { Tree } from "../entities";
@@ -89,11 +91,11 @@ export class WorldManager {
   private getSlopeType(
     hasBlockLeft: boolean,
     hasBlockRight: boolean,
-  ): "left" | "right" | "both" | "none" {
-    if (hasBlockLeft && hasBlockRight) return "none";
-    if (hasBlockLeft) return "right";
-    if (hasBlockRight) return "left";
-    return "both";
+  ): BlockSlope {
+    if (hasBlockLeft && hasBlockRight) return null;
+    if (hasBlockLeft) return BlockVariant.SlopeRight;
+    if (hasBlockRight) return BlockVariant.SlopeLeft;
+    return BlockVariant.SlopeBoth;
   }
 
   private addBlock(block: Block): void {
@@ -112,7 +114,7 @@ export class WorldManager {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    slope: "left" | "right" | "both" | "none",
+    slope: BlockSlope,
   ): Block {
     return this.blockFactory.create(position, matrixPosition, type, slope);
   }

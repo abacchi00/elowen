@@ -90,7 +90,7 @@ export class MiningSystem {
 
     this.playMiningSound(target);
 
-    const isDestroyed = target.takeDamage(MINING_DAMAGE);
+    const isDestroyed = target.takeDamage(MINING_DAMAGE) === "destroyed";
 
     if (isDestroyed) {
       this.destroyTarget(target);

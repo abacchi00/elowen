@@ -14,16 +14,22 @@ interface SpritesheetConfig {
 
 const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
   {
-    key: "grass_dirt_sheet",
+    key: "dirt_block_spritesheet",
+    path: "/assets/dirt_block_spritesheet.png",
+    frameWidth: 16,
+    frameHeight: 16,
+  },
+  {
+    key: "grass_block_spritesheet",
     path: "/assets/grass_block_spritesheet.png",
     frameWidth: 16,
     frameHeight: 16,
   },
   {
     key: "stone_block_spritesheet",
-    path: "/assets/stone_block.png",
-    frameWidth: 240,
-    frameHeight: 240,
+    path: "/assets/stone_block_spritesheet.png",
+    frameWidth: 16,
+    frameHeight: 16,
   },
   {
     key: "player_spritesheet",

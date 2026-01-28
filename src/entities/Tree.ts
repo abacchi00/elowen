@@ -72,13 +72,14 @@ export class Tree
     }
   }
 
-  takeDamage(damage: number): boolean {
+  takeDamage(damage: number): "destroyed" | "not_destroyed" {
     if (this.miningSound) {
       this.miningSound.play();
     }
 
     this.life = Math.max(0, this.life - damage);
-    return this.life <= 0;
+
+    return this.life <= 0 ? "destroyed" : "not_destroyed";
   }
 
   setupHoverEffects(): void {

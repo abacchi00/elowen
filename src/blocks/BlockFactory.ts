@@ -3,7 +3,7 @@ import { Block } from "./Block";
 import { GrassBlock } from "./GrassBlock";
 import { DirtBlock } from "./DirtBlock";
 import { StoneBlock } from "./StoneBlock";
-import { BlockType } from "../types";
+import { BlockSlope, BlockType } from "../types";
 
 /**
  * Factory for creating block instances based on block type.
@@ -23,7 +23,7 @@ export class BlockFactory {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    slope: "left" | "right" | "both" | "none",
+    slope: BlockSlope,
   ): Block {
     switch (type) {
       case "grass_block":
@@ -47,7 +47,7 @@ export class BlockFactory {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    slope: "left" | "right" | "both" | "none",
+    slope: BlockSlope,
   ): Block {
     const factory = new BlockFactory(scene);
     return factory.create(position, matrixPosition, type, slope);

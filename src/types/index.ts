@@ -37,7 +37,7 @@ export interface IMineable {
   life: number;
   maxLife: number;
   miningSound: Phaser.Sound.BaseSound | null;
-  takeDamage(damage: number): boolean;
+  takeDamage(damage: number): "destroyed" | "not_destroyed";
   mine(): void;
 }
 
@@ -89,12 +89,20 @@ export type { GameContext } from "./GameContext";
 export type BlockConfig = {
   type: BlockType;
   spritesheet: string;
-  fullFrames: number[];
-  borderLeftFrame: number;
-  borderRightFrame: number;
-  borderBothFrame: number;
-  highLifeTexture: string;
-  medLifeTexture: string;
-  lowLifeTexture: string;
   maxLife: number;
 };
+
+export enum BlockVariant {
+  Variant1 = 0,
+  Variant2 = 1,
+  Variant3 = 2,
+  SlopeLeft = 3,
+  SlopeRight = 4,
+  SlopeBoth = 5,
+}
+
+export type BlockSlope =
+  | BlockVariant.SlopeLeft
+  | BlockVariant.SlopeRight
+  | BlockVariant.SlopeBoth
+  | null;

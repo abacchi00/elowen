@@ -1,6 +1,12 @@
 import { BLOCK_SIZE } from "@/config/constants";
 import { ignoreOnUICameras } from "@/utils";
-import { BlockConfig, IHoverable, IMineable } from "@/types";
+import {
+  BlockConfig,
+  BlockSlope,
+  BlockVariant,
+  IHoverable,
+  IMineable,
+} from "@/types";
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
@@ -16,33 +22,34 @@ export abstract class Block
   public config: BlockConfig;
   public matrixPosition: { x: number; y: number };
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
+  public variant: BlockVariant;
 
   constructor(
     scene: Phaser.Scene,
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     config: BlockConfig,
-    slope: "left" | "right" | "both" | "none",
+    slope: BlockSlope,
   ) {
-    super(
-      scene,
-      position.x,
-      position.y,
-      config.spritesheet,
-      Block.getInitialFrame(config, slope),
-    );
+    const initialVariant = Block.generateVariant(slope);
+    const initialFrame = initialVariant;
 
+    super(scene, position.x, position.y, config.spritesheet, initialFrame);
+
+    this.variant = initialVariant;
     this.config = config;
     this.position = position;
     this.matrixPosition = matrixPosition;
 
     scene.add.existing(this);
 
+    this.setupPhysics();
+
     // Set display properties
     this.setDisplaySize(BLOCK_SIZE, BLOCK_SIZE);
 
     // Make interactive
-    this.setInteractive({ useHandCursor: true });
+    this.setInteractive();
     this.setupHoverEffects();
   }
 
@@ -51,12 +58,14 @@ export abstract class Block
     this.destroy();
   }
 
-  takeDamage(damage: number): boolean {
+  takeDamage(damage: number): "destroyed" | "not_destroyed" {
     this.life = Math.max(0, this.life - damage);
 
-    if (this.life <= 0) return true;
+    if (this.life <= 0) return "destroyed";
 
-    return false; // Block is not destroyed
+    this.updateFrameAfterDamage();
+
+    return "not_destroyed";
   }
 
   setupPhysics(): void {
@@ -94,18 +103,24 @@ export abstract class Block
     }
   }
 
-  static getInitialFrame(
-    config: BlockConfig,
-    slope: "left" | "right" | "both" | "none",
-  ): number {
-    if (slope === "left") return config.borderLeftFrame;
+  private updateFrameAfterDamage(): void {
+    if (this.life > 0.75 * this.maxLife) {
+      this.setFrame(this.variant);
+    } else if (this.life > 0.5 * this.maxLife) {
+      this.setFrame(this.variant + 6);
+    } else if (this.life > 0.25 * this.maxLife) {
+      this.setFrame(this.variant + 12);
+    } else {
+      this.setFrame(this.variant + 18);
+    }
+  }
 
-    if (slope === "right") return config.borderRightFrame;
+  static generateVariant(slope: BlockSlope): BlockVariant {
+    if (slope === null) {
+      const variantChosenRandomly = Math.floor(Math.random() * 3) as 0 | 1 | 2;
+      return variantChosenRandomly;
+    }
 
-    if (slope === "both") return config.borderBothFrame;
-
-    return config.fullFrames[
-      Math.floor(Math.random() * config.fullFrames.length)
-    ];
+    return slope;
   }
 }

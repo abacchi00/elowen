@@ -67,11 +67,8 @@ export class WorldManager {
         const blockType = this.mapMatrix[matrixX][matrixY];
         if (!blockType) continue;
 
-        const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
-        const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
-
         const worldPos = this.matrixToWorld(matrixX, matrixY);
-        const slope = this.getSlopeType(hasBlockLeft, hasBlockRight);
+        const slope = this.getSlopeTypeAt(matrixX, matrixY);
         const block = this.blockFactory.create(
           worldPos,
           { x: matrixX, y: matrixY },
@@ -91,8 +88,9 @@ export class WorldManager {
   private getSlopeType(
     hasBlockLeft: boolean,
     hasBlockRight: boolean,
+    hasBlockAbove: boolean,
   ): BlockSlope {
-    if (hasBlockLeft && hasBlockRight) return null;
+    if ((hasBlockLeft && hasBlockRight) || hasBlockAbove) return null;
     if (hasBlockLeft) return BlockVariant.SlopeRight;
     if (hasBlockRight) return BlockVariant.SlopeLeft;
     return BlockVariant.SlopeBoth;
@@ -208,6 +206,16 @@ export class WorldManager {
     return foundTree;
   }
 
+  /**
+   * Gets the slope type at the given matrix position.
+   */
+  getSlopeTypeAt(matrixX: number, matrixY: number): BlockSlope {
+    const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
+    const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
+    const hasBlockAbove = this.hasBlockAt(matrixX, matrixY - 1);
+    return this.getSlopeType(hasBlockLeft, hasBlockRight, hasBlockAbove);
+  }
+
   // ============================================================================
   // Block Modifications
   // ============================================================================
@@ -219,9 +227,7 @@ export class WorldManager {
     if (!this.canPlaceAt(matrixX, matrixY)) return null;
 
     const worldPos = this.matrixToWorld(matrixX, matrixY);
-    const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
-    const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
-    const slope = this.getSlopeType(hasBlockLeft, hasBlockRight);
+    const slope = this.getSlopeTypeAt(matrixX, matrixY);
 
     const block = this.createBlock(
       { x: worldPos.x, y: worldPos.y },
@@ -234,6 +240,8 @@ export class WorldManager {
     block.setupPhysics();
 
     this.mapMatrix[matrixX][matrixY] = type;
+
+    this.updateAdjacentBlocksSlope(matrixX, matrixY);
 
     return block;
   }
@@ -257,7 +265,26 @@ export class WorldManager {
     // Destroy the block
     block.mine();
 
+    this.updateAdjacentBlocksSlope(minedMatrixX, minedMatrixY);
+
     return blockType;
+  }
+
+  /**
+   * Updates the slope of the adjacent blocks.
+   */
+  updateAdjacentBlocksSlope(matrixX: number, matrixY: number): void {
+    Array.from({ length: 8 }).forEach((_, index) => {
+      const x = matrixX + (index % 3) - 1;
+      const y = matrixY + (Math.floor(index / 3) - 1);
+
+      const block = this.getBlockAt(x, y);
+      if (block) {
+        block.updateSlope(
+          this.getSlopeTypeAt(block.matrixPosition.x, block.matrixPosition.y),
+        );
+      }
+    });
   }
 
   /**

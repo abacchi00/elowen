@@ -65,7 +65,7 @@ export abstract class Block
 
     if (this.life <= 0) return "destroyed";
 
-    this.updateFrameAfterDamage();
+    this.updateFrame();
 
     return "not_destroyed";
   }
@@ -124,6 +124,12 @@ export abstract class Block
     this.on("pointerout", this.hideOutline, this);
   }
 
+  updateSlope(slope: BlockSlope): void {
+    this.variant = Block.generateVariant(slope);
+
+    this.updateFrame();
+  }
+
   private showOutline(): void {
     if (this.hoverOutline || !this.scene) return;
 
@@ -148,7 +154,7 @@ export abstract class Block
     }
   }
 
-  private updateFrameAfterDamage(): void {
+  private updateFrame(): void {
     if (this.life > 0.75 * this.maxLife) {
       this.setFrame(this.variant);
     } else if (this.life > 0.5 * this.maxLife) {

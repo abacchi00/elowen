@@ -2,6 +2,8 @@
 // Display Constants
 // ============================================================================
 
+import { BlockVariant } from "@/types";
+
 export const TILE_SIZE = 6;
 export const BLOCK_SIZE = TILE_SIZE * 4;
 
@@ -53,3 +55,9 @@ export const BASE_DEPTH = 43;
 export const TREE_MAX_LIFE = 80;
 export const TREE_SPAWN_CHANCE = 0.2; // 15%
 export const TREE_DARK_TINT_CHANCE = 0.3; // 30%
+
+// ============================================================================
+// Block Constants
+// ============================================================================
+
+export const BLOCK_VARIANT_COUNT = 7; // TODO refactor shitty code

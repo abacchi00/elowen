@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { BlockConfig, BlockSlope } from "@/types";
+import { BlockConfig, BlockVariant } from "@/types";
 import { Block } from "./Block";
 
 const GRASS_CONFIG: BlockConfig = {
@@ -13,8 +13,8 @@ export class GrassBlock extends Block {
     scene: Phaser.Scene,
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
-    slope: BlockSlope,
+    variant: BlockVariant | null,
   ) {
-    super(scene, position, matrixPosition, GRASS_CONFIG, slope);
+    super(scene, position, matrixPosition, GRASS_CONFIG, variant);
   }
 }

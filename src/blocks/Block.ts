@@ -1,12 +1,6 @@
-import { BLOCK_SIZE } from "@/config/constants";
+import { BLOCK_SIZE, BLOCK_VARIANT_COUNT } from "@/config/constants";
 import { ignoreOnUICameras } from "@/utils";
-import {
-  BlockConfig,
-  BlockSlope,
-  BlockVariant,
-  IHoverable,
-  IMineable,
-} from "@/types";
+import { BlockConfig, BlockVariant, IHoverable, IMineable } from "@/types";
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
@@ -29,9 +23,9 @@ export abstract class Block
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     config: BlockConfig,
-    slope: BlockSlope,
+    variant: BlockVariant | null,
   ) {
-    const initialVariant = Block.generateVariant(slope);
+    const initialVariant = Block.generateVariant(variant);
     const initialFrame = initialVariant;
 
     super(scene, position.x, position.y, config.spritesheet, initialFrame);
@@ -124,8 +118,8 @@ export abstract class Block
     this.on("pointerout", this.hideOutline, this);
   }
 
-  updateSlope(slope: BlockSlope): void {
-    this.variant = Block.generateVariant(slope);
+  updateSlope(variant: BlockVariant | null): void {
+    this.variant = Block.generateVariant(variant);
 
     this.updateFrame();
   }
@@ -158,20 +152,29 @@ export abstract class Block
     if (this.life > 0.75 * this.maxLife) {
       this.setFrame(this.variant);
     } else if (this.life > 0.5 * this.maxLife) {
-      this.setFrame(this.variant + 6);
+      this.setFrame(this.variant + BLOCK_VARIANT_COUNT);
     } else if (this.life > 0.25 * this.maxLife) {
-      this.setFrame(this.variant + 12);
+      this.setFrame(this.variant + BLOCK_VARIANT_COUNT * 2);
     } else {
-      this.setFrame(this.variant + 18);
+      this.setFrame(this.variant + BLOCK_VARIANT_COUNT * 3);
     }
   }
 
-  static generateVariant(slope: BlockSlope): BlockVariant {
-    if (slope === null) {
-      const variantChosenRandomly = Math.floor(Math.random() * 3) as 0 | 1 | 2;
+  static generateVariant(variant: BlockVariant | null): BlockVariant {
+    if (variant === null) {
+      const surfaceVariants = [
+        BlockVariant.Surface1,
+        BlockVariant.Surface2,
+        BlockVariant.Surface3,
+      ];
+
+      const randomIndex = Math.floor(Math.random() * surfaceVariants.length);
+
+      const variantChosenRandomly = surfaceVariants[randomIndex];
+
       return variantChosenRandomly;
     }
 
-    return slope;
+    return variant;
   }
 }

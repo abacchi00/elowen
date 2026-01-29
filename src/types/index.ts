@@ -93,16 +93,18 @@ export type BlockConfig = {
 };
 
 export enum BlockVariant {
-  Variant1 = 0,
-  Variant2 = 1,
-  Variant3 = 2,
-  SlopeLeft = 3,
-  SlopeRight = 4,
-  SlopeBoth = 5,
+  Default = 0,
+  Surface1 = 1,
+  Surface2 = 2,
+  Surface3 = 3,
+  SlopeLeftAndUp = 4,
+  SlopeRightAndUp = 5,
+  SlopeBothAndUp = 6,
+  SlopeAll = 28,
+  Ceiling1 = 29,
+  Ceiling2 = 30,
+  Ceiling3 = 31,
+  SlopeLeftAndDown = 32,
+  SlopeRightAndDown = 33,
+  SlopeBothAndDown = 34,
 }
-
-export type BlockSlope =
-  | BlockVariant.SlopeLeft
-  | BlockVariant.SlopeRight
-  | BlockVariant.SlopeBoth
-  | null;

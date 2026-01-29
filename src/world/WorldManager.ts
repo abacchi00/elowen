@@ -11,7 +11,6 @@ import {
   GameSounds,
   Position,
   MatrixPosition,
-  BlockSlope,
   BlockVariant,
 } from "../types";
 import { BlockFactory } from "../blocks";
@@ -86,14 +85,30 @@ export class WorldManager {
   }
 
   private getSlopeType(
-    hasBlockLeft: boolean,
-    hasBlockRight: boolean,
-    hasBlockAbove: boolean,
-  ): BlockSlope {
-    if ((hasBlockLeft && hasBlockRight) || hasBlockAbove) return null;
-    if (hasBlockLeft) return BlockVariant.SlopeRight;
-    if (hasBlockRight) return BlockVariant.SlopeLeft;
-    return BlockVariant.SlopeBoth;
+    neighbors: `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`,
+  ): BlockVariant | null {
+    if (neighbors === "u0d0l0r0") return BlockVariant.SlopeAll;
+
+    if (neighbors === "u0d0l0r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+    if (neighbors === "u0d0l1r0") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+    if (neighbors === "u0d1l0r0") return BlockVariant.SlopeBothAndUp;
+    if (neighbors === "u1d0l0r0") return BlockVariant.SlopeBothAndDown;
+
+    if (neighbors === "u0d0l1r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+    if (neighbors === "u0d1l1r0") return BlockVariant.SlopeRightAndUp;
+    if (neighbors === "u1d1l0r0") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+    if (neighbors === "u0d1l0r1") return BlockVariant.SlopeLeftAndUp;
+    if (neighbors === "u1d0l0r1") return BlockVariant.SlopeLeftAndDown;
+    if (neighbors === "u1d0l1r0") return BlockVariant.SlopeRightAndDown;
+
+    if (neighbors === "u0d1l1r1") return null;
+    if (neighbors === "u1d1l1r0") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+    if (neighbors === "u1d0l1r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+    if (neighbors === "u1d1l0r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+
+    if (neighbors === "u1d1l1r1") return BlockVariant.Default;
+
+    return null;
   }
 
   private addBlock(block: Block): void {
@@ -112,9 +127,9 @@ export class WorldManager {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    slope: BlockSlope,
+    variant: BlockVariant | null,
   ): Block {
-    return this.blockFactory.create(position, matrixPosition, type, slope);
+    return this.blockFactory.create(position, matrixPosition, type, variant);
   }
 
   private createTree(worldX: number, worldY: number, blockDepth: number): void {
@@ -209,11 +224,15 @@ export class WorldManager {
   /**
    * Gets the slope type at the given matrix position.
    */
-  getSlopeTypeAt(matrixX: number, matrixY: number): BlockSlope {
+  getSlopeTypeAt(matrixX: number, matrixY: number): BlockVariant | null {
     const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
     const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
     const hasBlockAbove = this.hasBlockAt(matrixX, matrixY - 1);
-    return this.getSlopeType(hasBlockLeft, hasBlockRight, hasBlockAbove);
+    const hasBlockBelow = this.hasBlockAt(matrixX, matrixY + 1);
+    const neighbors = `u${hasBlockAbove ? 1 : 0}d${hasBlockBelow ? 1 : 0}l${hasBlockLeft ? 1 : 0}r${hasBlockRight ? 1 : 0}`;
+    return this.getSlopeType(
+      neighbors as `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`,
+    );
   }
 
   // ============================================================================

@@ -3,7 +3,7 @@ import { Block } from "./Block";
 import { GrassBlock } from "./GrassBlock";
 import { DirtBlock } from "./DirtBlock";
 import { StoneBlock } from "./StoneBlock";
-import { BlockSlope, BlockType } from "../types";
+import { BlockType, BlockVariant } from "../types";
 
 /**
  * Factory for creating block instances based on block type.
@@ -23,15 +23,15 @@ export class BlockFactory {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    slope: BlockSlope,
+    variant: BlockVariant | null,
   ): Block {
     switch (type) {
       case "grass_block":
-        return new GrassBlock(this.scene, position, matrixPosition, slope);
+        return new GrassBlock(this.scene, position, matrixPosition, variant);
       case "dirt_block":
-        return new DirtBlock(this.scene, position, matrixPosition, slope);
+        return new DirtBlock(this.scene, position, matrixPosition, variant);
       case "stone_block":
-        return new StoneBlock(this.scene, position, matrixPosition, slope);
+        return new StoneBlock(this.scene, position, matrixPosition, variant);
       default:
         // TypeScript ensures exhaustive check
         const _exhaustiveCheck: never = type;
@@ -47,9 +47,9 @@ export class BlockFactory {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    slope: BlockSlope,
+    variant: BlockVariant | null,
   ): Block {
     const factory = new BlockFactory(scene);
-    return factory.create(position, matrixPosition, type, slope);
+    return factory.create(position, matrixPosition, type, variant);
   }
 }

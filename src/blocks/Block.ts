@@ -68,7 +68,7 @@ export abstract class Block
     return "not_destroyed";
   }
 
-  // TODO refactor and refactor block base scale
+  // TODO: Refactor - make code more readable and refactor block base scale
   private playMiningAnimation(): void {
     // Stop any existing mining animation
     this.scene.tweens.killTweensOf(this);
@@ -111,6 +111,7 @@ export abstract class Block
     }
   }
 
+  // TODO: Refactor so only surface (accessible blocks) are used for physics to improve performance
   setupPhysics(): void {
     if (this.body) {
       (this.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();

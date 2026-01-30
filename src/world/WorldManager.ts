@@ -86,6 +86,7 @@ export class WorldManager {
     }
   }
 
+  // TODO: Refactor this to use a more efficient algorithm
   private getBlockVariantFramesByNeighbors(
     neighbors: `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`,
   ): BlockVariantFramesType[BlockVariant] {

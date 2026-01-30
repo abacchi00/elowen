@@ -91,20 +91,3 @@ export type BlockConfig = {
   spritesheet: string;
   maxLife: number;
 };
-
-export enum BlockVariant {
-  Default = 0,
-  Surface1 = 1,
-  Surface2 = 2,
-  Surface3 = 3,
-  SlopeLeftAndUp = 4,
-  SlopeRightAndUp = 5,
-  SlopeBothAndUp = 6,
-  SlopeAll = 28,
-  Ceiling1 = 29,
-  Ceiling2 = 30,
-  Ceiling3 = 31,
-  SlopeLeftAndDown = 32,
-  SlopeRightAndDown = 33,
-  SlopeBothAndDown = 34,
-}

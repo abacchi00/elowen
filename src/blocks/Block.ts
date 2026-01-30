@@ -1,6 +1,11 @@
-import { BLOCK_SIZE, BLOCK_VARIANT_COUNT } from "@/config/constants";
+import {
+  BLOCK_SIZE,
+  BlockLifeLevel,
+  BlockVariant,
+  BlockVariantFramesType,
+} from "@/config/constants";
 import { ignoreOnUICameras } from "@/utils";
-import { BlockConfig, BlockVariant, IHoverable, IMineable } from "@/types";
+import { BlockConfig, IHoverable, IMineable } from "@/types";
 
 const OUTLINE_COLOR = 0xffffff;
 const OUTLINE_WIDTH = 2;
@@ -16,21 +21,20 @@ export abstract class Block
   public config: BlockConfig;
   public matrixPosition: { x: number; y: number };
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
-  public variant: BlockVariant;
+  public variantFrames: BlockVariantFramesType[BlockVariant];
 
   constructor(
     scene: Phaser.Scene,
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     config: BlockConfig,
-    variant: BlockVariant | null,
+    variantFrames: BlockVariantFramesType[BlockVariant],
   ) {
-    const initialVariant = Block.generateVariant(variant);
-    const initialFrame = initialVariant;
+    const initialFrame = variantFrames[BlockLifeLevel.Full];
 
     super(scene, position.x, position.y, config.spritesheet, initialFrame);
 
-    this.variant = initialVariant;
+    this.variantFrames = variantFrames;
     this.config = config;
     this.position = position;
     this.matrixPosition = matrixPosition;
@@ -118,8 +122,8 @@ export abstract class Block
     this.on("pointerout", this.hideOutline, this);
   }
 
-  updateSlope(variant: BlockVariant | null): void {
-    this.variant = Block.generateVariant(variant);
+  updateSlope(variantFrames: BlockVariantFramesType[BlockVariant]): void {
+    this.variantFrames = variantFrames;
 
     this.updateFrame();
   }
@@ -150,31 +154,13 @@ export abstract class Block
 
   private updateFrame(): void {
     if (this.life > 0.75 * this.maxLife) {
-      this.setFrame(this.variant);
+      this.setFrame(this.variantFrames[BlockLifeLevel.Full]);
     } else if (this.life > 0.5 * this.maxLife) {
-      this.setFrame(this.variant + BLOCK_VARIANT_COUNT);
+      this.setFrame(this.variantFrames[BlockLifeLevel.High]);
     } else if (this.life > 0.25 * this.maxLife) {
-      this.setFrame(this.variant + BLOCK_VARIANT_COUNT * 2);
+      this.setFrame(this.variantFrames[BlockLifeLevel.Medium]);
     } else {
-      this.setFrame(this.variant + BLOCK_VARIANT_COUNT * 3);
+      this.setFrame(this.variantFrames[BlockLifeLevel.Low]);
     }
-  }
-
-  static generateVariant(variant: BlockVariant | null): BlockVariant {
-    if (variant === null) {
-      const surfaceVariants = [
-        BlockVariant.Surface1,
-        BlockVariant.Surface2,
-        BlockVariant.Surface3,
-      ];
-
-      const randomIndex = Math.floor(Math.random() * surfaceVariants.length);
-
-      const variantChosenRandomly = surfaceVariants[randomIndex];
-
-      return variantChosenRandomly;
-    }
-
-    return variant;
   }
 }

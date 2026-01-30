@@ -1,6 +1,7 @@
 import Phaser from "phaser";
-import { BlockConfig, BlockVariant } from "@/types";
+import { BlockConfig } from "@/types";
 import { Block } from "./Block";
+import { BlockVariant, BlockVariantFramesType } from "@/config/constants";
 
 const DIRT_CONFIG: BlockConfig = {
   type: "dirt_block",
@@ -13,8 +14,8 @@ export class DirtBlock extends Block {
     scene: Phaser.Scene,
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
-    variant: BlockVariant | null,
+    variantFrames: BlockVariantFramesType[BlockVariant],
   ) {
-    super(scene, position, matrixPosition, DIRT_CONFIG, variant);
+    super(scene, position, matrixPosition, DIRT_CONFIG, variantFrames);
   }
 }

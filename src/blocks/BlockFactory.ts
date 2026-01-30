@@ -3,7 +3,8 @@ import { Block } from "./Block";
 import { GrassBlock } from "./GrassBlock";
 import { DirtBlock } from "./DirtBlock";
 import { StoneBlock } from "./StoneBlock";
-import { BlockType, BlockVariant } from "../types";
+import { BlockType } from "../types";
+import { BlockVariant, BlockVariantFramesType } from "@/config/constants";
 
 /**
  * Factory for creating block instances based on block type.
@@ -23,15 +24,30 @@ export class BlockFactory {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    variant: BlockVariant | null,
+    variantFrames: BlockVariantFramesType[BlockVariant],
   ): Block {
     switch (type) {
       case "grass_block":
-        return new GrassBlock(this.scene, position, matrixPosition, variant);
+        return new GrassBlock(
+          this.scene,
+          position,
+          matrixPosition,
+          variantFrames,
+        );
       case "dirt_block":
-        return new DirtBlock(this.scene, position, matrixPosition, variant);
+        return new DirtBlock(
+          this.scene,
+          position,
+          matrixPosition,
+          variantFrames,
+        );
       case "stone_block":
-        return new StoneBlock(this.scene, position, matrixPosition, variant);
+        return new StoneBlock(
+          this.scene,
+          position,
+          matrixPosition,
+          variantFrames,
+        );
       default:
         // TypeScript ensures exhaustive check
         const _exhaustiveCheck: never = type;
@@ -47,9 +63,9 @@ export class BlockFactory {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    variant: BlockVariant | null,
+    variantFrames: BlockVariantFramesType[BlockVariant],
   ): Block {
     const factory = new BlockFactory(scene);
-    return factory.create(position, matrixPosition, type, variant);
+    return factory.create(position, matrixPosition, type, variantFrames);
   }
 }

@@ -1,7 +1,10 @@
 import Phaser from "phaser";
 import {
   BLOCK_SIZE,
+  BLOCK_VARIANT_FRAMES,
+  BlockVariantFramesType,
   BLOCKS_COUNT,
+  BlockVariant,
   GROUND_Y,
   TREE_SPAWN_CHANCE,
 } from "../config/constants";
@@ -11,7 +14,6 @@ import {
   GameSounds,
   Position,
   MatrixPosition,
-  BlockVariant,
 } from "../types";
 import { BlockFactory } from "../blocks";
 import { Tree } from "../entities";
@@ -67,7 +69,7 @@ export class WorldManager {
         if (!blockType) continue;
 
         const worldPos = this.matrixToWorld(matrixX, matrixY);
-        const slope = this.getSlopeTypeAt(matrixX, matrixY);
+        const slope = this.getBlockVariantFramesAt(matrixX, matrixY);
         const block = this.blockFactory.create(
           worldPos,
           { x: matrixX, y: matrixY },
@@ -84,31 +86,49 @@ export class WorldManager {
     }
   }
 
-  private getSlopeType(
+  private getBlockVariantFramesByNeighbors(
     neighbors: `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`,
-  ): BlockVariant | null {
-    if (neighbors === "u0d0l0r0") return BlockVariant.SlopeAll;
+  ): BlockVariantFramesType[BlockVariant] {
+    const frames = BLOCK_VARIANT_FRAMES;
 
-    if (neighbors === "u0d0l0r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
-    if (neighbors === "u0d0l1r0") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
-    if (neighbors === "u0d1l0r0") return BlockVariant.SlopeBothAndUp;
-    if (neighbors === "u1d0l0r0") return BlockVariant.SlopeBothAndDown;
+    if (neighbors === "u1d1l1r1") return frames[BlockVariant.Default];
 
-    if (neighbors === "u0d0l1r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
-    if (neighbors === "u0d1l1r0") return BlockVariant.SlopeRightAndUp;
-    if (neighbors === "u1d1l0r0") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
-    if (neighbors === "u0d1l0r1") return BlockVariant.SlopeLeftAndUp;
-    if (neighbors === "u1d0l0r1") return BlockVariant.SlopeLeftAndDown;
-    if (neighbors === "u1d0l1r0") return BlockVariant.SlopeRightAndDown;
+    if (neighbors === "u0d1l1r1")
+      return frames[
+        `UpwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
+      ];
 
-    if (neighbors === "u0d1l1r1") return null;
-    if (neighbors === "u1d1l1r0") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
-    if (neighbors === "u1d0l1r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
-    if (neighbors === "u1d1l0r1") return BlockVariant.Default; // TODO create sprite / rotate sprite for this case
+    if (neighbors === "u1d0l1r1")
+      return frames[
+        `DownwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
+      ];
 
-    if (neighbors === "u1d1l1r1") return BlockVariant.Default;
+    if (neighbors === "u1d1l1r0")
+      return frames[
+        `RightwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
+      ];
 
-    return null;
+    if (neighbors === "u1d1l0r1")
+      return frames[
+        `LeftwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
+      ];
+
+    if (neighbors === "u0d1l0r1") return frames[BlockVariant.UpLeftSurface];
+    if (neighbors === "u0d1l1r0") return frames[BlockVariant.UpRightSurface];
+    if (neighbors === "u1d0l0r1") return frames[BlockVariant.DownLeftSurface];
+    if (neighbors === "u1d0l1r0") return frames[BlockVariant.DownRightSurface];
+    if (neighbors === "u0d1l0r0")
+      return frames[BlockVariant.UpLeftRightSurface];
+    if (neighbors === "u1d0l0r0")
+      return frames[BlockVariant.DownLeftRightSurface];
+    if (neighbors === "u0d0l1r0")
+      return frames[BlockVariant.UpDownRightSurface];
+    if (neighbors === "u0d0l0r1") return frames[BlockVariant.UpDownLeftSurface];
+
+    if (neighbors === "u1d1l0r0") return frames[BlockVariant.LeftRightSurface];
+    if (neighbors === "u0d0l1r1") return frames[BlockVariant.UpDownSurface];
+
+    return frames[BlockVariant.AllSurfaces];
   }
 
   private addBlock(block: Block): void {
@@ -127,9 +147,14 @@ export class WorldManager {
     position: { x: number; y: number },
     matrixPosition: { x: number; y: number },
     type: BlockType,
-    variant: BlockVariant | null,
+    variantFrames: BlockVariantFramesType[BlockVariant],
   ): Block {
-    return this.blockFactory.create(position, matrixPosition, type, variant);
+    return this.blockFactory.create(
+      position,
+      matrixPosition,
+      type,
+      variantFrames,
+    );
   }
 
   private createTree(worldX: number, worldY: number, blockDepth: number): void {
@@ -224,13 +249,16 @@ export class WorldManager {
   /**
    * Gets the slope type at the given matrix position.
    */
-  getSlopeTypeAt(matrixX: number, matrixY: number): BlockVariant | null {
+  getBlockVariantFramesAt(
+    matrixX: number,
+    matrixY: number,
+  ): BlockVariantFramesType[BlockVariant] {
     const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
     const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
     const hasBlockAbove = this.hasBlockAt(matrixX, matrixY - 1);
     const hasBlockBelow = this.hasBlockAt(matrixX, matrixY + 1);
     const neighbors = `u${hasBlockAbove ? 1 : 0}d${hasBlockBelow ? 1 : 0}l${hasBlockLeft ? 1 : 0}r${hasBlockRight ? 1 : 0}`;
-    return this.getSlopeType(
+    return this.getBlockVariantFramesByNeighbors(
       neighbors as `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`,
     );
   }
@@ -246,7 +274,7 @@ export class WorldManager {
     if (!this.canPlaceAt(matrixX, matrixY)) return null;
 
     const worldPos = this.matrixToWorld(matrixX, matrixY);
-    const slope = this.getSlopeTypeAt(matrixX, matrixY);
+    const slope = this.getBlockVariantFramesAt(matrixX, matrixY);
 
     const block = this.createBlock(
       { x: worldPos.x, y: worldPos.y },
@@ -300,7 +328,10 @@ export class WorldManager {
       const block = this.getBlockAt(x, y);
       if (block) {
         block.updateSlope(
-          this.getSlopeTypeAt(block.matrixPosition.x, block.matrixPosition.y),
+          this.getBlockVariantFramesAt(
+            block.matrixPosition.x,
+            block.matrixPosition.y,
+          ),
         );
       }
     });

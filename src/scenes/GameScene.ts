@@ -52,6 +52,7 @@ export class GameScene extends Phaser.Scene {
     const inventory = new InventorySystem(9);
     inventory.addItem("dirt_block", 10);
     inventory.addItem("stone_block", 5);
+    inventory.addItem("grass_block", 20);
 
     // 3. Create world
     const world = new WorldManager(this, sounds);

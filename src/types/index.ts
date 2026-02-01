@@ -1,3 +1,4 @@
+import { BlockConstructorProps } from "@/blocks/Block";
 import Phaser from "phaser";
 
 // ============================================================================
@@ -91,3 +92,10 @@ export type BlockConfig = {
   spritesheet: string;
   maxLife: number;
 };
+
+export type SpecializedBlockConstructorProps = Omit<
+  BlockConstructorProps,
+  "config"
+>;
+
+export type BlockNeighbourPresence = `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`;

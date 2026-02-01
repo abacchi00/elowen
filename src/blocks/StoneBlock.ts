@@ -1,7 +1,5 @@
-import Phaser from "phaser";
 import { Block } from "./Block";
-import { BlockConfig } from "@/types";
-import { BlockVariant, BlockVariantFramesType } from "@/config/constants";
+import { BlockConfig, SpecializedBlockConstructorProps } from "@/types";
 
 const STONE_CONFIG: BlockConfig = {
   type: "stone_block",
@@ -10,12 +8,7 @@ const STONE_CONFIG: BlockConfig = {
 };
 
 export class StoneBlock extends Block {
-  constructor(
-    scene: Phaser.Scene,
-    position: { x: number; y: number },
-    matrixPosition: { x: number; y: number },
-    variantFrames: BlockVariantFramesType[BlockVariant],
-  ) {
-    super(scene, position, matrixPosition, STONE_CONFIG, variantFrames);
+  constructor(props: SpecializedBlockConstructorProps) {
+    super({ ...props, config: STONE_CONFIG });
   }
 }

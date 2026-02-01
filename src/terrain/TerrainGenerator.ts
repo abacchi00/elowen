@@ -1,6 +1,6 @@
 import {
-  BLOCKS_COUNT,
-  LAYERS,
+  WORLD_WIDTH_BLOCKS,
+  WORLD_HEIGHT_BLOCKS,
   BLOCK_SIZE,
   MAX_MOUNTAIN_HEIGHT,
   BASE_DEPTH,
@@ -17,7 +17,10 @@ export class TerrainGenerator {
   public mapMatrix: BlockMatrix = [];
   public heightMap: number[] = [];
 
-  constructor(width: number = BLOCKS_COUNT, depth: number = LAYERS) {
+  constructor(
+    width: number = WORLD_WIDTH_BLOCKS,
+    depth: number = WORLD_HEIGHT_BLOCKS,
+  ) {
     this.width = width;
     this.depth = depth;
   }

@@ -12,8 +12,8 @@ export const SCREEN_HEIGHT = window.innerHeight;
 // World Constants
 // ============================================================================
 
-export const BLOCKS_COUNT = 300; // Number of blocks horizontally
-export const LAYERS = 100; // Number of vertical layers
+export const WORLD_WIDTH_BLOCKS = 300; // Number of blocks horizontally
+export const WORLD_HEIGHT_BLOCKS = 100; // Number of vertical layers
 export const GROUND_Y = 0;
 
 // ============================================================================

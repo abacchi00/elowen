@@ -51,31 +51,16 @@ export class Tree
     this.startWobbleAnimation();
   }
 
-  private applyRandomVariant(): void {
-    // 70% chance for variant 2, 30% for variant 1
-    if (Math.random() < 0.7) {
-      this.setTexture("tree_variant_2");
-    } else {
-      this.setTexture("tree_variant_1");
-    }
-  }
+  mine(): void {
+    this.hideOutline();
 
-  private applyRandomScale(): void {
-    // Random scale between 0.9 and 1.1
-    const scale = 2.5 + Math.random() * 1.5;
-    this.setScale(scale);
-  }
+    if (this.scene?.tweens) this.scene.tweens.killTweensOf(this);
 
-  private applyRandomTint(): void {
-    if (Math.random() < TREE_DARK_TINT_CHANCE) {
-      this.setTint(DARK_TINT);
-    }
+    this.destroy();
   }
 
   takeDamage(damage: number): "destroyed" | "not_destroyed" {
-    if (this.miningSound) {
-      this.miningSound.play();
-    }
+    if (this.miningSound) this.miningSound.play();
 
     this.life = Math.max(0, this.life - damage);
 
@@ -135,12 +120,22 @@ export class Tree
     });
   }
 
-  mine(): void {
-    this.hideOutline();
-    // Stop any active tweens before destroying
-    if (this.scene?.tweens) {
-      this.scene.tweens.killTweensOf(this);
+  private applyRandomVariant(): void {
+    if (Math.random() < 0.7) {
+      this.setTexture("tree_variant_2");
+    } else {
+      this.setTexture("tree_variant_1");
     }
-    this.destroy();
+  }
+
+  private applyRandomScale(): void {
+    const scale = 2.5 + Math.random() * 1.5;
+    this.setScale(scale);
+  }
+
+  private applyRandomTint(): void {
+    if (Math.random() < TREE_DARK_TINT_CHANCE) {
+      this.setTint(DARK_TINT);
+    }
   }
 }

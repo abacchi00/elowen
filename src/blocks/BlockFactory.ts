@@ -3,8 +3,7 @@ import { Block } from "./Block";
 import { GrassBlock } from "./GrassBlock";
 import { DirtBlock } from "./DirtBlock";
 import { StoneBlock } from "./StoneBlock";
-import { BlockType } from "../types";
-import { BlockVariant, BlockVariantFramesType } from "@/config/constants";
+import { BlockType, SpecializedBlockConstructorProps } from "../types";
 
 /**
  * Factory for creating block instances based on block type.
@@ -20,36 +19,22 @@ export class BlockFactory {
   /**
    * Creates a block instance based on the block type.
    */
-  create(
-    position: { x: number; y: number },
-    matrixPosition: { x: number; y: number },
-    type: BlockType,
-    variantFrames: BlockVariantFramesType[BlockVariant],
-  ): Block {
+  create({
+    type,
+    ...props
+  }: Omit<SpecializedBlockConstructorProps, "scene"> & {
+    type: BlockType;
+  }): Block {
+    const fullProps = { ...props, scene: this.scene };
+
     switch (type) {
       case "grass_block":
-        return new GrassBlock(
-          this.scene,
-          position,
-          matrixPosition,
-          variantFrames,
-        );
+        return new GrassBlock(fullProps);
       case "dirt_block":
-        return new DirtBlock(
-          this.scene,
-          position,
-          matrixPosition,
-          variantFrames,
-        );
+        return new DirtBlock(fullProps);
       case "stone_block":
-        return new StoneBlock(
-          this.scene,
-          position,
-          matrixPosition,
-          variantFrames,
-        );
+        return new StoneBlock(fullProps);
       default:
-        // TypeScript ensures exhaustive check
         const _exhaustiveCheck: never = type;
         throw new Error(`Unknown block type: ${_exhaustiveCheck}`);
     }
@@ -59,13 +44,10 @@ export class BlockFactory {
    * Static factory method for simple use cases.
    */
   static createBlock(
-    scene: Phaser.Scene,
-    position: { x: number; y: number },
-    matrixPosition: { x: number; y: number },
-    type: BlockType,
-    variantFrames: BlockVariantFramesType[BlockVariant],
+    props: SpecializedBlockConstructorProps & { type: BlockType },
   ): Block {
-    const factory = new BlockFactory(scene);
-    return factory.create(position, matrixPosition, type, variantFrames);
+    const factory = new BlockFactory(props.scene);
+
+    return factory.create(props);
   }
 }

@@ -3,10 +3,11 @@ import {
   BLOCK_SIZE,
   BLOCK_VARIANT_FRAMES,
   BlockVariantFramesType,
-  BLOCKS_COUNT,
+  WORLD_WIDTH_BLOCKS,
   BlockVariant,
   GROUND_Y,
   TREE_SPAWN_CHANCE,
+  WORLD_HEIGHT_BLOCKS,
 } from "../config/constants";
 import {
   BlockType,
@@ -14,6 +15,7 @@ import {
   GameSounds,
   Position,
   MatrixPosition,
+  BlockNeighbourPresence,
 } from "../types";
 import { BlockFactory } from "../blocks";
 import { Tree } from "../entities";
@@ -65,17 +67,18 @@ export class WorldManager {
         matrixY < this.mapMatrix[matrixX].length;
         matrixY++
       ) {
+        const matrixPosition = { matrixX, matrixY };
         const blockType = this.mapMatrix[matrixX][matrixY];
         if (!blockType) continue;
 
-        const worldPos = this.matrixToWorld(matrixX, matrixY);
-        const slope = this.getBlockVariantFramesAt(matrixX, matrixY);
-        const block = this.blockFactory.create(
-          worldPos,
-          { x: matrixX, y: matrixY },
-          blockType,
-          slope,
-        );
+        const worldPos = this.matrixToWorld(matrixPosition);
+        const variantFrames = this.getBlockVariantFramesAt(matrixPosition);
+        const block = this.blockFactory.create({
+          position: this.matrixToWorld(matrixPosition),
+          matrixPosition: { matrixX, matrixY },
+          type: blockType,
+          variantFrames,
+        });
 
         this.addBlock(block);
 
@@ -86,75 +89,53 @@ export class WorldManager {
     }
   }
 
-  // TODO: Refactor this to use a more efficient algorithm
   private getBlockVariantFramesByNeighbors(
-    neighbors: `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`,
+    neighbors: BlockNeighbourPresence,
   ): BlockVariantFramesType[BlockVariant] {
     const frames = BLOCK_VARIANT_FRAMES;
+    const randomTo3 = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
 
-    if (neighbors === "u1d1l1r1") return frames[BlockVariant.Default];
-
-    if (neighbors === "u0d1l1r1")
-      return frames[
-        `UpwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
-      ];
-
-    if (neighbors === "u1d0l1r1")
-      return frames[
-        `DownwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
-      ];
-
-    if (neighbors === "u1d1l1r0")
-      return frames[
-        `RightwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
-      ];
-
-    if (neighbors === "u1d1l0r1")
-      return frames[
-        `LeftwardsSurface${Math.floor(Math.random() * 3) + 1}` as BlockVariant
-      ];
-
-    if (neighbors === "u0d1l0r1") return frames[BlockVariant.UpLeftSurface];
-    if (neighbors === "u0d1l1r0") return frames[BlockVariant.UpRightSurface];
-    if (neighbors === "u1d0l0r1") return frames[BlockVariant.DownLeftSurface];
-    if (neighbors === "u1d0l1r0") return frames[BlockVariant.DownRightSurface];
-    if (neighbors === "u0d1l0r0")
-      return frames[BlockVariant.UpLeftRightSurface];
-    if (neighbors === "u1d0l0r0")
-      return frames[BlockVariant.DownLeftRightSurface];
-    if (neighbors === "u0d0l1r0")
-      return frames[BlockVariant.UpDownRightSurface];
-    if (neighbors === "u0d0l0r1") return frames[BlockVariant.UpDownLeftSurface];
-
-    if (neighbors === "u1d1l0r0") return frames[BlockVariant.LeftRightSurface];
-    if (neighbors === "u0d0l1r1") return frames[BlockVariant.UpDownSurface];
-
-    return frames[BlockVariant.AllSurfaces];
+    switch (neighbors) {
+      case "u1d1l1r1":
+        return frames[BlockVariant.Default];
+      case "u0d1l1r1":
+        return frames[`UpwardsSurface${randomTo3}`];
+      case "u1d0l1r1":
+        return frames[`DownwardsSurface${randomTo3}`];
+      case "u1d1l1r0":
+        return frames[`RightwardsSurface${randomTo3}`];
+      case "u1d1l0r1":
+        return frames[`LeftwardsSurface${randomTo3}`];
+      case "u0d1l0r1":
+        return frames[BlockVariant.UpLeftSurface];
+      case "u0d1l1r0":
+        return frames[BlockVariant.UpRightSurface];
+      case "u1d0l0r1":
+        return frames[BlockVariant.DownLeftSurface];
+      case "u1d0l1r0":
+        return frames[BlockVariant.DownRightSurface];
+      case "u0d1l0r0":
+        return frames[BlockVariant.UpLeftRightSurface];
+      case "u1d0l0r0":
+        return frames[BlockVariant.DownLeftRightSurface];
+      case "u0d0l1r0":
+        return frames[BlockVariant.UpDownRightSurface];
+      case "u0d0l0r1":
+        return frames[BlockVariant.UpDownLeftSurface];
+      case "u1d1l0r0":
+        return frames[BlockVariant.LeftRightSurface];
+      case "u0d0l1r1":
+        return frames[BlockVariant.UpDownSurface];
+      default:
+        return frames[BlockVariant.AllSurfaces];
+    }
   }
 
   private addBlock(block: Block): void {
     this.blocks.add(block);
     this.blockMap.set(
-      `${block.matrixPosition.x},${block.matrixPosition.y}`,
+      `${block.matrixPosition.matrixX},${block.matrixPosition.matrixY}`,
       block,
-    );
-  }
-
-  private removeBlockFromMap(block: Block): void {
-    this.blockMap.delete(`${block.matrixPosition.x},${block.matrixPosition.y}`);
-  }
-
-  private createBlock(
-    position: { x: number; y: number },
-    matrixPosition: { x: number; y: number },
-    type: BlockType,
-    variantFrames: BlockVariantFramesType[BlockVariant],
-  ): Block {
-    return this.blockFactory.create(
-      position,
-      matrixPosition,
-      type,
-      variantFrames,
     );
   }
 
@@ -173,9 +154,10 @@ export class WorldManager {
   /**
    * Converts matrix coordinates to world coordinates.
    */
-  matrixToWorld(matrixX: number, matrixY: number): Position {
+  matrixToWorld({ matrixX, matrixY }: MatrixPosition): Position {
     const worldX =
-      (matrixX - Math.floor(BLOCKS_COUNT / 2)) * BLOCK_SIZE + BLOCK_SIZE / 2;
+      (matrixX - Math.floor(WORLD_WIDTH_BLOCKS / 2)) * BLOCK_SIZE +
+      BLOCK_SIZE / 2;
     const worldY =
       GROUND_Y - (this.maxHeight - matrixY) * BLOCK_SIZE + BLOCK_SIZE / 2;
     return { x: worldX, y: worldY };
@@ -186,7 +168,7 @@ export class WorldManager {
    */
   worldToMatrix(worldX: number, worldY: number): MatrixPosition {
     const matrixX =
-      Math.floor(worldX / BLOCK_SIZE) + Math.floor(BLOCKS_COUNT / 2);
+      Math.floor(worldX / BLOCK_SIZE) + Math.floor(WORLD_WIDTH_BLOCKS / 2);
     const matrixY =
       this.maxHeight + Math.floor((worldY - GROUND_Y) / BLOCK_SIZE);
     return { matrixX, matrixY };
@@ -199,8 +181,36 @@ export class WorldManager {
   /**
    * Gets the block at the given matrix position.
    */
-  getBlockAt(matrixX: number, matrixY: number): Block | null {
+  getBlockAt({ matrixX, matrixY }: MatrixPosition): Block | null {
     return this.blockMap.get(`${matrixX},${matrixY}`) ?? null;
+  }
+
+  /**
+   * Gets the blocks at the given matrix positions.
+   */
+  getBlockNeighboursPresence({
+    matrixX,
+    matrixY,
+  }: MatrixPosition): BlockNeighbourPresence {
+    const leftCode =
+      matrixX !== 0 && !!this.mapMatrix[matrixX - 1][matrixY] ? 1 : 0;
+
+    const rightCode =
+      matrixX !== WORLD_WIDTH_BLOCKS - 1 &&
+      !!this.mapMatrix[matrixX + 1][matrixY]
+        ? 1
+        : 0;
+
+    const aboveCode =
+      matrixY !== 0 && !!this.mapMatrix[matrixX][matrixY - 1] ? 1 : 0;
+
+    const belowCode =
+      matrixY !== WORLD_HEIGHT_BLOCKS - 1 &&
+      !!this.mapMatrix[matrixX][matrixY + 1]
+        ? 1
+        : 0;
+
+    return `u${aboveCode}d${belowCode}l${leftCode}r${rightCode}`;
   }
 
   /**
@@ -248,19 +258,13 @@ export class WorldManager {
   }
 
   /**
-   * Gets the slope type at the given matrix position.
+   * Gets the variant frames of a block at the given matrix position.
    */
   getBlockVariantFramesAt(
-    matrixX: number,
-    matrixY: number,
+    matrixPosition: MatrixPosition,
   ): BlockVariantFramesType[BlockVariant] {
-    const hasBlockLeft = this.hasBlockAt(matrixX - 1, matrixY);
-    const hasBlockRight = this.hasBlockAt(matrixX + 1, matrixY);
-    const hasBlockAbove = this.hasBlockAt(matrixX, matrixY - 1);
-    const hasBlockBelow = this.hasBlockAt(matrixX, matrixY + 1);
-    const neighbors = `u${hasBlockAbove ? 1 : 0}d${hasBlockBelow ? 1 : 0}l${hasBlockLeft ? 1 : 0}r${hasBlockRight ? 1 : 0}`;
     return this.getBlockVariantFramesByNeighbors(
-      neighbors as `u${0 | 1}d${0 | 1}l${0 | 1}r${0 | 1}`,
+      this.getBlockNeighboursPresence(matrixPosition),
     );
   }
 
@@ -271,25 +275,24 @@ export class WorldManager {
   /**
    * Places a block at the given matrix position.
    */
-  placeBlock(matrixX: number, matrixY: number, type: BlockType): Block | null {
-    if (!this.canPlaceAt(matrixX, matrixY)) return null;
+  placeBlock(matrixPosition: MatrixPosition, type: BlockType): Block | null {
+    if (!this.canPlaceAt(matrixPosition)) return null;
 
-    const worldPos = this.matrixToWorld(matrixX, matrixY);
-    const slope = this.getBlockVariantFramesAt(matrixX, matrixY);
+    const position = this.matrixToWorld(matrixPosition);
+    const variantFrames = this.getBlockVariantFramesAt(matrixPosition);
 
-    const block = this.createBlock(
-      { x: worldPos.x, y: worldPos.y },
-      { x: matrixX, y: matrixY },
+    const block = this.blockFactory.create({
+      position,
+      matrixPosition,
       type,
-      slope,
-    );
+      variantFrames,
+    });
 
     this.addBlock(block);
-    block.setupPhysics();
 
-    this.mapMatrix[matrixX][matrixY] = type;
+    this.mapMatrix[matrixPosition.matrixX][matrixPosition.matrixY] = type;
 
-    this.updateAdjacentBlocksSlope(matrixX, matrixY);
+    this.updateAdjacentBlocksVariantFrames(matrixPosition);
 
     return block;
   }
@@ -300,39 +303,45 @@ export class WorldManager {
   removeBlock(block: Block): BlockType | null {
     const blockType = block.config.type;
 
-    const minedMatrixX = block.matrixPosition.x;
-    const minedMatrixY = block.matrixPosition.y;
+    const minedMatrixX = block.matrixPosition.matrixX;
+    const minedMatrixY = block.matrixPosition.matrixY;
 
     // Update matrix
     this.mapMatrix[minedMatrixX][minedMatrixY] = null;
 
     // Remove from physics group and block map
     this.blocks.remove(block, true, true);
-    this.removeBlockFromMap(block);
+    this.blockMap.delete(
+      `${block.matrixPosition.matrixX},${block.matrixPosition.matrixY}`,
+    );
 
     // Destroy the block
     block.mine();
 
-    this.updateAdjacentBlocksSlope(minedMatrixX, minedMatrixY);
+    this.updateAdjacentBlocksVariantFrames({
+      matrixX: minedMatrixX,
+      matrixY: minedMatrixY,
+    });
 
     return blockType;
   }
 
   /**
-   * Updates the slope of the adjacent blocks.
+   * Updates the variant frames of the adjacent blocks.
    */
-  updateAdjacentBlocksSlope(matrixX: number, matrixY: number): void {
+  private updateAdjacentBlocksVariantFrames({
+    matrixX,
+    matrixY,
+  }: MatrixPosition): void {
     Array.from({ length: 8 }).forEach((_, index) => {
       const x = matrixX + (index % 3) - 1;
       const y = matrixY + (Math.floor(index / 3) - 1);
 
-      const block = this.getBlockAt(x, y);
+      const block = this.getBlockAt({ matrixX: x, matrixY: y });
+
       if (block) {
-        block.updateSlope(
-          this.getBlockVariantFramesAt(
-            block.matrixPosition.x,
-            block.matrixPosition.y,
-          ),
+        block.updateVariantFrames(
+          this.getBlockVariantFramesAt(block.matrixPosition),
         );
       }
     });
@@ -349,7 +358,7 @@ export class WorldManager {
   /**
    * Checks if a block can be placed at the given position.
    */
-  canPlaceAt(matrixX: number, matrixY: number): boolean {
+  canPlaceAt({ matrixX, matrixY }: MatrixPosition): boolean {
     // Check bounds
     if (matrixX < 0 || matrixX >= this.mapMatrix.length) return false;
     if (matrixY < 0 || matrixY >= this.mapMatrix[matrixX].length) return false;
@@ -358,12 +367,7 @@ export class WorldManager {
     if (this.mapMatrix[matrixX][matrixY] !== null) return false;
 
     // Check if there's an adjacent block
-    return (
-      this.hasBlockAt(matrixX - 1, matrixY) ||
-      this.hasBlockAt(matrixX + 1, matrixY) ||
-      this.hasBlockAt(matrixX, matrixY - 1) ||
-      this.hasBlockAt(matrixX, matrixY + 1)
-    );
+    return this.getBlockNeighboursPresence({ matrixX, matrixY }) !== "u0d0l0r0";
   }
 
   // ============================================================================

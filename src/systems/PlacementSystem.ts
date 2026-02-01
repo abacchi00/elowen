@@ -51,12 +51,9 @@ export class PlacementSystem {
     );
     const gridPos = this.ctx.world.worldToMatrix(worldPos.x, worldPos.y);
 
-    if (!this.ctx.world.canPlaceAt(gridPos.matrixX, gridPos.matrixY)) return;
+    if (!this.ctx.world.canPlaceAt(gridPos)) return;
 
-    const worldGridPos = this.ctx.world.matrixToWorld(
-      gridPos.matrixX,
-      gridPos.matrixY,
-    );
+    const worldGridPos = this.ctx.world.matrixToWorld(gridPos);
 
     // Draw semi-transparent preview
     this.previewGraphics.fillStyle(0xffffff, 0.3);
@@ -82,21 +79,18 @@ export class PlacementSystem {
     const worldPos = this.ctx.camera.screenToWorld(pointer.x, pointer.y);
     const gridPos = this.ctx.world.worldToMatrix(worldPos.x, worldPos.y);
 
-    if (!this.ctx.world.canPlaceAt(gridPos.matrixX, gridPos.matrixY)) return;
+    if (!this.ctx.world.canPlaceAt(gridPos)) return;
 
     // Use item from inventory
     const usedType = this.ctx.inventory.useSelectedItem();
+
     if (!usedType) return;
 
     // TODO create a sound for placement
     this.ctx.sounds?.pickaxeHit.play();
 
     // Place the block (WorldManager handles the event)
-    this.ctx.world.placeBlock(
-      gridPos.matrixX,
-      gridPos.matrixY,
-      usedType as BlockType,
-    );
+    this.ctx.world.placeBlock(gridPos, usedType as BlockType);
   }
 
   private isBlockType(type: string): type is BlockType {

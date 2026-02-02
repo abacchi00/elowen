@@ -3,3 +3,4 @@ export {
   screenToWorld,
   getMouseWorldPosition,
 } from "./camera";
+export { createFloatingText, formatItemName } from "./floatingText";

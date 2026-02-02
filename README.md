@@ -33,9 +33,12 @@ Try the game in your browser! No installation required.
 - **Block Placement**: Place blocks from your inventory to build structures
 - **Player Movement**: Smooth 2D platformer controls with jumping and running
 - **Inventory System**: 9-slot hotbar for managing your blocks
+- **Item Drop & Pickup**: Items drop when mined and can be collected with a magnet effect
+- **Item Stacking**: Items of the same type attract to each other and merge into stacks
+- **Floating Text**: Visual feedback showing what items you've collected
 - **Terrain Generation**: Procedurally generated terrain with varying heights
 - **Trees**: Decorative trees scattered across the landscape
-- **Sound Effects**: Audio feedback for mining, jumping, and movement
+- **Sound Effects**: Audio feedback for mining, placing blocks, jumping, movement, and item pickup
 - **Camera System**: Smooth camera following with zoom controls
 - **Block Variants**: Visual variants based on neighboring blocks (slopes, surfaces)
 - **Damage System**: Blocks show visual damage as they're mined

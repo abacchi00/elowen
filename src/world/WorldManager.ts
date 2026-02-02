@@ -18,9 +18,10 @@ import {
   BlockNeighbourPresence,
 } from "../types";
 import { BlockFactory } from "../blocks";
-import { Tree } from "../entities";
+import { Tree, ItemDrop } from "../entities";
 import { TerrainGenerator } from "../terrain";
 import { Block } from "@/blocks/Block";
+import { ItemType } from "../types";
 
 /**
  * Manages the game world: terrain, blocks, and coordinate conversions.
@@ -34,6 +35,7 @@ export class WorldManager {
   private blocks: Phaser.Physics.Arcade.StaticGroup;
   private blockMap: Map<string, Block> = new Map(); // matrixX,matrixY -> Block
   private trees: Phaser.GameObjects.Group;
+  private droppedItems: Phaser.GameObjects.Group;
   private blockFactory: BlockFactory;
 
   // Terrain info
@@ -45,6 +47,7 @@ export class WorldManager {
     this.scene = scene;
     this.blocks = scene.physics.add.staticGroup();
     this.trees = scene.add.group();
+    this.droppedItems = scene.add.group();
 
     this.blockFactory = new BlockFactory(scene);
   }
@@ -318,6 +321,9 @@ export class WorldManager {
     // Destroy the block
     block.mine();
 
+    // Drop the item
+    this.dropItem(block.position.x, block.position.y, blockType, 1);
+
     this.updateAdjacentBlocksVariantFrames({
       matrixX: minedMatrixX,
       matrixY: minedMatrixY,
@@ -388,5 +394,49 @@ export class WorldManager {
 
   getMatrix(): BlockMatrix {
     return this.mapMatrix;
+  }
+
+  getDroppedItems(): Phaser.GameObjects.Group {
+    return this.droppedItems;
+  }
+
+  /**
+   * Drops an item at the specified world position.
+   * Items will be attracted to each other and merge when close enough.
+   */
+  dropItem(
+    worldX: number,
+    worldY: number,
+    itemType: ItemType,
+    quantity: number = 1,
+  ): void {
+    // Always create a new item - items will attract to each other and merge
+    const item = new ItemDrop(this.scene, worldX, worldY, itemType, quantity);
+    this.droppedItems.add(item);
+  }
+
+  /**
+   * Merges two items together, transferring quantity from source to target.
+   * Returns true if merge was successful.
+   */
+  mergeItems(sourceItem: ItemDrop, targetItem: ItemDrop): boolean {
+    if (!sourceItem.active || !targetItem.active) return false;
+    if (sourceItem.itemType !== targetItem.itemType) return false;
+
+    // Transfer quantity
+    targetItem.quantity += sourceItem.quantity;
+
+    // Remove and destroy source item
+    this.removeDroppedItem(sourceItem);
+    sourceItem.destroy();
+
+    return true;
+  }
+
+  /**
+   * Removes a dropped item from the world.
+   */
+  removeDroppedItem(item: ItemDrop): void {
+    this.droppedItems.remove(item, true, true);
   }
 }

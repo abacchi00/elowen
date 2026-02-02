@@ -8,6 +8,7 @@ import {
   MiningSystem,
   InventorySystem,
   PlacementSystem,
+  PickupSystem,
 } from "../systems";
 import { WorldManager } from "../world";
 import { Hotbar } from "../ui";
@@ -30,6 +31,7 @@ export class GameScene extends Phaser.Scene {
   // Systems
   private miningSystem!: MiningSystem;
   private placementSystem!: PlacementSystem;
+  private pickupSystem!: PickupSystem;
 
   // UI
   private hotbar!: Hotbar;
@@ -75,6 +77,7 @@ export class GameScene extends Phaser.Scene {
 
     // 7. Setup collisions
     this.physics.add.collider(this.player, world.getBlocks());
+    this.physics.add.collider(world.getDroppedItems(), world.getBlocks()); // Items collide with blocks
 
     // 8. Follow player with camera
     camera.followTarget(this.player);
@@ -82,6 +85,7 @@ export class GameScene extends Phaser.Scene {
     // 9. Create gameplay systems
     this.miningSystem = new MiningSystem(this.ctx, this.pickaxe);
     this.placementSystem = new PlacementSystem(this.ctx);
+    this.pickupSystem = new PickupSystem(this.ctx, this.player);
 
     // 10. Create UI
     this.hotbar = new Hotbar(this, inventory);
@@ -95,6 +99,7 @@ export class GameScene extends Phaser.Scene {
     this.pickaxe.update();
     this.miningSystem.update(delta);
     this.placementSystem.update();
+    this.pickupSystem.update();
   }
 
   private createPlayer(sounds: GameSounds): void {

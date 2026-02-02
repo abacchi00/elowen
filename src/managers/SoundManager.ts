@@ -11,6 +11,7 @@ const SOUND_CONFIGS: Record<keyof GameSounds, SoundConfig> = {
   jump: { volume: 0.6 },
   pickaxeHit: { volume: 0.2 },
   pickaxeHitStone: { volume: 0.2 },
+  itemPickup: { volume: 0.4 },
 };
 
 /**
@@ -37,6 +38,10 @@ export class SoundManager {
       pickaxeHitStone: this.soundManager.add(
         "pickaxe_hit_stone",
         SOUND_CONFIGS.pickaxeHitStone,
+      ),
+      itemPickup: this.soundManager.add(
+        "item_pickup",
+        SOUND_CONFIGS.itemPickup,
       ),
     };
   }

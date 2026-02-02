@@ -28,6 +28,7 @@ export interface GameSounds {
   jump: Phaser.Sound.BaseSound;
   pickaxeHit: Phaser.Sound.BaseSound;
   pickaxeHitStone: Phaser.Sound.BaseSound;
+  itemPickup: Phaser.Sound.BaseSound;
 }
 
 // ============================================================================

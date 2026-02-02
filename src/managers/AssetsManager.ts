@@ -50,6 +50,7 @@ const AUDIO_ASSETS: AssetConfig[] = [
   { key: "jump", path: "./assets/audio/jump.mp3" },
   { key: "pickaxe_hit", path: "./assets/audio/pickaxe_hit.mp3" },
   { key: "pickaxe_hit_stone", path: "./assets/audio/pickaxe_hit_stone.mp3" },
+  { key: "item_pickup", path: "./assets/audio/pickaxe_hit.mp3" }, // Using pickaxe_hit as placeholder until pickup sound is added
 ];
 
 /**

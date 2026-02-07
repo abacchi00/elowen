@@ -300,12 +300,18 @@ export class WorldManager {
     return block;
   }
 
+  remove(target: Block | Tree): void {
+    if (target instanceof Block) {
+      this.removeBlock(target);
+    } else if (target instanceof Tree) {
+      this.removeTree(target);
+    }
+  }
+
   /**
    * Removes a block from the world.
    */
-  removeBlock(block: Block): BlockType | null {
-    const blockType = block.config.type;
-
+  private removeBlock(block: Block): void {
     const minedMatrixX = block.matrixPosition.matrixX;
     const minedMatrixY = block.matrixPosition.matrixY;
 
@@ -321,15 +327,10 @@ export class WorldManager {
     // Destroy the block
     block.mine();
 
-    // Drop the item
-    this.dropItem(block.position.x, block.position.y, blockType, 1);
-
     this.updateAdjacentBlocksVariantFrames({
       matrixX: minedMatrixX,
       matrixY: minedMatrixY,
     });
-
-    return blockType;
   }
 
   /**
@@ -356,7 +357,7 @@ export class WorldManager {
   /**
    * Removes a tree from the world.
    */
-  removeTree(tree: Tree): void {
+  private removeTree(tree: Tree): void {
     this.trees.remove(tree, true, true);
     tree.mine();
   }

@@ -24,12 +24,19 @@ export class Tree
   public maxLife: number;
   public miningSound: Phaser.Sound.BaseSound | null = null;
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
+  public drop: IMineable["drop"];
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, "tree");
 
     this.maxLife = TREE_MAX_LIFE;
     this.life = this.maxLife;
+
+    this.drop = {
+      type: "wood_block",
+      quantity: Math.floor(Math.random() * 3) + 1,
+      position: { x, y: y - TREE_DISPLAY_HEIGHT / 2 },
+    };
 
     // Add to scene
     scene.add.existing(this);

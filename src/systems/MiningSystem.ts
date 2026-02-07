@@ -1,8 +1,4 @@
-import {
-  MINING_DAMAGE,
-  MINING_INTERVAL,
-  BLOCK_SIZE,
-} from "../config/constants";
+import { MINING_DAMAGE, MINING_INTERVAL } from "../config/constants";
 import { Block } from "../blocks/Block";
 import { Tree } from "../entities/Tree";
 import { Pickaxe } from "../entities/Pickaxe";
@@ -107,19 +103,17 @@ export class MiningSystem {
   }
 
   private destroyTarget(target: MineableTarget): void {
-    if (target instanceof Block) {
-      // removeBlock() already handles dropping the item
-      this.ctx.world.removeBlock(target);
-    } else if (target instanceof Tree) {
-      // Store position before removing
-      const treeX = target.x;
-      const treeY = target.y;
-      this.ctx.world.removeTree(target);
-      // Drop item for trees slightly higher (trees are taller than blocks)
-      this.ctx.world.dropItem(treeX, treeY - BLOCK_SIZE * 0.5, "wood", 1);
-    }
+    this.ctx.world.dropItem(
+      target.drop.position.x,
+      target.drop.position.y,
+      target.drop.type,
+      target.drop.quantity,
+    );
+
+    this.ctx.world.remove(target);
 
     this.resetMining();
+
     this.pickaxe.stopMining();
   }
 

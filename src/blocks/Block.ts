@@ -36,6 +36,7 @@ export abstract class Block
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
   public variantFrames: BlockVariantFramesType[BlockVariant];
   public matrixPosition: MatrixPosition;
+  public drop: IMineable["drop"];
 
   constructor({
     config,
@@ -52,6 +53,11 @@ export abstract class Block
     this.variantFrames = variantFrames;
     this.config = config;
     this.position = position;
+    this.drop = {
+      type: config.type,
+      quantity: 1,
+      position: position,
+    };
 
     scene.add.existing(this);
 

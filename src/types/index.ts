@@ -5,7 +5,11 @@ import Phaser from "phaser";
 // Game Types
 // ============================================================================
 
-export type BlockType = "grass_block" | "dirt_block" | "stone_block";
+export type BlockType =
+  | "grass_block"
+  | "dirt_block"
+  | "stone_block"
+  | "wood_block";
 
 export type BlockMatrix = (BlockType | null)[][];
 
@@ -39,6 +43,11 @@ export interface IMineable {
   life: number;
   maxLife: number;
   miningSound: Phaser.Sound.BaseSound | null;
+  drop: {
+    type: ItemType;
+    quantity: number;
+    position: Position;
+  };
   takeDamage(damage: number): "destroyed" | "not_destroyed";
   mine(): void;
 }
@@ -56,7 +65,7 @@ export interface IUpdatable {
 // Inventory Types
 // ============================================================================
 
-export type ItemType = BlockType | "wood"; // Blocks + other items like wood from trees
+export type ItemType = BlockType; // Blocks + other items in the future
 
 export interface InventoryItem {
   type: ItemType;
@@ -82,7 +91,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
   grass_block: { maxStack: 64, texture: "grass_block_spritesheet", frame: 0 },
   dirt_block: { maxStack: 64, texture: "dirt_block_spritesheet", frame: 0 },
   stone_block: { maxStack: 64, texture: "stone_block_spritesheet", frame: 0 },
-  wood: { maxStack: 64, texture: "tree_variant_1" },
+  wood_block: { maxStack: 64, texture: "stone_block_spritesheet", frame: 0 }, // TODO: Add wood block texture, frame and class
 };
 
 // Re-export GameContext

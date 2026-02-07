@@ -41,17 +41,12 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
 
     // Physics properties
     if (this.body) {
-      (this.body as Phaser.Physics.Arcade.Body).setCollideWorldBounds(false);
-      (this.body as Phaser.Physics.Arcade.Body).setGravityY(300);
-      (this.body as Phaser.Physics.Arcade.Body).setBounce(0.3);
-      (this.body as Phaser.Physics.Arcade.Body).setDragX(100);
-    }
+      const body = this.body as Phaser.Physics.Arcade.Body;
 
-    // Add a small random velocity when dropped
-    if (this.body) {
-      const randomX = (Math.random() - 0.5) * 100;
-      const randomY = -50 - Math.random() * 50;
-      (this.body as Phaser.Physics.Arcade.Body).setVelocity(randomX, randomY);
+      body.setCollideWorldBounds(false);
+      body.setGravityY(200);
+      body.setBounce(0.5);
+      body.setDragX(100);
     }
   }
 

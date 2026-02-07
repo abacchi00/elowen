@@ -16,6 +16,7 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
   private creationTime: number; // Timestamp when item was created
   private readonly PICKUP_COOLDOWN = 100; // Milliseconds before item can be picked up
   private readonly STACK_COOLDOWN = 200; // Milliseconds before item can stack with others
+  private outline: Phaser.GameObjects.Graphics | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -38,6 +39,8 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     // Set display properties
     this.setDisplaySize(BLOCK_SIZE * 0.75, BLOCK_SIZE * 0.75);
     this.setDepth(100); // Render above blocks but below UI
+
+    this.setOutline();
 
     // Physics properties
     if (this.body) {
@@ -128,6 +131,47 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     );
 
     return distance <= this.mergeRadius;
+  }
+
+  private setOutline(): void {
+    this.outline = this.scene.add.graphics();
+    this.outline.lineStyle(2, 0x222222, 1);
+    this.outline.strokeRect(
+      -BLOCK_SIZE / 2,
+      -BLOCK_SIZE / 2,
+      BLOCK_SIZE,
+      BLOCK_SIZE,
+    );
+    this.outline.setPosition(this.x, this.y);
+    this.outline.setDepth(this.depth + 1);
+    this.outline.setScrollFactor(1, 1);
+    this.outline.setScale(0.75);
+  }
+
+  private clearOutline(): void {
+    if (this.outline) {
+      this.outline.destroy();
+      this.outline = null;
+    }
+  }
+
+  /**
+   * Updates the outline position to follow the item.
+   */
+  preUpdate(time: number, delta: number): void {
+    super.preUpdate(time, delta);
+
+    if (this.outline && this.active) {
+      this.outline.setPosition(this.x, this.y);
+    }
+  }
+
+  /**
+   * Cleans up the outline when the item is destroyed.
+   */
+  destroy(fromScene?: boolean): void {
+    this.clearOutline();
+    super.destroy(fromScene);
   }
 
   /**

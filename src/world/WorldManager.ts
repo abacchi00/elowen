@@ -75,6 +75,7 @@ export class WorldManager {
           position: this.matrixToWorld(matrixPosition),
           matrixPosition: { matrixX, matrixY },
           type: blockType,
+          neighbours: this.blockAt({ matrixX, matrixY }).getNeighbours(),
         });
 
         this.addBlock(block);
@@ -142,30 +143,63 @@ export class WorldManager {
 
   blockAt({ matrixX, matrixY }: MatrixPosition): {
     hasNeighbours: () => boolean;
+    hasLeftNeighbour: () => boolean;
+    hasRightNeighbour: () => boolean;
+    hasTopNeighbour: () => boolean;
+    hasBottomNeighbour: () => boolean;
+    getNeighbours: () => {
+      left: boolean;
+      right: boolean;
+      top: boolean;
+      bottom: boolean;
+    };
+    getNeighboursCoordinates: () => {
+      left: MatrixPosition | null;
+      right: MatrixPosition | null;
+      top: MatrixPosition | null;
+      bottom: MatrixPosition | null;
+    };
   } {
+    const hasLeftNeighbour = () =>
+      matrixX !== 0 && !!this.mapMatrix[matrixX - 1][matrixY];
+    const hasRightNeighbour = () =>
+      matrixX !== WORLD_WIDTH_BLOCKS - 1 &&
+      !!this.mapMatrix[matrixX + 1][matrixY];
+    const hasTopNeighbour = () =>
+      matrixY !== 0 && !!this.mapMatrix[matrixX][matrixY - 1];
+    const hasBottomNeighbour = () =>
+      matrixY !== WORLD_HEIGHT_BLOCKS - 1 &&
+      !!this.mapMatrix[matrixX][matrixY + 1];
+    const hasNeighbours = () =>
+      hasLeftNeighbour() ||
+      hasRightNeighbour() ||
+      hasTopNeighbour() ||
+      hasBottomNeighbour();
+    const getNeighbours = () => {
+      return {
+        left: hasLeftNeighbour(),
+        right: hasRightNeighbour(),
+        top: hasTopNeighbour(),
+        bottom: hasBottomNeighbour(),
+      };
+    };
+    const getNeighboursCoordinates = () => {
+      return {
+        left: hasLeftNeighbour() ? { matrixX: matrixX - 1, matrixY } : null,
+        right: hasRightNeighbour() ? { matrixX: matrixX + 1, matrixY } : null,
+        top: hasTopNeighbour() ? { matrixX, matrixY: matrixY - 1 } : null,
+        bottom: hasBottomNeighbour() ? { matrixX, matrixY: matrixY + 1 } : null,
+      };
+    };
+
     return {
-      hasNeighbours: () => {
-        const hasLeftNeighbour =
-          matrixX !== 0 && !!this.mapMatrix[matrixX - 1][matrixY];
-
-        const hasRightNeighbour =
-          matrixX !== WORLD_WIDTH_BLOCKS - 1 &&
-          !!this.mapMatrix[matrixX + 1][matrixY];
-
-        const hasTopNeighbour =
-          matrixY !== 0 && !!this.mapMatrix[matrixX][matrixY - 1];
-
-        const hasBottomNeighbour =
-          matrixY !== WORLD_HEIGHT_BLOCKS - 1 &&
-          !!this.mapMatrix[matrixX][matrixY + 1];
-
-        return (
-          hasLeftNeighbour ||
-          hasRightNeighbour ||
-          hasTopNeighbour ||
-          hasBottomNeighbour
-        );
-      },
+      hasNeighbours,
+      hasLeftNeighbour,
+      hasRightNeighbour,
+      hasTopNeighbour,
+      hasBottomNeighbour,
+      getNeighbours,
+      getNeighboursCoordinates,
     };
   }
 
@@ -229,11 +263,25 @@ export class WorldManager {
       position,
       matrixPosition,
       type,
+      neighbours: this.blockAt(matrixPosition).getNeighbours(),
     });
 
     this.addBlock(block);
 
     this.mapMatrix[matrixPosition.matrixX][matrixPosition.matrixY] = type;
+
+    const { left, right, top, bottom } =
+      this.blockAt(matrixPosition).getNeighboursCoordinates();
+
+    const leftBlock = left ? this.getBlockAt(left) : null;
+    const rightBlock = right ? this.getBlockAt(right) : null;
+    const topBlock = top ? this.getBlockAt(top) : null;
+    const bottomBlock = bottom ? this.getBlockAt(bottom) : null;
+
+    leftBlock?.updateNeighbours({ right: true });
+    rightBlock?.updateNeighbours({ left: true });
+    topBlock?.updateNeighbours({ bottom: true });
+    bottomBlock?.updateNeighbours({ top: true });
 
     return block;
   }
@@ -252,6 +300,21 @@ export class WorldManager {
   private removeBlock(block: Block): void {
     const minedMatrixX = block.matrixPosition.matrixX;
     const minedMatrixY = block.matrixPosition.matrixY;
+
+    // Update neighbours
+    const { left, right, top, bottom } = this.blockAt(
+      block.matrixPosition,
+    ).getNeighboursCoordinates();
+
+    const leftBlock = left ? this.getBlockAt(left) : null;
+    const rightBlock = right ? this.getBlockAt(right) : null;
+    const topBlock = top ? this.getBlockAt(top) : null;
+    const bottomBlock = bottom ? this.getBlockAt(bottom) : null;
+
+    leftBlock?.updateNeighbours({ right: false });
+    rightBlock?.updateNeighbours({ left: false });
+    topBlock?.updateNeighbours({ bottom: false });
+    bottomBlock?.updateNeighbours({ top: false });
 
     // Update matrix
     this.mapMatrix[minedMatrixX][minedMatrixY] = null;

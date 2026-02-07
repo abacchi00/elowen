@@ -17,6 +17,12 @@ export type BlockConstructorProps = {
   position: Position;
   matrixPosition: MatrixPosition;
   config: BlockConfig;
+  neighbours?: {
+    left: boolean;
+    right: boolean;
+    top: boolean;
+    bottom: boolean;
+  };
 };
 
 export abstract class Block
@@ -29,17 +35,31 @@ export abstract class Block
   public miningSound: IMineable["miningSound"] = "pickaxeHit";
   public config: BlockConfig;
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
+  public outline: Phaser.GameObjects.Graphics | null = null;
   public matrixPosition: MatrixPosition;
   public drop: IMineable["drop"];
+  public neighbours: {
+    left: boolean;
+    right: boolean;
+    top: boolean;
+    bottom: boolean;
+  } = {
+    left: false,
+    right: false,
+    top: false,
+    bottom: false,
+  };
 
   constructor({
     config,
     position,
     scene,
     matrixPosition,
+    neighbours,
   }: BlockConstructorProps) {
     super(scene, position.x, position.y, config.spritesheet, 0);
 
+    if (neighbours) this.neighbours = neighbours;
     this.matrixPosition = matrixPosition;
     this.config = config;
     this.position = position;
@@ -59,10 +79,12 @@ export abstract class Block
     // Make interactive
     this.setInteractive({ useHandCursor: true });
     this.setupHoverEffects();
+    this.showOutline();
   }
 
   mine(): void {
     this.hideOutline();
+    this.hideHoverOutline();
 
     if (this.scene?.tweens) this.scene.tweens.killTweensOf(this);
 
@@ -78,18 +100,75 @@ export abstract class Block
   }
 
   setupHoverEffects(): void {
-    this.on("pointerover", this.showOutline, this);
-    this.on("pointerout", this.hideOutline, this);
+    this.on("pointerover", this.showHoverOutline, this);
+    this.on("pointerout", this.hideHoverOutline, this);
   }
 
-  // TODO: Refactor so only surface (accessible blocks) are used for physics to improve performance
-  private setupPhysics(): void {
-    if (this.body) {
-      (this.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
+  updateNeighbours(newNeighbours: {
+    left?: boolean;
+    right?: boolean;
+    top?: boolean;
+    bottom?: boolean;
+  }): void {
+    if (newNeighbours.left !== undefined)
+      this.neighbours.left = newNeighbours.left;
+    if (newNeighbours.right !== undefined)
+      this.neighbours.right = newNeighbours.right;
+    if (newNeighbours.top !== undefined)
+      this.neighbours.top = newNeighbours.top;
+    if (newNeighbours.bottom !== undefined)
+      this.neighbours.bottom = newNeighbours.bottom;
+
+    this.hideOutline();
+    this.showOutline();
+  }
+
+  showOutline(): void {
+    this.outline = this.scene.add.graphics();
+    this.outline.lineStyle(2, 0x111111, 1);
+    console.log(this.neighbours);
+
+    if (!this.neighbours.top)
+      this.outline.lineBetween(
+        -BLOCK_SIZE / 2,
+        -BLOCK_SIZE / 2,
+        BLOCK_SIZE / 2,
+        -BLOCK_SIZE / 2,
+      );
+    if (!this.neighbours.bottom)
+      this.outline.lineBetween(
+        -BLOCK_SIZE / 2,
+        BLOCK_SIZE / 2,
+        BLOCK_SIZE / 2,
+        BLOCK_SIZE / 2,
+      );
+    if (!this.neighbours.left)
+      this.outline.lineBetween(
+        -BLOCK_SIZE / 2,
+        BLOCK_SIZE / 2,
+        -BLOCK_SIZE / 2,
+        -BLOCK_SIZE / 2,
+      );
+    if (!this.neighbours.right)
+      this.outline.lineBetween(
+        BLOCK_SIZE / 2,
+        BLOCK_SIZE / 2,
+        BLOCK_SIZE / 2,
+        -BLOCK_SIZE / 2,
+      );
+    this.outline.setPosition(this.x, this.y);
+    this.outline.setDepth(this.depth + 1);
+    this.outline.setScrollFactor(1, 1);
+  }
+
+  private hideOutline(): void {
+    if (this.outline) {
+      this.outline.destroy();
+      this.outline = null;
     }
   }
 
-  private showOutline(): void {
+  private showHoverOutline(): void {
     if (this.hoverOutline || !this.scene) return;
 
     this.hoverOutline = this.scene.add.graphics();
@@ -110,14 +189,14 @@ export abstract class Block
     ignoreOnUICameras(this.scene, this.hoverOutline);
   }
 
-  private hideOutline(): void {
+  private hideHoverOutline(): void {
     if (this.hoverOutline) {
       this.hoverOutline.destroy();
       this.hoverOutline = null;
     }
   }
 
-  // TODO: Refactor - make code more readable and refactor block base scale
+  // TODO: Refactor - make code more readable
   private playMiningAnimation(): void {
     // Stop any existing mining animation
     this.scene.tweens.killTweensOf(this);
@@ -140,6 +219,7 @@ export abstract class Block
         this.setDepth(originalDepth);
       },
     });
+
     if (this.hoverOutline) {
       const originalHoverOutlineDepth = this.hoverOutline?.depth ?? 0;
       const originalHoverOutlineScale = this.hoverOutline?.scale ?? 1;
@@ -159,6 +239,13 @@ export abstract class Block
           this.hoverOutline?.setDepth(originalHoverOutlineDepth);
         },
       });
+    }
+  }
+
+  // TODO: Refactor so only surface (accessible blocks) are used for physics to improve performance
+  private setupPhysics(): void {
+    if (this.body) {
+      (this.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
     }
   }
 }

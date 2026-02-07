@@ -4,10 +4,7 @@ import {
   WORLD_WIDTH_BLOCKS,
   BLOCK_SIZE,
 } from "../config/constants";
-
-const SKY_COLOR_LIGHT = 0x86f9ff; // Light sky blue (bottom/middle)
-const SKY_COLOR_DARK = 0x2196f3; // Dark blue (top)
-const SKY_DEPTH = -1000;
+import { SKY_COLOR_LIGHT, SKY_COLOR_DARK, SKY_DEPTH } from "@/config/constants";
 
 /**
  * Manages the game background rendering.

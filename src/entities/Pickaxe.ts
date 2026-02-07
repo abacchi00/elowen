@@ -3,10 +3,10 @@ import { BLOCK_SIZE } from "../config/constants";
 import { Player } from "./Player";
 import { IUpdatable } from "../types";
 import { getMouseWorldPosition } from "../utils";
-
-const SWING_SPEED = 0.03;
-const SWING_AMPLITUDE = 0.6;
-
+import {
+  PICKAXE_SWING_SPEED,
+  PICKAXE_SWING_AMPLITUDE,
+} from "@/config/constants";
 /**
  * Pickaxe entity that follows the player and animates during mining.
  */
@@ -99,14 +99,15 @@ export class Pickaxe extends Phaser.GameObjects.Image implements IUpdatable {
   }
 
   private animateMining(): void {
-    this.mineAnimationProgress += SWING_SPEED;
+    this.mineAnimationProgress += PICKAXE_SWING_SPEED;
 
     if (this.mineAnimationProgress >= 1) {
       this.mineAnimationProgress = 0;
     }
 
     const swingAngle =
-      Math.sin(this.mineAnimationProgress * Math.PI * 2) * SWING_AMPLITUDE;
+      Math.sin(this.mineAnimationProgress * Math.PI * 2) *
+      PICKAXE_SWING_AMPLITUDE;
     this.rotation = this.targetRotation + swingAngle;
   }
 

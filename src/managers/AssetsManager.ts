@@ -1,63 +1,9 @@
 import Phaser from "phaser";
-
-interface AssetConfig {
-  key: string;
-  path: string;
-}
-
-interface SpritesheetConfig {
-  key: string;
-  path: string;
-  frameWidth: number;
-  frameHeight: number;
-}
-
-const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
-  {
-    key: "dirt_block_spritesheet",
-    path: "/assets/spritesheets/dirt_block_spritesheet.png",
-    frameWidth: 16,
-    frameHeight: 16,
-  },
-  {
-    key: "grass_block_spritesheet",
-    path: "/assets/spritesheets/grass_block_spritesheet.png",
-    frameWidth: 16,
-    frameHeight: 16,
-  },
-  {
-    key: "stone_block_spritesheet",
-    path: "/assets/spritesheets/stone_block_spritesheet.png",
-    frameWidth: 16,
-    frameHeight: 16,
-  },
-  {
-    key: "wood_block_spritesheet",
-    // TODO: Using stone_block_spritesheet as placeholder until wood block texture is added
-    path: "/assets/spritesheets/stone_block_spritesheet.png",
-    frameWidth: 16,
-    frameHeight: 16,
-  },
-  {
-    key: "player_spritesheet",
-    path: "/assets/spritesheets/player_spritesheet.png",
-    frameWidth: 16,
-    frameHeight: 24,
-  },
-];
-
-const IMAGE_ASSETS: AssetConfig[] = [
-  { key: "pickaxe", path: "./assets/images/pickaxe.png" },
-  { key: "tree_variant_1", path: "./assets/images/tree_variant_1.png" },
-  { key: "tree_variant_2", path: "./assets/images/tree_variant_2.png" },
-];
-
-const AUDIO_ASSETS: AssetConfig[] = [
-  { key: "running", path: "./assets/audio/running.mp3" },
-  { key: "jump", path: "./assets/audio/jump.mp3" },
-  { key: "pickaxe_hit", path: "./assets/audio/pickaxe_hit.mp3" },
-  { key: "item_pickup", path: "./assets/audio/item_pickup.mp3" },
-];
+import {
+  IMAGE_ASSETS,
+  SPRITESHEET_ASSETS,
+  AUDIO_ASSETS,
+} from "@/config/constants";
 
 /**
  * Manages loading of game assets.

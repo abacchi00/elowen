@@ -1,17 +1,6 @@
 import Phaser from "phaser";
-import { GameSounds } from "../types";
-
-interface SoundConfig {
-  loop?: boolean;
-  volume?: number;
-}
-
-const SOUND_CONFIGS: Record<keyof GameSounds, SoundConfig> = {
-  running: { loop: true, volume: 2 },
-  jump: { volume: 0.6 },
-  pickaxeHit: { volume: 0.2 },
-  itemPickup: { volume: 0.4 },
-};
+import { GameSounds } from "@/types";
+import { SOUND_CONFIGS } from "@/config";
 
 /**
  * Manages game sound effects.
@@ -27,18 +16,12 @@ export class SoundManager {
   }
 
   private createSounds(): GameSounds {
-    return {
-      running: this.soundManager.add("running", SOUND_CONFIGS.running),
-      jump: this.soundManager.add("jump", SOUND_CONFIGS.jump),
-      pickaxeHit: this.soundManager.add(
-        "pickaxe_hit",
-        SOUND_CONFIGS.pickaxeHit,
-      ),
-      itemPickup: this.soundManager.add(
-        "item_pickup",
-        SOUND_CONFIGS.itemPickup,
-      ),
-    };
+    return Object.fromEntries(
+      Object.entries(SOUND_CONFIGS).map(([key, config]) => [
+        key,
+        this.soundManager.add(config.key, config),
+      ]),
+    ) as unknown as GameSounds;
   }
 
   getSounds(): GameSounds {

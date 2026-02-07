@@ -3,15 +3,14 @@ import {
   BLOCK_SIZE,
   TREE_MAX_LIFE,
   TREE_DARK_TINT_CHANCE,
+  MINEABLE_OUTLINE_WIDTH,
+  MINEABLE_OUTLINE_COLOR,
+  TREE_DISPLAY_WIDTH,
+  TREE_DISPLAY_HEIGHT,
+  TREE_DARK_TINT,
 } from "../config/constants";
 import { IMineable, IHoverable } from "../types";
 import { ignoreOnUICameras } from "../utils";
-
-const TREE_DISPLAY_WIDTH = BLOCK_SIZE * 6;
-const TREE_DISPLAY_HEIGHT = BLOCK_SIZE * 10;
-const DARK_TINT = 0xbbbbbb;
-const OUTLINE_COLOR = 0xffffff;
-const OUTLINE_WIDTH = 2;
 
 /**
  * Tree entity - passable but minable.
@@ -52,7 +51,6 @@ export class Tree
     // Add visual variance
     this.applyRandomVariant();
     this.applyRandomTint();
-    this.applyRandomScale();
 
     // Add wobble animation (wind effect)
     this.startWobbleAnimation();
@@ -81,7 +79,11 @@ export class Tree
     if (this.hoverOutline || !this.scene) return;
 
     this.hoverOutline = this.scene.add.graphics();
-    this.hoverOutline.lineStyle(OUTLINE_WIDTH, OUTLINE_COLOR, 1);
+    this.hoverOutline.lineStyle(
+      MINEABLE_OUTLINE_WIDTH,
+      MINEABLE_OUTLINE_COLOR,
+      1,
+    );
     this.hoverOutline.strokeRect(
       -BLOCK_SIZE / 2,
       -BLOCK_SIZE,
@@ -133,14 +135,9 @@ export class Tree
     }
   }
 
-  private applyRandomScale(): void {
-    const scale = 2.5 + Math.random() * 1.5;
-    this.setScale(scale);
-  }
-
   private applyRandomTint(): void {
     if (Math.random() < TREE_DARK_TINT_CHANCE) {
-      this.setTint(DARK_TINT);
+      this.setTint(TREE_DARK_TINT);
     }
   }
 }

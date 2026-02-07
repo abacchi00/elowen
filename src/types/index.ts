@@ -4,6 +4,22 @@ import { BlockConstructorProps } from "@/blocks/Block";
 import Phaser from "phaser";
 
 // ============================================================================
+// Asset Types
+// ============================================================================
+
+export interface AssetConfig {
+  key: string;
+  path: string;
+}
+
+export interface SpritesheetConfig {
+  key: string;
+  path: string;
+  frameWidth: number;
+  frameHeight: number;
+}
+
+// ============================================================================
 // Game Types
 // ============================================================================
 
@@ -34,6 +50,12 @@ export interface GameSounds {
   jump: Phaser.Sound.BaseSound;
   pickaxeHit: Phaser.Sound.BaseSound;
   itemPickup: Phaser.Sound.BaseSound;
+}
+
+export interface SoundConfig {
+  key: string;
+  loop?: boolean;
+  volume?: number;
 }
 
 // ============================================================================

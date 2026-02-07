@@ -10,8 +10,8 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
   public quantity: number;
   private pickupRadius: number = BLOCK_SIZE * 1.5; // Distance at which item can be picked up
   private magnetSpeed: number = 200; // Speed at which item moves toward player when in range
-  private itemAttractionSpeed: number = 50; // Speed at which item moves toward other items
-  private itemAttractionRadius: number = BLOCK_SIZE * 3; // Distance to attract to other items
+  private itemAttractionSpeed: number = 100; // Speed at which item moves toward other items
+  private itemAttractionRadius: number = BLOCK_SIZE * 2; // Distance to attract to other items
   private mergeRadius: number = BLOCK_SIZE * 0.5; // Distance to merge with other items
   private creationTime: number; // Timestamp when item was created
   private readonly PICKUP_COOLDOWN = 100; // Milliseconds before item can be picked up

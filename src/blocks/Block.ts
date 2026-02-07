@@ -152,14 +152,14 @@ export abstract class Block
 
     this.scene.tweens.add({
       targets: this,
-      scaleX: 2,
-      scaleY: 2,
+      scaleX: 1.5,
+      scaleY: 1.5,
       duration: 50,
       ease: "Power2",
       yoyo: true,
       repeat: 0,
       onComplete: () => {
-        this.setScale(1.5);
+        this.setScale(1);
         this.setDepth(originalDepth);
       },
     });

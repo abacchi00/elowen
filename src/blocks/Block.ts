@@ -72,14 +72,11 @@ export abstract class Block
     scene.add.existing(this);
 
     this.setupPhysics();
-
-    // Set display properties
+    this.setCollisions();
     this.setDisplaySize(BLOCK_SIZE, BLOCK_SIZE);
-
-    // Make interactive
     this.setInteractive({ useHandCursor: true });
     this.setupHoverEffects();
-    this.showOutline();
+    this.setOutline();
   }
 
   mine(): void {
@@ -119,43 +116,68 @@ export abstract class Block
     if (newNeighbours.bottom !== undefined)
       this.neighbours.bottom = newNeighbours.bottom;
 
+    this.setCollisions();
     this.hideOutline();
-    this.showOutline();
+    this.setOutline();
   }
 
-  showOutline(): void {
+  setCollisions(): void {
+    if (!this.body) return;
+
+    const body = this.body as Phaser.Physics.Arcade.StaticBody;
+
+    body.checkCollision.left = !this.neighbours.left;
+    body.checkCollision.right = !this.neighbours.right;
+    body.checkCollision.up = !this.neighbours.top;
+    body.checkCollision.down = !this.neighbours.bottom;
+  }
+
+  setOutline(): void {
     this.outline = this.scene.add.graphics();
     this.outline.lineStyle(2, 0x111111, 1);
-    console.log(this.neighbours);
 
-    if (!this.neighbours.top)
+    const halfSize = BLOCK_SIZE / 2;
+    const corners = {
+      topLeft: { x: -halfSize, y: -halfSize },
+      topRight: { x: halfSize, y: -halfSize },
+      bottomLeft: { x: -halfSize, y: halfSize },
+      bottomRight: { x: halfSize, y: halfSize },
+    };
+
+    // Draw outline only on sides without neighbors
+    if (!this.neighbours.top) {
       this.outline.lineBetween(
-        -BLOCK_SIZE / 2,
-        -BLOCK_SIZE / 2,
-        BLOCK_SIZE / 2,
-        -BLOCK_SIZE / 2,
+        corners.topLeft.x,
+        corners.topLeft.y,
+        corners.topRight.x,
+        corners.topRight.y,
       );
-    if (!this.neighbours.bottom)
+    }
+    if (!this.neighbours.bottom) {
       this.outline.lineBetween(
-        -BLOCK_SIZE / 2,
-        BLOCK_SIZE / 2,
-        BLOCK_SIZE / 2,
-        BLOCK_SIZE / 2,
+        corners.bottomLeft.x,
+        corners.bottomLeft.y,
+        corners.bottomRight.x,
+        corners.bottomRight.y,
       );
-    if (!this.neighbours.left)
+    }
+    if (!this.neighbours.left) {
       this.outline.lineBetween(
-        -BLOCK_SIZE / 2,
-        BLOCK_SIZE / 2,
-        -BLOCK_SIZE / 2,
-        -BLOCK_SIZE / 2,
+        corners.bottomLeft.x,
+        corners.bottomLeft.y,
+        corners.topLeft.x,
+        corners.topLeft.y,
       );
-    if (!this.neighbours.right)
+    }
+    if (!this.neighbours.right) {
       this.outline.lineBetween(
-        BLOCK_SIZE / 2,
-        BLOCK_SIZE / 2,
-        BLOCK_SIZE / 2,
-        -BLOCK_SIZE / 2,
+        corners.bottomRight.x,
+        corners.bottomRight.y,
+        corners.topRight.x,
+        corners.topRight.y,
       );
+    }
+
     this.outline.setPosition(this.x, this.y);
     this.outline.setDepth(this.depth + 1);
     this.outline.setScrollFactor(1, 1);
@@ -244,6 +266,7 @@ export abstract class Block
 
   // TODO: Refactor so only surface (accessible blocks) are used for physics to improve performance
   private setupPhysics(): void {
+    this.scene.physics.add.existing(this, true); // true = static body
     if (this.body) {
       (this.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
     }

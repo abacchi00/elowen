@@ -1,3 +1,5 @@
+// TODO: create file structure for constants
+
 // ============================================================================
 // Display Constants
 // ============================================================================
@@ -52,62 +54,3 @@ export const BASE_DEPTH = 43;
 export const TREE_MAX_LIFE = 80;
 export const TREE_SPAWN_CHANCE = 0.15; // 15%
 export const TREE_DARK_TINT_CHANCE = 0.3; // 30%
-
-// ============================================================================
-// Block Constants
-// ============================================================================
-
-export enum BlockVariant {
-  Default = "Default",
-  UpwardsSurface1 = "UpwardsSurface1",
-  UpwardsSurface2 = "UpwardsSurface2",
-  UpwardsSurface3 = "UpwardsSurface3",
-  DownwardsSurface1 = "DownwardsSurface1",
-  DownwardsSurface2 = "DownwardsSurface2",
-  DownwardsSurface3 = "DownwardsSurface3",
-  RightwardsSurface1 = "RightwardsSurface1",
-  RightwardsSurface2 = "RightwardsSurface2",
-  RightwardsSurface3 = "RightwardsSurface3",
-  LeftwardsSurface1 = "LeftwardsSurface1",
-  LeftwardsSurface2 = "LeftwardsSurface2",
-  LeftwardsSurface3 = "LeftwardsSurface3",
-  UpLeftSurface = "UpLeftSurface",
-  UpRightSurface = "UpRightSurface",
-  DownLeftSurface = "DownLeftSurface",
-  DownRightSurface = "DownRightSurface",
-  UpLeftRightSurface = "UpLeftRightSurface",
-  DownLeftRightSurface = "DownLeftRightSurface",
-  UpDownRightSurface = "UpDownRightSurface",
-  UpDownLeftSurface = "UpDownLeftSurface",
-  AllSurfaces = "AllSurfaces",
-  LeftRightSurface = "LeftRightSurface",
-  UpDownSurface = "UpDownSurface",
-}
-
-export const BLOCK_VARIANT_COUNT = Object.values(BlockVariant).length;
-
-export enum BlockLifeLevel {
-  Full = "Full",
-  High = "High",
-  Medium = "Medium",
-  Low = "Low",
-}
-
-export type BlockVariantFramesType = Record<
-  BlockVariant,
-  Record<BlockLifeLevel, number>
->;
-
-export const BLOCK_VARIANT_FRAMES: BlockVariantFramesType = Object.values(
-  BlockVariant,
-).reduce((acc, variant, index) => {
-  return {
-    ...acc,
-    [variant]: {
-      [BlockLifeLevel.Full]: index,
-      [BlockLifeLevel.High]: index + BLOCK_VARIANT_COUNT,
-      [BlockLifeLevel.Medium]: index + 2 * BLOCK_VARIANT_COUNT,
-      [BlockLifeLevel.Low]: index + 3 * BLOCK_VARIANT_COUNT,
-    },
-  };
-}, {} as BlockVariantFramesType);

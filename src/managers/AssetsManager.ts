@@ -32,6 +32,13 @@ const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
     frameHeight: 16,
   },
   {
+    key: "wood_block_spritesheet",
+    // TODO: Using stone_block_spritesheet as placeholder until wood block texture is added
+    path: "/assets/spritesheets/stone_block_spritesheet.png",
+    frameWidth: 16,
+    frameHeight: 16,
+  },
+  {
     key: "player_spritesheet",
     path: "/assets/spritesheets/player_spritesheet.png",
     frameWidth: 16,
@@ -49,8 +56,7 @@ const AUDIO_ASSETS: AssetConfig[] = [
   { key: "running", path: "./assets/audio/running.mp3" },
   { key: "jump", path: "./assets/audio/jump.mp3" },
   { key: "pickaxe_hit", path: "./assets/audio/pickaxe_hit.mp3" },
-  { key: "pickaxe_hit_stone", path: "./assets/audio/pickaxe_hit_stone.mp3" },
-  { key: "item_pickup", path: "./assets/audio/pickaxe_hit.mp3" }, // Using pickaxe_hit as placeholder until pickup sound is added
+  { key: "item_pickup", path: "./assets/audio/item_pickup.mp3" },
 ];
 
 /**

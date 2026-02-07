@@ -10,7 +10,6 @@ const SOUND_CONFIGS: Record<keyof GameSounds, SoundConfig> = {
   running: { loop: true, volume: 2 },
   jump: { volume: 0.6 },
   pickaxeHit: { volume: 0.2 },
-  pickaxeHitStone: { volume: 0.2 },
   itemPickup: { volume: 0.4 },
 };
 
@@ -34,10 +33,6 @@ export class SoundManager {
       pickaxeHit: this.soundManager.add(
         "pickaxe_hit",
         SOUND_CONFIGS.pickaxeHit,
-      ),
-      pickaxeHitStone: this.soundManager.add(
-        "pickaxe_hit_stone",
-        SOUND_CONFIGS.pickaxeHitStone,
       ),
       itemPickup: this.soundManager.add(
         "item_pickup",

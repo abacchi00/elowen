@@ -1,8 +1,11 @@
 import Phaser from "phaser";
+
 import { Block } from "./Block";
 import { GrassBlock } from "./GrassBlock";
 import { DirtBlock } from "./DirtBlock";
 import { StoneBlock } from "./StoneBlock";
+import { WoodBlock } from "./WoodBlock";
+
 import { BlockType, SpecializedBlockConstructorProps } from "../types";
 
 /**
@@ -34,6 +37,8 @@ export class BlockFactory {
         return new DirtBlock(fullProps);
       case "stone_block":
         return new StoneBlock(fullProps);
+      case "wood_block":
+        return new WoodBlock(fullProps);
       default:
         const _exhaustiveCheck: never = type;
         throw new Error(`Unknown block type: ${_exhaustiveCheck}`);

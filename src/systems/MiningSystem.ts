@@ -2,7 +2,7 @@ import { MINING_DAMAGE, MINING_INTERVAL } from "../config/constants";
 import { Block } from "../blocks/Block";
 import { Tree } from "../entities/Tree";
 import { Pickaxe } from "../entities/Pickaxe";
-import { GameContext, IMineable } from "../types";
+import { GameContext } from "../types";
 
 type MineableTarget = Block | Tree;
 
@@ -80,26 +80,16 @@ export class MiningSystem {
   }
 
   private damageTarget(target: MineableTarget): void {
-    // Check if target is still active
-    const isActive = target.active;
-
-    if (!isActive) {
+    if (!target.active) {
       this.resetMining();
       return;
     }
 
-    this.playMiningSound(target);
+    this.ctx.sounds[target.miningSound].play();
 
-    const isDestroyed = target.takeDamage(MINING_DAMAGE) === "destroyed";
+    const { destroyed } = target.takeDamage(MINING_DAMAGE);
 
-    if (isDestroyed) {
-      this.destroyTarget(target);
-    }
-  }
-
-  private playMiningSound(target: IMineable): void {
-    if (target.miningSound) return; // Target plays its own sound
-    this.ctx.sounds?.pickaxeHit.play();
+    if (destroyed) this.destroyTarget(target);
   }
 
   private destroyTarget(target: MineableTarget): void {

@@ -22,7 +22,7 @@ export class Tree
 {
   public life: number;
   public maxLife: number;
-  public miningSound: Phaser.Sound.BaseSound | null = null;
+  public miningSound: IMineable["miningSound"] = "pickaxeHit";
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
   public drop: IMineable["drop"];
 
@@ -66,12 +66,10 @@ export class Tree
     this.destroy();
   }
 
-  takeDamage(damage: number): "destroyed" | "not_destroyed" {
-    if (this.miningSound) this.miningSound.play();
-
+  takeDamage(damage: number): { destroyed: boolean } {
     this.life = Math.max(0, this.life - damage);
 
-    return this.life <= 0 ? "destroyed" : "not_destroyed";
+    return { destroyed: this.life <= 0 };
   }
 
   setupHoverEffects(): void {

@@ -1,9 +1,4 @@
-import {
-  BLOCK_SIZE,
-  BlockLifeLevel,
-  BlockVariant,
-  BlockVariantFramesType,
-} from "@/config/constants";
+import { BLOCK_SIZE } from "@/config/constants";
 import { ignoreOnUICameras } from "@/utils";
 import {
   BlockConfig,
@@ -21,7 +16,6 @@ export type BlockConstructorProps = {
   position: Position;
   matrixPosition: MatrixPosition;
   config: BlockConfig;
-  variantFrames: BlockVariantFramesType[BlockVariant];
 };
 
 export abstract class Block
@@ -31,10 +25,9 @@ export abstract class Block
   public position: Position;
   public maxLife: number = 100;
   public life: number = 100;
-  public miningSound: Phaser.Sound.BaseSound | null = null;
+  public miningSound: IMineable["miningSound"] = "pickaxeHit";
   public config: BlockConfig;
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
-  public variantFrames: BlockVariantFramesType[BlockVariant];
   public matrixPosition: MatrixPosition;
   public drop: IMineable["drop"];
 
@@ -42,15 +35,11 @@ export abstract class Block
     config,
     position,
     scene,
-    variantFrames,
     matrixPosition,
   }: BlockConstructorProps) {
-    const initialFrame = variantFrames[BlockLifeLevel.Full];
-
-    super(scene, position.x, position.y, config.spritesheet, initialFrame);
+    super(scene, position.x, position.y, config.spritesheet, 0);
 
     this.matrixPosition = matrixPosition;
-    this.variantFrames = variantFrames;
     this.config = config;
     this.position = position;
     this.drop = {
@@ -79,29 +68,17 @@ export abstract class Block
     this.destroy();
   }
 
-  takeDamage(damage: number): "destroyed" | "not_destroyed" {
+  takeDamage(damage: number): { destroyed: boolean } {
     this.life = Math.max(0, this.life - damage);
 
     this.playMiningAnimation();
 
-    if (this.life <= 0) return "destroyed";
-
-    this.updateLifeBasedFrame();
-
-    return "not_destroyed";
+    return { destroyed: this.life <= 0 };
   }
 
   setupHoverEffects(): void {
     this.on("pointerover", this.showOutline, this);
     this.on("pointerout", this.hideOutline, this);
-  }
-
-  updateVariantFrames(
-    variantFrames: BlockVariantFramesType[BlockVariant],
-  ): void {
-    this.variantFrames = variantFrames;
-
-    this.updateLifeBasedFrame();
   }
 
   // TODO: Refactor so only surface (accessible blocks) are used for physics to improve performance
@@ -132,18 +109,6 @@ export abstract class Block
     if (this.hoverOutline) {
       this.hoverOutline.destroy();
       this.hoverOutline = null;
-    }
-  }
-
-  private updateLifeBasedFrame(): void {
-    if (this.life > 0.75 * this.maxLife) {
-      this.setFrame(this.variantFrames[BlockLifeLevel.Full]);
-    } else if (this.life > 0.5 * this.maxLife) {
-      this.setFrame(this.variantFrames[BlockLifeLevel.High]);
-    } else if (this.life > 0.25 * this.maxLife) {
-      this.setFrame(this.variantFrames[BlockLifeLevel.Medium]);
-    } else {
-      this.setFrame(this.variantFrames[BlockLifeLevel.Low]);
     }
   }
 

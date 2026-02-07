@@ -1,3 +1,5 @@
+// TODO: create file structure for types
+
 import { BlockConstructorProps } from "@/blocks/Block";
 import Phaser from "phaser";
 
@@ -31,7 +33,6 @@ export interface GameSounds {
   running: Phaser.Sound.BaseSound;
   jump: Phaser.Sound.BaseSound;
   pickaxeHit: Phaser.Sound.BaseSound;
-  pickaxeHitStone: Phaser.Sound.BaseSound;
   itemPickup: Phaser.Sound.BaseSound;
 }
 
@@ -42,13 +43,13 @@ export interface GameSounds {
 export interface IMineable {
   life: number;
   maxLife: number;
-  miningSound: Phaser.Sound.BaseSound | null;
+  miningSound: keyof GameSounds;
   drop: {
     type: ItemType;
     quantity: number;
     position: Position;
   };
-  takeDamage(damage: number): "destroyed" | "not_destroyed";
+  takeDamage(damage: number): { destroyed: boolean };
   mine(): void;
 }
 
@@ -91,7 +92,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
   grass_block: { maxStack: 64, texture: "grass_block_spritesheet", frame: 0 },
   dirt_block: { maxStack: 64, texture: "dirt_block_spritesheet", frame: 0 },
   stone_block: { maxStack: 64, texture: "stone_block_spritesheet", frame: 0 },
-  wood_block: { maxStack: 64, texture: "stone_block_spritesheet", frame: 0 }, // TODO: Add wood block texture, frame and class
+  wood_block: { maxStack: 64, texture: "wood_block_spritesheet", frame: 0 },
 };
 
 // Re-export GameContext

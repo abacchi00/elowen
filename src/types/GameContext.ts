@@ -12,5 +12,5 @@ export interface GameContext {
   world: WorldManager;
   inventory: InventorySystem;
   camera: CameraSystem;
-  sounds: GameSounds | null;
+  sounds: GameSounds;
 }

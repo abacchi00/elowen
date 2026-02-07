@@ -1,10 +1,7 @@
 import Phaser from "phaser";
 import {
   BLOCK_SIZE,
-  BLOCK_VARIANT_FRAMES,
-  BlockVariantFramesType,
   WORLD_WIDTH_BLOCKS,
-  BlockVariant,
   GROUND_Y,
   TREE_SPAWN_CHANCE,
   WORLD_HEIGHT_BLOCKS,
@@ -15,7 +12,6 @@ import {
   GameSounds,
   Position,
   MatrixPosition,
-  BlockNeighbourPresence,
 } from "../types";
 import { BlockFactory } from "../blocks";
 import { Tree, ItemDrop } from "../entities";
@@ -75,12 +71,10 @@ export class WorldManager {
         if (!blockType) continue;
 
         const worldPos = this.matrixToWorld(matrixPosition);
-        const variantFrames = this.getBlockVariantFramesAt(matrixPosition);
         const block = this.blockFactory.create({
           position: this.matrixToWorld(matrixPosition),
           matrixPosition: { matrixX, matrixY },
           type: blockType,
-          variantFrames,
         });
 
         this.addBlock(block);
@@ -89,48 +83,6 @@ export class WorldManager {
           this.createTree(worldPos.x, worldPos.y, block.depth);
         }
       }
-    }
-  }
-
-  private getBlockVariantFramesByNeighbors(
-    neighbors: BlockNeighbourPresence,
-  ): BlockVariantFramesType[BlockVariant] {
-    const frames = BLOCK_VARIANT_FRAMES;
-    const randomTo3 = (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3;
-
-    switch (neighbors) {
-      case "u1d1l1r1":
-        return frames[BlockVariant.Default];
-      case "u0d1l1r1":
-        return frames[`UpwardsSurface${randomTo3}`];
-      case "u1d0l1r1":
-        return frames[`DownwardsSurface${randomTo3}`];
-      case "u1d1l1r0":
-        return frames[`RightwardsSurface${randomTo3}`];
-      case "u1d1l0r1":
-        return frames[`LeftwardsSurface${randomTo3}`];
-      case "u0d1l0r1":
-        return frames[BlockVariant.UpLeftSurface];
-      case "u0d1l1r0":
-        return frames[BlockVariant.UpRightSurface];
-      case "u1d0l0r1":
-        return frames[BlockVariant.DownLeftSurface];
-      case "u1d0l1r0":
-        return frames[BlockVariant.DownRightSurface];
-      case "u0d1l0r0":
-        return frames[BlockVariant.UpLeftRightSurface];
-      case "u1d0l0r0":
-        return frames[BlockVariant.DownLeftRightSurface];
-      case "u0d0l1r0":
-        return frames[BlockVariant.UpDownRightSurface];
-      case "u0d0l0r1":
-        return frames[BlockVariant.UpDownLeftSurface];
-      case "u1d1l0r0":
-        return frames[BlockVariant.LeftRightSurface];
-      case "u0d0l1r1":
-        return frames[BlockVariant.UpDownSurface];
-      default:
-        return frames[BlockVariant.AllSurfaces];
     }
   }
 
@@ -188,32 +140,33 @@ export class WorldManager {
     return this.blockMap.get(`${matrixX},${matrixY}`) ?? null;
   }
 
-  /**
-   * Gets the blocks at the given matrix positions.
-   */
-  getBlockNeighboursPresence({
-    matrixX,
-    matrixY,
-  }: MatrixPosition): BlockNeighbourPresence {
-    const leftCode =
-      matrixX !== 0 && !!this.mapMatrix[matrixX - 1][matrixY] ? 1 : 0;
+  blockAt({ matrixX, matrixY }: MatrixPosition): {
+    hasNeighbours: () => boolean;
+  } {
+    return {
+      hasNeighbours: () => {
+        const hasLeftNeighbour =
+          matrixX !== 0 && !!this.mapMatrix[matrixX - 1][matrixY];
 
-    const rightCode =
-      matrixX !== WORLD_WIDTH_BLOCKS - 1 &&
-      !!this.mapMatrix[matrixX + 1][matrixY]
-        ? 1
-        : 0;
+        const hasRightNeighbour =
+          matrixX !== WORLD_WIDTH_BLOCKS - 1 &&
+          !!this.mapMatrix[matrixX + 1][matrixY];
 
-    const aboveCode =
-      matrixY !== 0 && !!this.mapMatrix[matrixX][matrixY - 1] ? 1 : 0;
+        const hasTopNeighbour =
+          matrixY !== 0 && !!this.mapMatrix[matrixX][matrixY - 1];
 
-    const belowCode =
-      matrixY !== WORLD_HEIGHT_BLOCKS - 1 &&
-      !!this.mapMatrix[matrixX][matrixY + 1]
-        ? 1
-        : 0;
+        const hasBottomNeighbour =
+          matrixY !== WORLD_HEIGHT_BLOCKS - 1 &&
+          !!this.mapMatrix[matrixX][matrixY + 1];
 
-    return `u${aboveCode}d${belowCode}l${leftCode}r${rightCode}`;
+        return (
+          hasLeftNeighbour ||
+          hasRightNeighbour ||
+          hasTopNeighbour ||
+          hasBottomNeighbour
+        );
+      },
+    };
   }
 
   /**
@@ -260,17 +213,6 @@ export class WorldManager {
     return foundTree;
   }
 
-  /**
-   * Gets the variant frames of a block at the given matrix position.
-   */
-  getBlockVariantFramesAt(
-    matrixPosition: MatrixPosition,
-  ): BlockVariantFramesType[BlockVariant] {
-    return this.getBlockVariantFramesByNeighbors(
-      this.getBlockNeighboursPresence(matrixPosition),
-    );
-  }
-
   // ============================================================================
   // Block Modifications
   // ============================================================================
@@ -282,20 +224,16 @@ export class WorldManager {
     if (!this.canPlaceAt(matrixPosition)) return null;
 
     const position = this.matrixToWorld(matrixPosition);
-    const variantFrames = this.getBlockVariantFramesAt(matrixPosition);
 
     const block = this.blockFactory.create({
       position,
       matrixPosition,
       type,
-      variantFrames,
     });
 
     this.addBlock(block);
 
     this.mapMatrix[matrixPosition.matrixX][matrixPosition.matrixY] = type;
-
-    this.updateAdjacentBlocksVariantFrames(matrixPosition);
 
     return block;
   }
@@ -326,32 +264,6 @@ export class WorldManager {
 
     // Destroy the block
     block.mine();
-
-    this.updateAdjacentBlocksVariantFrames({
-      matrixX: minedMatrixX,
-      matrixY: minedMatrixY,
-    });
-  }
-
-  /**
-   * Updates the variant frames of the adjacent blocks.
-   */
-  private updateAdjacentBlocksVariantFrames({
-    matrixX,
-    matrixY,
-  }: MatrixPosition): void {
-    Array.from({ length: 8 }).forEach((_, index) => {
-      const x = matrixX + (index % 3) - 1;
-      const y = matrixY + (Math.floor(index / 3) - 1);
-
-      const block = this.getBlockAt({ matrixX: x, matrixY: y });
-
-      if (block) {
-        block.updateVariantFrames(
-          this.getBlockVariantFramesAt(block.matrixPosition),
-        );
-      }
-    });
   }
 
   /**
@@ -374,32 +286,12 @@ export class WorldManager {
     if (this.mapMatrix[matrixX][matrixY] !== null) return false;
 
     // Check if there's an adjacent block
-    return this.getBlockNeighboursPresence({ matrixX, matrixY }) !== "u0d0l0r0";
+    return this.blockAt({ matrixX, matrixY }).hasNeighbours();
   }
 
   // ============================================================================
-  // Getters
+  // Item Management
   // ============================================================================
-
-  getBlocks(): Phaser.Physics.Arcade.StaticGroup {
-    return this.blocks;
-  }
-
-  getTrees(): Phaser.GameObjects.Group {
-    return this.trees;
-  }
-
-  getMaxHeight(): number {
-    return this.maxHeight;
-  }
-
-  getMatrix(): BlockMatrix {
-    return this.mapMatrix;
-  }
-
-  getDroppedItems(): Phaser.GameObjects.Group {
-    return this.droppedItems;
-  }
 
   /**
    * Drops an item at the specified world position.
@@ -439,5 +331,29 @@ export class WorldManager {
    */
   removeDroppedItem(item: ItemDrop): void {
     this.droppedItems.remove(item, true, true);
+  }
+
+  // ============================================================================
+  // Getters
+  // ============================================================================
+
+  getBlocks(): Phaser.Physics.Arcade.StaticGroup {
+    return this.blocks;
+  }
+
+  getTrees(): Phaser.GameObjects.Group {
+    return this.trees;
+  }
+
+  getMaxHeight(): number {
+    return this.maxHeight;
+  }
+
+  getMatrix(): BlockMatrix {
+    return this.mapMatrix;
+  }
+
+  getDroppedItems(): Phaser.GameObjects.Group {
+    return this.droppedItems;
   }
 }

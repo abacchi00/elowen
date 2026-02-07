@@ -1,5 +1,7 @@
 export { Block } from "./Block";
+export { BlockFactory } from "./BlockFactory";
+
 export { GrassBlock } from "./GrassBlock";
 export { DirtBlock } from "./DirtBlock";
 export { StoneBlock } from "./StoneBlock";
-export { BlockFactory } from "./BlockFactory";
+export { WoodBlock } from "./WoodBlock";

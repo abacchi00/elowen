@@ -93,8 +93,11 @@ export class PlacementSystem {
     this.ctx.world.placeBlock(gridPos, usedType as BlockType);
   }
 
+  // TODO: refactor this to use a more generic approach
   private isBlockType(type: string): type is BlockType {
-    return ["grass_block", "dirt_block", "stone_block"].includes(type);
+    return ["grass_block", "dirt_block", "stone_block", "wood_block"].includes(
+      type,
+    );
   }
 
   destroy(): void {

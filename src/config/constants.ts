@@ -115,8 +115,7 @@ export const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
   },
   {
     key: "wood_block_spritesheet",
-    // TODO: Using stone_block_spritesheet as placeholder until wood block texture is added
-    path: "/assets/spritesheets/stone_block_spritesheet.png",
+    path: "/assets/spritesheets/wood_block_spritesheet.png",
     frameWidth: 16,
     frameHeight: 16,
   },

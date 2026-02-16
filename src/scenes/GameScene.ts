@@ -29,7 +29,6 @@ export class GameScene extends Phaser.Scene {
   backgroundManager!: BackgroundManager;
 
   // Systems
-  private miningSystem!: MiningSystem;
   private placementSystem!: PlacementSystem;
   private pickupSystem!: PickupSystem;
   private heldItemSystem!: HeldItemSystem;
@@ -86,7 +85,7 @@ export class GameScene extends Phaser.Scene {
     camera.followTarget(this.player);
 
     // 9. Create gameplay systems
-    this.miningSystem = new MiningSystem(this.ctx);
+    new MiningSystem(this.ctx);
     this.heldItemSystem = new HeldItemSystem(this.ctx);
     this.placementSystem = new PlacementSystem(this.ctx);
     this.pickupSystem = new PickupSystem(this.ctx, this.player);

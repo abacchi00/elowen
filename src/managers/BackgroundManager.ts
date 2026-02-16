@@ -24,13 +24,14 @@ export class BackgroundManager implements IUpdatable {
     this.clouds = this.createClouds(scene);
   }
 
-  update(): void {
+  update(_time?: number, delta?: number): void {
     const worldHalfWidth = (WORLD_WIDTH_BLOCKS / 2) * BLOCK_SIZE;
+    const dt = (delta ?? 16) / 1000; // seconds elapsed since last frame
 
     this.clouds.children.each(cloud => {
       const cloudImage = cloud as Phaser.GameObjects.Image;
 
-      cloudImage.x += BLOCK_SIZE * 0.005;
+      cloudImage.x += BLOCK_SIZE * 0.3 * dt;
 
       // Wrap cloud back to the left edge when it passes the right edge
       if (cloudImage.x > worldHalfWidth) {
@@ -83,7 +84,7 @@ export class BackgroundManager implements IUpdatable {
 
       cloud.setPosition(
         getRandomArbitrary(-worldHalfWidth, worldHalfWidth),
-        getRandomArbitrary(-BLOCK_SIZE * 40, 0),
+        getRandomArbitrary(-BLOCK_SIZE * 30, BLOCK_SIZE * 5),
       );
       cloud.setDepth(SKY_DEPTH + 1);
       cloud.setScrollFactor(0.5, 0.5);

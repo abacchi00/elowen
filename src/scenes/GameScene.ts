@@ -106,6 +106,6 @@ export class GameScene extends Phaser.Scene {
     this.placementSystem.update();
     this.pickupSystem.update();
     this.heldItemSystem.update(delta, this.player.getBodyCenter());
-    this.backgroundManager.update();
+    this.backgroundManager.update(undefined, delta);
   }
 }

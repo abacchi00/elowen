@@ -1,6 +1,7 @@
 // TODO: create file structure for types
 
 import { BlockConstructorProps } from "@/blocks/Block";
+import { BlockHoldable, PickaxeHoldable } from "@/holdables";
 import Phaser from "phaser";
 
 // ============================================================================
@@ -50,6 +51,7 @@ export interface GameSounds {
   jump: Phaser.Sound.BaseSound;
   pickaxeHit: Phaser.Sound.BaseSound;
   itemPickup: Phaser.Sound.BaseSound;
+  backgroundMusic: Phaser.Sound.BaseSound;
 }
 
 export interface SoundConfig {
@@ -84,13 +86,28 @@ export interface IUpdatable {
   update(time?: number, delta?: number): void;
 }
 
+export interface IHoldable {
+  handlePrimaryAction?(delta: number, mousePointer: Phaser.Input.Pointer): void;
+  stopPrimaryAction?(): void;
+  handleSecondaryAction?(
+    delta: number,
+    mousePointer: Phaser.Input.Pointer,
+  ): void;
+  stopSecondaryAction?(): void;
+  displaySize: { width: number; height: number };
+  texture: string;
+  frame: number;
+  events: Phaser.Events.EventEmitter;
+}
+
 // ============================================================================
 // Inventory Types
 // ============================================================================
 
-export type ItemType = BlockType; // Blocks + other items in the future
+export type ItemType = BlockType | "pickaxe"; // Blocks + other items in the future
 
 export interface InventoryItem {
+  holdable: IHoldable;
   type: ItemType;
   quantity: number;
   maxStack: number;
@@ -108,13 +125,40 @@ export interface ItemConfig {
   maxStack: number;
   texture: string;
   frame?: number; // Optional frame index for spritesheet textures
+  holdable: IHoldable;
 }
 
 export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
-  grass_block: { maxStack: 64, texture: "grass_block_spritesheet", frame: 0 },
-  dirt_block: { maxStack: 64, texture: "dirt_block_spritesheet", frame: 0 },
-  stone_block: { maxStack: 64, texture: "stone_block_spritesheet", frame: 0 },
-  wood_block: { maxStack: 64, texture: "wood_block_spritesheet", frame: 0 },
+  grass_block: {
+    maxStack: 64,
+    texture: "grass_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("grass_block"),
+  },
+  dirt_block: {
+    maxStack: 64,
+    texture: "dirt_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("dirt_block"),
+  },
+  stone_block: {
+    maxStack: 64,
+    texture: "stone_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("stone_block"),
+  },
+  wood_block: {
+    maxStack: 64,
+    texture: "wood_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("wood_block"),
+  },
+  pickaxe: {
+    maxStack: 1,
+    texture: "pickaxe",
+    frame: 0,
+    holdable: new PickaxeHoldable(),
+  },
 };
 
 // Re-export GameContext

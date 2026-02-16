@@ -88,6 +88,7 @@ export const SOUND_CONFIGS: Record<keyof GameSounds, SoundConfig> = {
   jump: { key: "jump", volume: 0.6 },
   pickaxeHit: { key: "pickaxe_hit", volume: 0.2 },
   itemPickup: { key: "item_pickup", volume: 0.4 },
+  backgroundMusic: { key: "background_music", loop: true, volume: 0.15 },
 };
 
 // ============================================================================
@@ -138,4 +139,8 @@ export const AUDIO_ASSETS: AssetConfig[] = [
   { key: "jump", path: "./assets/audio/jump.mp3" },
   { key: "pickaxe_hit", path: "./assets/audio/pickaxe_hit.mp3" },
   { key: "item_pickup", path: "./assets/audio/item_pickup.mp3" },
+  {
+    key: "background_music",
+    path: "./assets/audio/background_music.mp3",
+  },
 ];

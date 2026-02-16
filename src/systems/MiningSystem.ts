@@ -1,7 +1,6 @@
 import { MINING_DAMAGE, MINING_INTERVAL } from "../config/constants";
 import { Block } from "../blocks/Block";
 import { Tree } from "../entities/Tree";
-import { Pickaxe } from "../entities/Pickaxe";
 import { GameContext } from "../types";
 
 type MineableTarget = Block | Tree;
@@ -12,32 +11,22 @@ type MineableTarget = Block | Tree;
  */
 export class MiningSystem {
   private ctx: GameContext;
-  private pickaxe: Pickaxe;
 
   private currentTarget: MineableTarget | null = null;
   private miningTimer: number = 0;
 
-  constructor(ctx: GameContext, pickaxe: Pickaxe) {
+  constructor(ctx: GameContext) {
     this.ctx = ctx;
-    this.pickaxe = pickaxe;
-  }
 
-  update(delta: number): void {
-    const mousePointer = this.ctx.scene.input.mousePointer;
-
-    if (mousePointer.isDown) {
-      this.handleMining(delta, mousePointer);
-    } else {
-      this.stopMining();
-    }
+    this.ctx.scene.events.on("handleMining", this.handleMining, this);
+    this.ctx.scene.events.on("stopMining", this.stopMining, this);
   }
 
   private handleMining(
     delta: number,
     mousePointer: Phaser.Input.Pointer,
   ): void {
-    if (!this.pickaxe.active) return;
-    this.pickaxe.startMining(null);
+    console.log("handleMining");
 
     const worldPos = this.ctx.camera.screenToWorld(
       mousePointer.x,
@@ -69,8 +58,6 @@ export class MiningSystem {
     }
 
     // Get the Phaser game object for pickaxe targeting
-    const gameObject = target;
-    this.pickaxe.startMining(gameObject);
     this.miningTimer += delta;
 
     if (this.miningTimer >= MINING_INTERVAL) {
@@ -103,8 +90,6 @@ export class MiningSystem {
     this.ctx.world.remove(target);
 
     this.resetMining();
-
-    this.pickaxe.stopMining();
   }
 
   private resetMining(): void {
@@ -114,6 +99,5 @@ export class MiningSystem {
 
   private stopMining(): void {
     this.resetMining();
-    this.pickaxe.stopMining();
   }
 }

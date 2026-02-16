@@ -22,16 +22,7 @@ export class PlacementSystem {
 
   private setupInput(): void {
     // Right-click to place
-    this.ctx.scene.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      if (pointer.rightButtonDown()) {
-        this.tryPlaceBlock(pointer);
-      }
-    });
-
-    // Disable context menu
-    this.ctx.scene.game.canvas.addEventListener("contextmenu", e => {
-      e.preventDefault();
-    });
+    this.ctx.scene.events.on("handlePlacing", this.tryPlaceBlock, this);
   }
 
   update(): void {
@@ -72,10 +63,10 @@ export class PlacementSystem {
     );
   }
 
-  private tryPlaceBlock(pointer: Phaser.Input.Pointer): void {
-    const selectedType = this.ctx.inventory.getSelectedItemType();
-    if (!selectedType || !this.isBlockType(selectedType)) return;
-
+  private tryPlaceBlock(
+    pointer: Phaser.Input.Pointer,
+    blockType: BlockType,
+  ): void {
     const worldPos = this.ctx.camera.screenToWorld(pointer.x, pointer.y);
     const gridPos = this.ctx.world.worldToMatrix(worldPos.x, worldPos.y);
 
@@ -90,7 +81,7 @@ export class PlacementSystem {
     this.ctx.sounds?.pickaxeHit.play();
 
     // Place the block (WorldManager handles the event)
-    this.ctx.world.placeBlock(gridPos, usedType as BlockType);
+    this.ctx.world.placeBlock(gridPos, blockType);
   }
 
   // TODO: refactor this to use a more generic approach

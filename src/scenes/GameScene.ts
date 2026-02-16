@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { SCREEN_HEIGHT } from "../config/constants";
-import { GameContext, GameSounds } from "../types";
-import { Player, Pickaxe } from "../entities";
+import { GameContext } from "../types";
+import { Player } from "../entities";
 import { AssetsManager, SoundManager, BackgroundManager } from "../managers";
 import {
   CameraSystem,
@@ -12,6 +12,7 @@ import {
 } from "../systems";
 import { WorldManager } from "../world";
 import { Hotbar } from "../ui";
+import { HeldItemSystem } from "@/systems/HeldItemSystem";
 
 /**
  * Main game scene - simplified using WorldManager and GameContext.
@@ -22,7 +23,6 @@ export class GameScene extends Phaser.Scene {
 
   // Entities (not in context as they're scene-specific)
   private player!: Player;
-  private pickaxe!: Pickaxe;
 
   // Managers
   private soundManager!: SoundManager;
@@ -32,6 +32,7 @@ export class GameScene extends Phaser.Scene {
   private miningSystem!: MiningSystem;
   private placementSystem!: PlacementSystem;
   private pickupSystem!: PickupSystem;
+  private heldItemSystem!: HeldItemSystem;
 
   // UI
   private hotbar!: Hotbar;
@@ -55,6 +56,7 @@ export class GameScene extends Phaser.Scene {
     inventory.addItem("dirt_block", 10);
     inventory.addItem("stone_block", 5);
     inventory.addItem("grass_block", 20);
+    inventory.addItem("pickaxe", 1);
 
     // 3. Create world
     const world = new WorldManager(this, sounds);
@@ -72,8 +74,9 @@ export class GameScene extends Phaser.Scene {
       sounds,
     };
 
-    // 6. Create player and pickaxe
-    this.createPlayer(sounds);
+    // 6. Create player
+    this.player = new Player(this, 0, -SCREEN_HEIGHT / 2 + 100);
+    this.player.sounds = sounds;
 
     // 7. Setup collisions
     this.physics.add.collider(this.player, world.getBlocks());
@@ -83,28 +86,25 @@ export class GameScene extends Phaser.Scene {
     camera.followTarget(this.player);
 
     // 9. Create gameplay systems
-    this.miningSystem = new MiningSystem(this.ctx, this.pickaxe);
+    this.miningSystem = new MiningSystem(this.ctx);
+    this.heldItemSystem = new HeldItemSystem(this.ctx);
     this.placementSystem = new PlacementSystem(this.ctx);
     this.pickupSystem = new PickupSystem(this.ctx, this.player);
 
     // 10. Create UI
     this.hotbar = new Hotbar(this, inventory);
 
-    // 11. Handle resize
+    // 11. Play background music
+    this.ctx.sounds.backgroundMusic.play();
+
+    // 12. Handle resize
     this.scale.on("resize", () => this.hotbar.onResize());
   }
 
   update(_time: number, delta: number): void {
     this.player.update();
-    this.pickaxe.update();
-    this.miningSystem.update(delta);
     this.placementSystem.update();
     this.pickupSystem.update();
-  }
-
-  private createPlayer(sounds: GameSounds): void {
-    this.player = new Player(this, 0, -SCREEN_HEIGHT / 2 + 100);
-    this.player.sounds = sounds;
-    this.pickaxe = new Pickaxe(this, this.player);
+    this.heldItemSystem.update(delta, this.player.getBodyCenter());
   }
 }

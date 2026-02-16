@@ -1,4 +1,4 @@
-import { ItemType, InventorySlot, ITEM_CONFIGS } from "../types";
+import { ItemType, InventorySlot, ITEM_CONFIGS } from "@/types";
 
 const DEFAULT_HOTBAR_SIZE = 9;
 
@@ -9,7 +9,8 @@ const DEFAULT_HOTBAR_SIZE = 9;
 export class InventorySystem {
   private slots: InventorySlot[];
   private selectedSlotIndex: number = 0;
-  private onChangeCallbacks: (() => void)[] = [];
+  private onChangeCallbacks: ((item: InventorySlot["item"] | null) => void)[] =
+    [];
 
   constructor(size: number = DEFAULT_HOTBAR_SIZE) {
     this.slots = Array(size)
@@ -45,6 +46,7 @@ export class InventorySystem {
       if (!slot.item) {
         const toAdd = Math.min(remaining, config.maxStack);
         slot.item = {
+          holdable: config.holdable,
           type,
           quantity: toAdd,
           maxStack: config.maxStack,
@@ -53,7 +55,7 @@ export class InventorySystem {
       }
     }
 
-    this.notifyChange();
+    this.notifyChange(this.slots[this.selectedSlotIndex].item);
     return remaining;
   }
 
@@ -71,7 +73,7 @@ export class InventorySystem {
       slot.item = null;
     }
 
-    this.notifyChange();
+    this.notifyChange(slot.item);
     return true;
   }
 
@@ -95,7 +97,7 @@ export class InventorySystem {
   selectSlot(index: number): void {
     if (index >= 0 && index < this.slots.length) {
       this.selectedSlotIndex = index;
-      this.notifyChange();
+      this.notifyChange(this.slots[index].item);
     }
   }
 
@@ -148,11 +150,11 @@ export class InventorySystem {
   /**
    * Registers a callback to be called when inventory changes.
    */
-  onChange(callback: () => void): void {
+  onChange(callback: (item: InventorySlot["item"] | null) => void): void {
     this.onChangeCallbacks.push(callback);
   }
 
-  private notifyChange(): void {
-    this.onChangeCallbacks.forEach(cb => cb());
+  private notifyChange(item: InventorySlot["item"] | null): void {
+    this.onChangeCallbacks.forEach(cb => cb(item));
   }
 }

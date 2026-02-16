@@ -19,5 +19,6 @@ export const createGameConfig = (
     pixelArt: true,
     antialias: false,
   },
+  disableContextMenu: true,
   backgroundColor: 0x4b90ac,
 });

@@ -181,6 +181,8 @@ export abstract class Block
     this.outline.setPosition(this.x, this.y);
     this.outline.setDepth(this.depth + 1);
     this.outline.setScrollFactor(1, 1);
+
+    ignoreOnUICameras(this.scene, this.outline);
   }
 
   private hideOutline(): void {
@@ -264,7 +266,6 @@ export abstract class Block
     }
   }
 
-  // TODO: Refactor so only surface (accessible blocks) are used for physics to improve performance
   private setupPhysics(): void {
     this.scene.physics.add.existing(this, true); // true = static body
     if (this.body) {

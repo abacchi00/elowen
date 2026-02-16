@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { ItemType, ITEM_CONFIGS } from "../types";
 import { BLOCK_SIZE } from "../config/constants";
+import { ignoreOnUICameras } from "@/utils";
 
 /**
  * Represents a dropped item in the world that can be picked up by the player.
@@ -41,6 +42,8 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     this.setDepth(100); // Render above blocks but below UI
 
     this.setOutline();
+
+    ignoreOnUICameras(this.scene, this);
 
     // Physics properties
     if (this.body) {
@@ -146,6 +149,8 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     this.outline.setDepth(this.depth + 1);
     this.outline.setScrollFactor(1, 1);
     this.outline.setScale(0.75);
+
+    ignoreOnUICameras(this.scene, this.outline);
   }
 
   private clearOutline(): void {

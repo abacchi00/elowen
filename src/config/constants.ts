@@ -126,6 +126,12 @@ export const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
     frameWidth: 16,
     frameHeight: 24,
   },
+  {
+    key: "boar_spritesheet",
+    path: "/assets/spritesheets/boar_spritesheet.png",
+    frameWidth: 48,
+    frameHeight: 32,
+  },
 ];
 
 export const IMAGE_ASSETS: AssetConfig[] = [

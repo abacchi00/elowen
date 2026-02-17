@@ -214,17 +214,12 @@ export class WorldManager {
 
   /**
    * Finds a block at world coordinates.
+   * Uses O(1) matrix lookup instead of iterating all blocks.
    */
   findBlockAtWorld(worldX: number, worldY: number): Block | null {
-    for (const block of this.blockMap.values()) {
-      if (block.active) {
-        const bounds = block.getBounds();
-        if (bounds.contains(worldX, worldY)) {
-          return block;
-        }
-      }
-    }
-    return null;
+    const { matrixX, matrixY } = this.worldToMatrix(worldX, worldY);
+    const block = this.getBlockAt({ matrixX, matrixY });
+    return block?.active ? block : null;
   }
 
   /**

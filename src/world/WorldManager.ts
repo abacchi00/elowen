@@ -34,6 +34,9 @@ export class WorldManager {
   private droppedItems: Phaser.GameObjects.Group;
   private blockFactory: BlockFactory;
 
+  // Single shared Graphics for all block outlines
+  private blockOutlines!: Phaser.GameObjects.Graphics;
+
   // Terrain info
   private maxHeight: number = 0;
 
@@ -46,6 +49,8 @@ export class WorldManager {
     this.droppedItems = scene.add.group();
 
     this.blockFactory = new BlockFactory(scene);
+    this.blockOutlines = scene.add.graphics();
+    this.blockOutlines.setDepth(1);
   }
 
   /**
@@ -57,6 +62,7 @@ export class WorldManager {
     this.maxHeight = Math.max(...generator.heightMap);
 
     this.createBlocksFromMatrix();
+    this.drawBlockOutlines();
   }
 
   private createBlocksFromMatrix(): void {
@@ -93,6 +99,61 @@ export class WorldManager {
       `${block.matrixPosition.matrixX},${block.matrixPosition.matrixY}`,
       block,
     );
+  }
+
+  // ============================================================================
+  // Block Outlines (single shared Graphics object)
+  // ============================================================================
+
+  /**
+   * Redraws all block outlines on the single shared Graphics object.
+   * Called once after generation and again when blocks change.
+   */
+  drawBlockOutlines(): void {
+    this.blockOutlines.clear();
+    this.blockOutlines.lineStyle(2, 0x111111, 1);
+
+    const halfSize = BLOCK_SIZE / 2;
+
+    for (const block of this.blockMap.values()) {
+      if (!block.active) continue;
+
+      const { x, y } = block;
+      const { left, right, top, bottom } = block.neighbours;
+
+      if (!top) {
+        this.blockOutlines.lineBetween(
+          x - halfSize,
+          y - halfSize,
+          x + halfSize,
+          y - halfSize,
+        );
+      }
+      if (!bottom) {
+        this.blockOutlines.lineBetween(
+          x - halfSize,
+          y + halfSize,
+          x + halfSize,
+          y + halfSize,
+        );
+      }
+      if (!left) {
+        this.blockOutlines.lineBetween(
+          x - halfSize,
+          y + halfSize,
+          x - halfSize,
+          y - halfSize,
+        );
+      }
+      if (!right) {
+        this.blockOutlines.lineBetween(
+          x + halfSize,
+          y + halfSize,
+          x + halfSize,
+          y - halfSize,
+        );
+      }
+    }
   }
 
   private createTree(worldX: number, worldY: number, blockDepth: number): void {
@@ -278,6 +339,8 @@ export class WorldManager {
     topBlock?.updateNeighbours({ bottom: true });
     bottomBlock?.updateNeighbours({ top: true });
 
+    this.drawBlockOutlines();
+
     return block;
   }
 
@@ -322,6 +385,8 @@ export class WorldManager {
 
     // Destroy the block
     block.mine();
+
+    this.drawBlockOutlines();
   }
 
   /**

@@ -35,7 +35,6 @@ export abstract class Block
   public miningSound: IMineable["miningSound"] = "pickaxeHit";
   public config: BlockConfig;
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
-  public outline: Phaser.GameObjects.Graphics | null = null;
   public matrixPosition: MatrixPosition;
   public drop: IMineable["drop"];
   public neighbours: {
@@ -76,11 +75,9 @@ export abstract class Block
     this.setDisplaySize(BLOCK_SIZE, BLOCK_SIZE);
     this.setInteractive({ useHandCursor: true });
     this.setupHoverEffects();
-    this.setOutline();
   }
 
   mine(): void {
-    this.hideOutline();
     this.hideHoverOutline();
 
     if (this.scene?.tweens) this.scene.tweens.killTweensOf(this);
@@ -117,8 +114,6 @@ export abstract class Block
       this.neighbours.bottom = newNeighbours.bottom;
 
     this.setCollisions();
-    this.hideOutline();
-    this.setOutline();
   }
 
   setCollisions(): void {
@@ -130,66 +125,6 @@ export abstract class Block
     body.checkCollision.right = !this.neighbours.right;
     body.checkCollision.up = !this.neighbours.top;
     body.checkCollision.down = !this.neighbours.bottom;
-  }
-
-  setOutline(): void {
-    this.outline = this.scene.add.graphics();
-    this.outline.lineStyle(2, 0x111111, 1);
-
-    const halfSize = BLOCK_SIZE / 2;
-    const corners = {
-      topLeft: { x: -halfSize, y: -halfSize },
-      topRight: { x: halfSize, y: -halfSize },
-      bottomLeft: { x: -halfSize, y: halfSize },
-      bottomRight: { x: halfSize, y: halfSize },
-    };
-
-    // Draw outline only on sides without neighbors
-    if (!this.neighbours.top) {
-      this.outline.lineBetween(
-        corners.topLeft.x,
-        corners.topLeft.y,
-        corners.topRight.x,
-        corners.topRight.y,
-      );
-    }
-    if (!this.neighbours.bottom) {
-      this.outline.lineBetween(
-        corners.bottomLeft.x,
-        corners.bottomLeft.y,
-        corners.bottomRight.x,
-        corners.bottomRight.y,
-      );
-    }
-    if (!this.neighbours.left) {
-      this.outline.lineBetween(
-        corners.bottomLeft.x,
-        corners.bottomLeft.y,
-        corners.topLeft.x,
-        corners.topLeft.y,
-      );
-    }
-    if (!this.neighbours.right) {
-      this.outline.lineBetween(
-        corners.bottomRight.x,
-        corners.bottomRight.y,
-        corners.topRight.x,
-        corners.topRight.y,
-      );
-    }
-
-    this.outline.setPosition(this.x, this.y);
-    this.outline.setDepth(this.depth + 1);
-    this.outline.setScrollFactor(1, 1);
-
-    ignoreOnUICameras(this.scene, this.outline);
-  }
-
-  private hideOutline(): void {
-    if (this.outline) {
-      this.outline.destroy();
-      this.outline = null;
-    }
   }
 
   private showHoverOutline(): void {

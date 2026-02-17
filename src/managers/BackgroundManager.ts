@@ -82,7 +82,6 @@ export class BackgroundManager implements IUpdatable {
     const cloudContainer = scene.add.container();
 
     cloudContainer.add(this.clouds);
-    cloudContainer.postFX.addBloom();
     cloudContainer.setDepth(SKY_DEPTH + 1);
 
     ignoreOnUICameras(scene, cloudContainer);

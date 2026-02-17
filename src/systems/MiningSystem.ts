@@ -26,8 +26,6 @@ export class MiningSystem {
     delta: number,
     mousePointer: Phaser.Input.Pointer,
   ): void {
-    console.log("handleMining");
-
     const worldPos = this.ctx.camera.screenToWorld(
       mousePointer.x,
       mousePointer.y,

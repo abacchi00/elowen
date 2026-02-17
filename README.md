@@ -24,7 +24,8 @@ Try the game in your browser! No installation required.
 - 🎨 Enhanced background and visual effects
 - 🌍 Improved procedural terrain generation
 - ⚡ Performance optimizations (culling, chunk loading, etc.)
-- 🎮 Additional gameplay mechanics
+- 🎮 Additional gameplay mechanics, such as crafting
+- ⚔️ Enemies and battle
 
 ## 🎮 Features
 
@@ -37,11 +38,9 @@ Try the game in your browser! No installation required.
 - **Item Stacking**: Items of the same type attract to each other and merge into stacks
 - **Floating Text**: Visual feedback showing what items you've collected
 - **Terrain Generation**: Procedurally generated terrain with varying heights
-- **Trees**: Decorative trees scattered across the landscape
+- **Trees**: Trees scattered across the landscape
 - **Sound Effects**: Audio feedback for mining, placing blocks, jumping, movement, and item pickup
 - **Camera System**: Smooth camera following with zoom controls
-- **Block Variants**: Visual variants based on neighboring blocks (slopes, surfaces)
-- **Damage System**: Blocks show visual damage as they're mined
 
 ## 🚀 Getting Started
 

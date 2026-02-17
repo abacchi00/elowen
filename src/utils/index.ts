@@ -1,6 +1,3 @@
-export {
-  ignoreOnUICameras,
-  screenToWorld,
-  getMouseWorldPosition,
-} from "./camera";
-export { createFloatingText, formatItemName } from "./floatingText";
+export * from "./camera";
+export * from "./floatingText";
+export * as MathUtils from "./math";

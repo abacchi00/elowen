@@ -5,31 +5,29 @@ import {
   BLOCK_SIZE,
 } from "../config/constants";
 import { SKY_COLOR_LIGHT, SKY_COLOR_DARK, SKY_DEPTH } from "@/config/constants";
-import { ignoreOnUICameras } from "@/utils";
+import { ignoreOnUICameras, MathUtils } from "@/utils";
 import { IUpdatable } from "@/types";
-
-function getRandomArbitrary(min: number, max: number): number {
-  return Math.random() * (max - min) + min;
-}
 
 /**
  * Manages the game background rendering.
  */
 export class BackgroundManager implements IUpdatable {
   private graphics: Phaser.GameObjects.Graphics;
-  private clouds: Phaser.GameObjects.Group;
+  private clouds: Phaser.GameObjects.Image[];
+  cloudContainer: Phaser.GameObjects.Container;
 
   constructor(scene: Phaser.Scene) {
     this.graphics = this.createSkyBackground(scene);
     this.clouds = this.createClouds(scene);
+    this.cloudContainer = this.createCloudContainer(scene);
   }
 
   update(_time?: number, delta?: number): void {
     const worldHalfWidth = (WORLD_WIDTH_BLOCKS / 2) * BLOCK_SIZE;
     const dt = (delta ?? 16) / 1000; // seconds elapsed since last frame
 
-    this.clouds.children.each(cloud => {
-      const cloudImage = cloud as Phaser.GameObjects.Image;
+    this.clouds.forEach(cloud => {
+      const cloudImage = cloud;
 
       cloudImage.x += BLOCK_SIZE * 0.3 * dt;
 
@@ -42,59 +40,51 @@ export class BackgroundManager implements IUpdatable {
     });
   }
 
-  /**
-   * Generates a reusable cloud texture with bloom and blur baked in.
-   */
-  private generateCloudTexture(
-    scene: Phaser.Scene,
-    key: string,
-    width: number,
-    height: number,
-  ): void {
-    const rt = scene.add.renderTexture(0, 0, width, height);
-    const gfx = scene.add.graphics();
-
-    gfx.fillStyle(0xeeeeee, 0.8);
-    gfx.fillRect(0, 0, width, height);
-    gfx.postFX.addBloom(undefined, undefined, undefined, 3);
-    gfx.postFX.addBlur(1);
-
-    rt.draw(gfx);
-    rt.saveTexture(key);
-
-    gfx.destroy();
-    rt.destroy();
-  }
-
-  private createClouds(scene: Phaser.Scene): Phaser.GameObjects.Group {
-    const clouds = scene.add.group();
+  private createCloud(scene: Phaser.Scene): Phaser.GameObjects.Image {
     const worldHalfWidth = (WORLD_WIDTH_BLOCKS / 2) * BLOCK_SIZE;
 
-    // Pre-generate a few cloud texture variants
-    const variants = 4;
-    for (let v = 0; v < variants; v++) {
-      const w = BLOCK_SIZE * getRandomArbitrary(8, 16);
-      const h = BLOCK_SIZE * getRandomArbitrary(3, 6);
-      this.generateCloudTexture(scene, `cloud_${v}`, w, h);
-    }
+    const textureKey = "cloud_1";
+    const cloud = scene.add.image(0, 0, textureKey);
 
-    for (let i = 0; i < 20; i++) {
-      const textureKey = `cloud_${i % variants}`;
-      const cloud = scene.add.image(0, 0, textureKey);
+    cloud.setPosition(
+      MathUtils.getRandomArbitrary(-worldHalfWidth, worldHalfWidth),
+      MathUtils.getRandomArbitrary(-BLOCK_SIZE * 19, -BLOCK_SIZE * 16),
+    );
 
-      cloud.setPosition(
-        getRandomArbitrary(-worldHalfWidth, worldHalfWidth),
-        getRandomArbitrary(-BLOCK_SIZE * 30, BLOCK_SIZE * 5),
-      );
-      cloud.setDepth(SKY_DEPTH + 1);
-      cloud.setScrollFactor(0.5, 0.5);
-      cloud.setOrigin(0, 0);
+    const randomScale = MathUtils.getRandomArbitrary(2, 6);
 
-      ignoreOnUICameras(scene, cloud);
-      clouds.add(cloud);
-    }
+    cloud.setScrollFactor(randomScale / 8, randomScale / 8);
+    cloud.setOrigin(0, 0);
+    cloud.setScale(randomScale);
+
+    if (randomScale < 3.5) cloud.setAlpha(0.6);
+    else if (randomScale < 5) cloud.setAlpha(0.8);
+
+    return cloud;
+  }
+
+  private createClouds(scene: Phaser.Scene): Phaser.GameObjects.Image[] {
+    const cloudQuantity = 20;
+
+    const clouds = Array.from({ length: cloudQuantity }, () =>
+      this.createCloud(scene),
+    );
 
     return clouds;
+  }
+
+  private createCloudContainer(
+    scene: Phaser.Scene,
+  ): Phaser.GameObjects.Container {
+    const cloudContainer = scene.add.container();
+
+    cloudContainer.add(this.clouds);
+    cloudContainer.postFX.addBloom();
+    cloudContainer.setDepth(SKY_DEPTH + 1);
+
+    ignoreOnUICameras(scene, cloudContainer);
+
+    return cloudContainer;
   }
 
   private createSkyBackground(

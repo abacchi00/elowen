@@ -132,6 +132,7 @@ export const IMAGE_ASSETS: AssetConfig[] = [
   { key: "pickaxe", path: "./assets/images/pickaxe.png" },
   { key: "tree_variant_1", path: "./assets/images/tree_variant_1.png" },
   { key: "tree_variant_2", path: "./assets/images/tree_variant_2.png" },
+  { key: "cloud_1", path: "./assets/images/cloud_1.png" },
 ];
 
 export const AUDIO_ASSETS: AssetConfig[] = [

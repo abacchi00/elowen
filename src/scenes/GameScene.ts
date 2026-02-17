@@ -1,18 +1,23 @@
 import Phaser from "phaser";
-import { SCREEN_HEIGHT } from "../config/constants";
-import { GameContext } from "../types";
-import { Player } from "../entities";
-import { AssetsManager, SoundManager, BackgroundManager } from "../managers";
+import { SCREEN_HEIGHT } from "@/config/constants";
+import { GameContext } from "@/types";
+import { Player } from "@/entities";
+import {
+  AssetsManager,
+  SoundManager,
+  BackgroundManager,
+  PerformanceManager,
+} from "@/managers";
 import {
   CameraSystem,
   MiningSystem,
   InventorySystem,
   PlacementSystem,
   PickupSystem,
-} from "../systems";
-import { WorldManager } from "../world";
-import { Hotbar } from "../ui";
-import { HeldItemSystem } from "@/systems/HeldItemSystem";
+  HeldItemSystem,
+} from "@/systems";
+import { WorldManager } from "@/world";
+import { Hotbar } from "@/ui";
 
 /**
  * Main game scene - simplified using WorldManager and GameContext.
@@ -27,6 +32,7 @@ export class GameScene extends Phaser.Scene {
   // Managers
   private soundManager!: SoundManager;
   backgroundManager!: BackgroundManager;
+  performanceManager!: PerformanceManager;
 
   // Systems
   miningSystem!: MiningSystem;
@@ -94,10 +100,13 @@ export class GameScene extends Phaser.Scene {
     // 10. Create UI
     this.hotbar = new Hotbar(this, inventory);
 
-    // 11. Play background music
+    // 11. Create performance monitor (after Hotbar so it renders on the UI camera)
+    this.performanceManager = new PerformanceManager(this);
+
+    // 12. Play background music
     this.ctx.sounds.backgroundMusic.play();
 
-    // 12. Handle resize
+    // 13. Handle resize
     this.scale.on("resize", () => this.hotbar.onResize());
   }
 
@@ -107,5 +116,6 @@ export class GameScene extends Phaser.Scene {
     this.pickupSystem.update();
     this.heldItemSystem.update(delta, this.player.getBodyCenter());
     this.backgroundManager.update(undefined, delta);
+    this.performanceManager.update(this);
   }
 }

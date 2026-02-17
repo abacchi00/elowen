@@ -57,8 +57,11 @@ export class BackgroundManager implements IUpdatable {
     cloud.setOrigin(0, 0);
     cloud.setScale(randomScale);
 
-    if (randomScale < 3.5) cloud.setAlpha(0.6);
-    else if (randomScale < 5) cloud.setAlpha(0.8);
+    if (randomScale < 3.5) {
+      cloud.setAlpha(0.6);
+    } else if (randomScale < 5) {
+      cloud.setAlpha(0.8);
+    }
 
     return cloud;
   }

@@ -5,6 +5,8 @@ import {
   GROUND_Y,
   TREE_SPAWN_CHANCE,
   WORLD_HEIGHT_BLOCKS,
+  MINEABLE_OUTLINE_COLOR,
+  MINEABLE_OUTLINE_WIDTH,
 } from "../config/constants";
 import {
   BlockType,
@@ -37,6 +39,10 @@ export class WorldManager {
   // Single shared Graphics for all block outlines
   private blockOutlines!: Phaser.GameObjects.Graphics;
 
+  // Single shared Graphics for block hover highlight
+  private hoverHighlight!: Phaser.GameObjects.Graphics;
+  private lastHoveredBlock: Block | null = null;
+
   // Terrain info
   private maxHeight: number = 0;
 
@@ -51,6 +57,10 @@ export class WorldManager {
     this.blockFactory = new BlockFactory(scene);
     this.blockOutlines = scene.add.graphics();
     this.blockOutlines.setDepth(1);
+
+    this.hoverHighlight = scene.add.graphics();
+    this.hoverHighlight.setDepth(2);
+    this.hoverHighlight.setVisible(false);
   }
 
   /**
@@ -478,5 +488,49 @@ export class WorldManager {
 
   getDroppedItems(): Phaser.GameObjects.Group {
     return this.droppedItems;
+  }
+
+  /**
+   * Updates the shared hover highlight based on the current pointer position.
+   * Call this from the scene's update loop.
+   */
+  updateHoverHighlight(): void {
+    const pointer = this.scene.input.activePointer;
+    const cam = this.scene.cameras.main;
+    const worldX = pointer.x / cam.zoom + cam.scrollX;
+    const worldY = pointer.y / cam.zoom + cam.scrollY;
+
+    const block = this.findBlockAtWorld(worldX, worldY);
+
+    if (!block) {
+      this.hoverHighlight.setVisible(false);
+      this.lastHoveredBlock = null;
+      return;
+    }
+
+    // Only redraw the rect shape when hovering a different block
+    if (block !== this.lastHoveredBlock) {
+      this.lastHoveredBlock = block;
+      this.hoverHighlight.clear();
+      this.hoverHighlight.lineStyle(
+        MINEABLE_OUTLINE_WIDTH,
+        MINEABLE_OUTLINE_COLOR,
+        1,
+      );
+      // Draw centered at origin so we can position + scale the Graphics object
+      this.hoverHighlight.strokeRect(
+        -BLOCK_SIZE / 2,
+        -BLOCK_SIZE / 2,
+        BLOCK_SIZE,
+        BLOCK_SIZE,
+      );
+    }
+
+    // Update every frame so position, scale, and depth follow the mining tween
+    this.hoverHighlight.setPosition(block.x, block.y);
+    const scaleRatio = block.displayWidth / BLOCK_SIZE;
+    this.hoverHighlight.setScale(scaleRatio);
+    this.hoverHighlight.setDepth(block.depth + 1);
+    this.hoverHighlight.setVisible(true);
   }
 }

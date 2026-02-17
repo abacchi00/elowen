@@ -1,16 +1,5 @@
-import {
-  BLOCK_SIZE,
-  MINEABLE_OUTLINE_COLOR,
-  MINEABLE_OUTLINE_WIDTH,
-} from "@/config/constants";
-import { ignoreOnUICameras } from "@/utils";
-import {
-  BlockConfig,
-  IHoverable,
-  IMineable,
-  MatrixPosition,
-  Position,
-} from "@/types";
+import { BLOCK_SIZE } from "@/config/constants";
+import { BlockConfig, IMineable, MatrixPosition, Position } from "@/types";
 
 export type BlockConstructorProps = {
   scene: Phaser.Scene;
@@ -27,14 +16,13 @@ export type BlockConstructorProps = {
 
 export abstract class Block
   extends Phaser.GameObjects.Image
-  implements IMineable, IHoverable
+  implements IMineable
 {
   public position: Position;
   public maxLife: number = 100;
   public life: number = 100;
   public miningSound: IMineable["miningSound"] = "pickaxeHit";
   public config: BlockConfig;
-  public hoverOutline: Phaser.GameObjects.Graphics | null = null;
   public matrixPosition: MatrixPosition;
   public drop: IMineable["drop"];
   public neighbours: {
@@ -73,13 +61,9 @@ export abstract class Block
     this.setupPhysics();
     this.setCollisions();
     this.setDisplaySize(BLOCK_SIZE, BLOCK_SIZE);
-    this.setInteractive({ useHandCursor: true });
-    this.setupHoverEffects();
   }
 
   mine(): void {
-    this.hideHoverOutline();
-
     if (this.scene?.tweens) this.scene.tweens.killTweensOf(this);
 
     this.destroy();
@@ -91,11 +75,6 @@ export abstract class Block
     this.playMiningAnimation();
 
     return { destroyed: this.life <= 0 };
-  }
-
-  setupHoverEffects(): void {
-    this.on("pointerover", this.showHoverOutline, this);
-    this.on("pointerout", this.hideHoverOutline, this);
   }
 
   updateNeighbours(newNeighbours: {
@@ -127,34 +106,6 @@ export abstract class Block
     body.checkCollision.down = !this.neighbours.bottom;
   }
 
-  private showHoverOutline(): void {
-    if (this.hoverOutline || !this.scene) return;
-
-    this.hoverOutline = this.scene.add.graphics();
-    this.hoverOutline.lineStyle(
-      MINEABLE_OUTLINE_WIDTH,
-      MINEABLE_OUTLINE_COLOR,
-      1,
-    );
-    this.hoverOutline.strokeRect(
-      -BLOCK_SIZE / 2,
-      -BLOCK_SIZE / 2,
-      BLOCK_SIZE,
-      BLOCK_SIZE,
-    );
-    this.hoverOutline.setPosition(this.x, this.y);
-    this.hoverOutline.setDepth(this.depth + 1);
-    this.hoverOutline.setScrollFactor(1, 1);
-    ignoreOnUICameras(this.scene, this.hoverOutline);
-  }
-
-  private hideHoverOutline(): void {
-    if (this.hoverOutline) {
-      this.hoverOutline.destroy();
-      this.hoverOutline = null;
-    }
-  }
-
   // TODO: Refactor - make code more readable
   private playMiningAnimation(): void {
     // Stop any existing mining animation
@@ -178,27 +129,6 @@ export abstract class Block
         this.setDepth(originalDepth);
       },
     });
-
-    if (this.hoverOutline) {
-      const originalHoverOutlineDepth = this.hoverOutline?.depth ?? 0;
-      const originalHoverOutlineScale = this.hoverOutline?.scale ?? 1;
-
-      this.hoverOutline?.setDepth(1001);
-
-      this.scene.tweens.add({
-        targets: this.hoverOutline,
-        scaleX: originalHoverOutlineScale * 1.33,
-        scaleY: originalHoverOutlineScale * 1.33,
-        duration: 50,
-        ease: "Power2",
-        yoyo: true,
-        repeat: 0,
-        onComplete: () => {
-          this.hoverOutline?.setScale(originalHoverOutlineScale);
-          this.hoverOutline?.setDepth(originalHoverOutlineDepth);
-        },
-      });
-    }
   }
 
   private setupPhysics(): void {

@@ -33,6 +33,7 @@ export class GameScene extends Phaser.Scene {
   private soundManager!: SoundManager;
   backgroundManager!: BackgroundManager;
   performanceManager!: PerformanceManager;
+  private worldManager!: WorldManager;
 
   // Systems
   miningSystem!: MiningSystem;
@@ -65,8 +66,8 @@ export class GameScene extends Phaser.Scene {
     inventory.addItem("pickaxe", 1);
 
     // 3. Create world
-    const world = new WorldManager(this, sounds);
-    world.generate();
+    this.worldManager = new WorldManager(this, sounds);
+    this.worldManager.generate();
 
     // 4. Create camera system
     const camera = new CameraSystem(this);
@@ -74,7 +75,7 @@ export class GameScene extends Phaser.Scene {
     // 5. Build the context
     this.ctx = {
       scene: this,
-      world,
+      world: this.worldManager,
       inventory,
       camera,
       sounds,
@@ -85,8 +86,11 @@ export class GameScene extends Phaser.Scene {
     this.player.sounds = sounds;
 
     // 7. Setup collisions
-    this.physics.add.collider(this.player, world.getBlocks());
-    this.physics.add.collider(world.getDroppedItems(), world.getBlocks()); // Items collide with blocks
+    this.physics.add.collider(this.player, this.worldManager.getBlocks());
+    this.physics.add.collider(
+      this.worldManager.getDroppedItems(),
+      this.worldManager.getBlocks(),
+    ); // Items collide with blocks
 
     // 8. Follow player with camera
     camera.followTarget(this.player);
@@ -116,6 +120,7 @@ export class GameScene extends Phaser.Scene {
     this.pickupSystem.update();
     this.heldItemSystem.update(delta, this.player.getBodyCenter());
     this.backgroundManager.update(undefined, delta);
+    this.worldManager.updateHoverHighlight();
     this.performanceManager.update(this);
   }
 }

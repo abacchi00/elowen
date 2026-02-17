@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import { ItemType, ITEM_CONFIGS } from "../types";
-import { BLOCK_SIZE } from "../config/constants";
+import { ItemType } from "@/types";
+import { BLOCK_SIZE, ITEM_CONFIGS } from "@/config/constants";
 import { ignoreOnUICameras } from "@/utils";
 
 /**

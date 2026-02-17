@@ -1,4 +1,5 @@
-import { ItemType, InventorySlot, ITEM_CONFIGS } from "@/types";
+import { INVENTORY_INITIAL_ITEMS, ITEM_CONFIGS } from "@/config/constants";
+import { ItemType, InventorySlot } from "@/types";
 
 const DEFAULT_HOTBAR_SIZE = 9;
 
@@ -7,15 +8,15 @@ const DEFAULT_HOTBAR_SIZE = 9;
  * Handles adding, removing, and selecting items.
  */
 export class InventorySystem {
-  private slots: InventorySlot[];
+  private slots: InventorySlot[] = [];
   private selectedSlotIndex: number = 0;
   private onChangeCallbacks: ((item: InventorySlot["item"] | null) => void)[] =
     [];
 
   constructor(size: number = DEFAULT_HOTBAR_SIZE) {
-    this.slots = Array(size)
-      .fill(null)
-      .map(() => ({ item: null }));
+    this.initalizeSlots(size);
+
+    this.addInitialItems();
   }
 
   /**
@@ -156,5 +157,17 @@ export class InventorySystem {
 
   private notifyChange(item: InventorySlot["item"] | null): void {
     this.onChangeCallbacks.forEach(cb => cb(item));
+  }
+
+  private initalizeSlots(size: number): void {
+    this.slots = Array(size)
+      .fill(null)
+      .map(() => ({ item: null }));
+  }
+
+  private addInitialItems(): void {
+    INVENTORY_INITIAL_ITEMS.forEach(({ type, quantity }) => {
+      this.addItem(type, quantity);
+    });
   }
 }

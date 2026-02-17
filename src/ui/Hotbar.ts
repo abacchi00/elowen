@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { InventorySystem } from "../systems/InventorySystem";
-import { ITEM_CONFIGS } from "../types";
+import { ITEM_CONFIGS } from "@/config/constants";
+import { ToolType } from "@/types";
 
 const SLOT_SIZE = 50;
 const SLOT_PADDING = 4;
@@ -146,7 +147,18 @@ export class Hotbar {
           config.texture,
           config.frame,
         );
-        image.setDisplaySize(SLOT_SIZE - 10, SLOT_SIZE - 10);
+
+        // Scale to fit the slot while preserving aspect ratio
+        const maxSize = SLOT_SIZE - 10;
+        const scale = Math.min(maxSize / image.width, maxSize / image.height);
+        image.setScale(scale);
+
+        // Rotate tool items 45° in the hotbar
+        const toolTypes: ToolType[] = ["pickaxe", "sword"];
+        if (toolTypes.includes(slot.item.type as ToolType)) {
+          image.setAngle(45);
+        }
+
         this.container.add(image);
         this.itemImages[i] = image;
 

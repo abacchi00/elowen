@@ -1,6 +1,9 @@
+import { BlockHoldable, PickaxeHoldable, SwordHoldable } from "@/holdables";
 import {
   AssetConfig,
   GameSounds,
+  ItemConfig,
+  ItemType,
   SoundConfig,
   SpritesheetConfig,
 } from "@/types";
@@ -41,8 +44,15 @@ export const GRAVITY = BLOCK_SIZE * 200;
 // Pickaxe Constants
 // ============================================================================
 
-export const PICKAXE_SWING_SPEED = 0.03;
-export const PICKAXE_SWING_AMPLITUDE = 0.6;
+export const PICKAXE_SWING_SPEED = 0.0035;
+export const PICKAXE_SWING_AMPLITUDE = 1.2;
+
+// ============================================================================
+// Sword Constants
+// ============================================================================
+
+export const SWORD_SWING_SPEED = 0.004; // How fast the swing progresses (lower = slower)
+export const SWORD_SWING_AMPLITUDE = 1.0; // Max rotation in radians
 
 // ============================================================================
 // Mining Constants
@@ -89,6 +99,12 @@ export const BOAR_JUMP_ON_COLLISION_PROBABILITY = 0.8;
 export const BOAR_DISPLAY_WIDTH = BLOCK_SIZE * 3;
 export const BOAR_DISPLAY_HEIGHT = BLOCK_SIZE * 2;
 export const BOAR_OUT_OF_BOUNDS_Y = BLOCK_SIZE * 200; // Destroy boar if it falls this far
+export const BOAR_HIT_KNOCKBACK_X = BLOCK_SIZE * 60; // Horizontal knockback speed
+export const BOAR_HIT_KNOCKBACK_Y = BLOCK_SIZE * 40; // Upward knockback speed
+export const BOAR_HIT_TINT = 0xff0000; // Red tint on hit
+export const BOAR_HIT_TINT_DURATION = 200; // ms the red tint lasts
+export const BOAR_HIT_COOLDOWN = 1000; // ms before the boar can be hit again
+export const SWORD_HIT_RANGE = BLOCK_SIZE * 5; // Distance from player to hit a boar
 
 // ============================================================================
 // Sound Constants
@@ -150,6 +166,7 @@ export const IMAGE_ASSETS: AssetConfig[] = [
   { key: "tree_variant_1", path: "./assets/images/tree_variant_1.png" },
   { key: "tree_variant_2", path: "./assets/images/tree_variant_2.png" },
   { key: "cloud_1", path: "./assets/images/cloud_1.png" },
+  { key: "sword", path: "./assets/images/sword.png" },
 ];
 
 export const AUDIO_ASSETS: AssetConfig[] = [
@@ -162,3 +179,58 @@ export const AUDIO_ASSETS: AssetConfig[] = [
     path: "./assets/audio/background_music.mp3",
   },
 ];
+
+// ============================================================================
+// Inventory Constants
+// ============================================================================
+
+export const INVENTORY_INITIAL_ITEMS: { type: ItemType; quantity: number }[] = [
+  { type: "pickaxe", quantity: 1 },
+  { type: "sword", quantity: 1 },
+  { type: "dirt_block", quantity: 15 },
+  { type: "stone_block", quantity: 15 },
+  { type: "grass_block", quantity: 15 },
+];
+
+// ============================================================================
+// Item Constants
+// ============================================================================
+
+export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
+  grass_block: {
+    maxStack: 64,
+    texture: "grass_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("grass_block"),
+  },
+  dirt_block: {
+    maxStack: 64,
+    texture: "dirt_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("dirt_block"),
+  },
+  stone_block: {
+    maxStack: 64,
+    texture: "stone_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("stone_block"),
+  },
+  wood_block: {
+    maxStack: 64,
+    texture: "wood_block_spritesheet",
+    frame: 0,
+    holdable: new BlockHoldable("wood_block"),
+  },
+  pickaxe: {
+    maxStack: 1,
+    texture: "pickaxe",
+    frame: 0,
+    holdable: new PickaxeHoldable(),
+  },
+  sword: {
+    maxStack: 1,
+    texture: "sword",
+    frame: 0,
+    holdable: new SwordHoldable(),
+  },
+};

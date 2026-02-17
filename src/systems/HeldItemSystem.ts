@@ -1,3 +1,4 @@
+import { BLOCK_SIZE } from "@/config";
 import { GameContext, IHoldable, Position } from "@/types";
 import { getMouseWorldPosition } from "@/utils/camera";
 
@@ -26,7 +27,6 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
     );
 
     // Set pivot point at the handle
-    this.setOrigin(-0.2, 0.9);
     this.setDepth(1000);
 
     this.scene.add.existing(this);
@@ -41,11 +41,20 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
     const mousePointer = this.ctx.scene.input.mousePointer;
 
     const mouseWorld = getMouseWorldPosition(this.scene);
-
     const isMouseOnLeft = mouseWorld.x < playerPosition.x;
 
-    this.setOrigin(isMouseOnLeft ? 1.4 : -0.4, 0.5);
+    this.setOrigin(0.5, 0.9);
     this.setFlipX(isMouseOnLeft);
+    this.y = playerPosition.y + BLOCK_SIZE / 2;
+    this.x =
+      playerPosition.x +
+      (isMouseOnLeft ? -BLOCK_SIZE * 0.75 : +BLOCK_SIZE * 0.75);
+
+    const baseRotation = isMouseOnLeft ? -Math.PI / 8 : Math.PI / 8;
+    const swingOffset = this.heldItem.rotationOffset ?? 0;
+    this.setRotation(
+      baseRotation + (isMouseOnLeft ? -swingOffset : swingOffset),
+    );
 
     if (mousePointer.leftButtonDown()) {
       this.heldItem.handlePrimaryAction?.(delta, mousePointer);
@@ -89,6 +98,8 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
     this.forwardEvent(this.heldItem, "stopMining");
     this.forwardEvent(this.heldItem, "handlePlacing");
     this.forwardEvent(this.heldItem, "stopPlacing");
+    this.forwardEvent(this.heldItem, "handleSwingingTool");
+    this.forwardEvent(this.heldItem, "stopSwingingTool");
 
     this.setVisible(true);
 
@@ -98,6 +109,13 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
       this.heldItem.displaySize.width,
       this.heldItem.displaySize.height,
     );
+  }
+
+  /**
+   * Returns true if the held item is currently mid-swing.
+   */
+  isSwinging(): boolean {
+    return (this.heldItem?.rotationOffset ?? 0) !== 0;
   }
 
   private forwardEvent(holdable: IHoldable, event: string): void {

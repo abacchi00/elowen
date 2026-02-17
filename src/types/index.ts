@@ -1,7 +1,6 @@
 // TODO: create file structure for types
 
 import { BlockConstructorProps } from "@/blocks/Block";
-import { BlockHoldable, PickaxeHoldable } from "@/holdables";
 import Phaser from "phaser";
 
 // ============================================================================
@@ -98,13 +97,16 @@ export interface IHoldable {
   texture: string;
   frame: number;
   events: Phaser.Events.EventEmitter;
+  rotationOffset?: number;
 }
 
 // ============================================================================
 // Inventory Types
 // ============================================================================
 
-export type ItemType = BlockType | "pickaxe"; // Blocks + other items in the future
+export type ToolType = "pickaxe" | "sword";
+
+export type ItemType = BlockType | ToolType;
 
 export interface InventoryItem {
   holdable: IHoldable;
@@ -127,39 +129,6 @@ export interface ItemConfig {
   frame?: number; // Optional frame index for spritesheet textures
   holdable: IHoldable;
 }
-
-export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
-  grass_block: {
-    maxStack: 64,
-    texture: "grass_block_spritesheet",
-    frame: 0,
-    holdable: new BlockHoldable("grass_block"),
-  },
-  dirt_block: {
-    maxStack: 64,
-    texture: "dirt_block_spritesheet",
-    frame: 0,
-    holdable: new BlockHoldable("dirt_block"),
-  },
-  stone_block: {
-    maxStack: 64,
-    texture: "stone_block_spritesheet",
-    frame: 0,
-    holdable: new BlockHoldable("stone_block"),
-  },
-  wood_block: {
-    maxStack: 64,
-    texture: "wood_block_spritesheet",
-    frame: 0,
-    holdable: new BlockHoldable("wood_block"),
-  },
-  pickaxe: {
-    maxStack: 1,
-    texture: "pickaxe",
-    frame: 0,
-    holdable: new PickaxeHoldable(),
-  },
-};
 
 // Re-export GameContext
 export type { GameContext } from "./GameContext";

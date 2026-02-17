@@ -1,17 +1,13 @@
-import {
-  BLOCK_SIZE,
-  PICKAXE_SWING_SPEED,
-  PICKAXE_SWING_AMPLITUDE,
-} from "@/config";
+import { BLOCK_SIZE, SWORD_SWING_SPEED, SWORD_SWING_AMPLITUDE } from "@/config";
 import { IHoldable } from "@/types";
 
-export class PickaxeHoldable implements IHoldable {
+export class SwordHoldable implements IHoldable {
   events: Phaser.Events.EventEmitter = new Phaser.Events.EventEmitter();
   displaySize: { width: number; height: number } = {
-    width: BLOCK_SIZE * 2,
-    height: BLOCK_SIZE * 3,
+    width: BLOCK_SIZE,
+    height: BLOCK_SIZE * 4,
   };
-  texture: string = "pickaxe";
+  texture: string = "sword";
   frame: number = 0;
   rotationOffset: number = 0;
 
@@ -24,23 +20,24 @@ export class PickaxeHoldable implements IHoldable {
       this.swingProgress = 0;
     }
 
-    this.swingProgress += delta * PICKAXE_SWING_SPEED;
+    this.swingProgress += delta * SWORD_SWING_SPEED;
 
     if (this.swingProgress >= 1) {
+      // Slash complete — snap back instantly
       this.isSwinging = false;
       this.swingProgress = 0;
       this.rotationOffset = 0;
     } else {
-      this.rotationOffset = this.swingProgress * PICKAXE_SWING_AMPLITUDE;
+      // Linear ramp: slash down fast, then reset
+      this.rotationOffset = this.swingProgress * SWORD_SWING_AMPLITUDE;
     }
-
-    this.events.emit("handleMining", delta, mousePointer);
+    this.events.emit("handleSwingingTool", delta, mousePointer);
   }
 
   stopPrimaryAction(): void {
     this.isSwinging = false;
     this.swingProgress = 0;
     this.rotationOffset = 0;
-    this.events.emit("stopMining");
+    this.events.emit("stopSwingingTool");
   }
 }

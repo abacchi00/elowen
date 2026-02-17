@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { SCREEN_HEIGHT } from "@/config/constants";
 import { GameContext } from "@/types";
-import { Player } from "@/entities";
+import { Player, Boar } from "@/entities";
 import {
   AssetsManager,
   SoundManager,
@@ -18,7 +18,6 @@ import {
 } from "@/systems";
 import { WorldManager } from "@/world";
 import { Hotbar } from "@/ui";
-import { Boar } from "@/entities/Boar";
 
 /**
  * Main game scene - simplified using WorldManager and GameContext.
@@ -29,7 +28,7 @@ export class GameScene extends Phaser.Scene {
 
   // Entities (not in context as they're scene-specific)
   private player!: Player;
-  private boars!: Boar[];
+  private boars!: Phaser.GameObjects.Group;
 
   // Managers
   private soundManager!: SoundManager;
@@ -88,20 +87,15 @@ export class GameScene extends Phaser.Scene {
     this.player.sounds = sounds;
 
     // Temporary: Create boars.
-    this.boars = [
-      new Boar(this, -100, -SCREEN_HEIGHT / 2 + 100),
-      new Boar(this, -500, -SCREEN_HEIGHT / 2 + 100),
-      new Boar(this, -1000, -SCREEN_HEIGHT / 2 + 100),
-      new Boar(this, -1500, -SCREEN_HEIGHT / 2 + 100),
-      new Boar(this, 100, -SCREEN_HEIGHT / 2 + 100),
-      new Boar(this, 500, -SCREEN_HEIGHT / 2 + 100),
-      new Boar(this, 1000, -SCREEN_HEIGHT / 2 + 100),
-      new Boar(this, 1500, -SCREEN_HEIGHT / 2 + 100),
+    this.boars = this.add.group();
+    const boarSpawnXPositions = [
+      -1500, -1000, -500, -100, 100, 500, 1000, 1500,
     ];
+    for (const x of boarSpawnXPositions) {
+      this.boars.add(new Boar(this, x, -SCREEN_HEIGHT / 2 + 100));
+    }
 
-    this.boars.forEach(boar => {
-      this.physics.add.collider(boar, this.worldManager.getBlocks());
-    });
+    this.physics.add.collider(this.boars, this.worldManager.getBlocks());
 
     // 7. Setup collisions
     this.physics.add.collider(this.player, this.worldManager.getBlocks());
@@ -134,7 +128,10 @@ export class GameScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     this.player.update();
-    this.boars.forEach(boar => boar.update());
+    this.boars.children.each(child => {
+      (child as Boar).update();
+      return true;
+    });
     this.placementSystem.update();
     this.pickupSystem.update();
     this.heldItemSystem.update(delta, this.player.getBodyCenter());

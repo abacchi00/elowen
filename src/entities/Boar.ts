@@ -1,10 +1,17 @@
-import { BLOCK_SIZE } from "@/config/constants";
+import {
+  BOAR_SPEED,
+  BOAR_JUMP_VELOCITY,
+  BOAR_JUMP_ON_COLLISION_PROBABILITY,
+  BOAR_DISPLAY_WIDTH,
+  BOAR_DISPLAY_HEIGHT,
+  BOAR_OUT_OF_BOUNDS_Y,
+} from "@/config/constants";
+import { IUpdatable } from "@/types";
 
-const BOAR_SPEED = BLOCK_SIZE * 2;
-const BOAR_JUMP_ON_COLLISION_PROBABILITY = 0.8;
-const BOAR_JUMP_VELOCITY = BLOCK_SIZE * 40;
-
-export class Boar extends Phaser.Physics.Arcade.Sprite {
+/**
+ * Boar entity - wanders horizontally and jumps when hitting obstacles.
+ */
+export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   private direction: number = 1;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -13,7 +20,7 @@ export class Boar extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    this.setDisplaySize(BLOCK_SIZE * 3, BLOCK_SIZE * 2);
+    this.setDisplaySize(BOAR_DISPLAY_WIDTH, BOAR_DISPLAY_HEIGHT);
     this.setCollideWorldBounds(false);
     this.setBounce(0);
 
@@ -23,11 +30,17 @@ export class Boar extends Phaser.Physics.Arcade.Sprite {
     // Random initial direction
     this.direction = Math.random() < 0.5 ? -1 : 1;
     this.setVelocityX(BOAR_SPEED * this.direction);
-    this.setFlipX(this.direction > 0);
+    this.setFlipX(this.direction < 0);
   }
 
   public update(): void {
     if (!this.body || !this.active) return;
+
+    // Destroy if fallen out of bounds
+    if (this.y > BOAR_OUT_OF_BOUNDS_Y) {
+      this.destroy();
+      return;
+    }
 
     const body = this.body as Phaser.Physics.Arcade.Body;
 
@@ -38,7 +51,7 @@ export class Boar extends Phaser.Physics.Arcade.Sprite {
     }
 
     // Play walk animation when moving on ground, idle otherwise
-    if (this.body.velocity.x !== 0) {
+    if (body.velocity.x !== 0) {
       this.play("boar_walk", true);
     } else {
       this.play("boar_idle", true);

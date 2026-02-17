@@ -80,6 +80,17 @@ export const TREE_DISPLAY_HEIGHT = BLOCK_SIZE * 6;
 export const TREE_DARK_TINT = 0xbbbbbb;
 
 // ============================================================================
+// Boar Constants
+// ============================================================================
+
+export const BOAR_SPEED = BLOCK_SIZE * 2;
+export const BOAR_JUMP_VELOCITY = BLOCK_SIZE * 40;
+export const BOAR_JUMP_ON_COLLISION_PROBABILITY = 0.8;
+export const BOAR_DISPLAY_WIDTH = BLOCK_SIZE * 3;
+export const BOAR_DISPLAY_HEIGHT = BLOCK_SIZE * 2;
+export const BOAR_OUT_OF_BOUNDS_Y = BLOCK_SIZE * 200; // Destroy boar if it falls this far
+
+// ============================================================================
 // Sound Constants
 // ============================================================================
 

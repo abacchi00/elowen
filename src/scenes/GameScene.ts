@@ -163,8 +163,10 @@ export class GameScene extends Phaser.Scene {
         boar.y,
       );
 
+      const SWORD_DAMAGE = 10;
+
       if (dist <= SWORD_HIT_RANGE) {
-        boar.takeHit(playerPos.x, this.ctx.sounds);
+        boar.takeHit(playerPos.x, SWORD_DAMAGE, this.ctx.sounds);
       }
 
       return true;

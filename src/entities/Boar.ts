@@ -19,10 +19,19 @@ import { GameSounds, IUpdatable } from "@/types";
 export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   private direction: number = 1;
   private lastHitTime: number = 0;
+  private maxLife: number = 100;
+  private life: number = this.maxLife;
+  private healthBar: Phaser.GameObjects.Image;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, "boar_spritesheet", 0);
 
+    this.healthBar = scene.add.image(x, y, "mob_health_bar_spritesheet", 0);
+    this.healthBar.setDisplaySize(32, 8);
+    this.healthBar.setDepth(1000);
+    this.healthBar.setVisible(false);
+
+    scene.add.existing(this.healthBar);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
@@ -42,9 +51,9 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   public update(): void {
     if (!this.body || !this.active) return;
 
-    // Destroy if fallen out of bounds
+    // Die if fallen out of bounds
     if (this.y > BOAR_OUT_OF_BOUNDS_Y) {
-      this.destroy();
+      this.handleDeath();
       return;
     }
 
@@ -72,6 +81,8 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
     }
 
     this.setFlipX(this.direction < 0);
+
+    this.healthBar.setPosition(this.x, this.y + 24);
   }
 
   private createAnimations(scene: Phaser.Scene): void {
@@ -133,11 +144,7 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
     this.setVelocityY(-BOAR_JUMP_VELOCITY);
   }
 
-  /**
-   * Called when the boar is hit by a weapon.
-   * Applies red tint flash and knockback away from the attacker.
-   */
-  public takeHit(fromX: number, sounds?: GameSounds): void {
+  public takeHit(fromX: number, damage: number, sounds?: GameSounds): void {
     if (!this.active || !this.body) return;
 
     const now = this.scene.time.now;
@@ -158,6 +165,54 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
     this.scene.time.delayedCall(BOAR_HIT_TINT_DURATION, () => {
       if (this.active) this.clearTint();
     });
+
+    this.handleLifeLoss(damage);
+  }
+
+  private handleLifeLoss(lifeLoss: number): void {
+    this.life -= lifeLoss;
+
+    if (this.life === this.maxLife) return;
+
+    if (this.life <= 0) {
+      this.handleDeath();
+      return;
+    }
+
+    this.healthBar.setVisible(true);
+
+    const healthPercentage = this.life / this.maxLife;
+
+    let healthBarFrame = 0;
+
+    if (healthPercentage > 0.9) {
+      healthBarFrame = 0;
+    } else if (healthPercentage > 0.8) {
+      healthBarFrame = 1;
+    } else if (healthPercentage > 0.7) {
+      healthBarFrame = 2;
+    } else if (healthPercentage > 0.6) {
+      healthBarFrame = 3;
+    } else if (healthPercentage > 0.5) {
+      healthBarFrame = 4;
+    } else if (healthPercentage > 0.4) {
+      healthBarFrame = 5;
+    } else if (healthPercentage > 0.3) {
+      healthBarFrame = 6;
+    } else if (healthPercentage > 0.2) {
+      healthBarFrame = 7;
+    } else if (healthPercentage > 0.1) {
+      healthBarFrame = 8;
+    } else {
+      healthBarFrame = 9;
+    }
+
+    this.healthBar.setFrame(healthBarFrame);
+  }
+
+  private handleDeath(): void {
+    this.healthBar.destroy();
+    this.destroy();
   }
 
   private isOnCooldown(): boolean {

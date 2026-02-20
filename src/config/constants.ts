@@ -159,6 +159,12 @@ export const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
     frameWidth: 48,
     frameHeight: 32,
   },
+  {
+    key: "mob_health_bar_spritesheet",
+    path: "/assets/spritesheets/mob_health_bar_spritesheet.png",
+    frameWidth: 32,
+    frameHeight: 8,
+  },
 ];
 
 export const IMAGE_ASSETS: AssetConfig[] = [

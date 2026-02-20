@@ -12,6 +12,8 @@ import {
   BOAR_HIT_COOLDOWN,
 } from "@/config/constants";
 import { GameSounds, IUpdatable } from "@/types";
+import { createFloatingText } from "@/utils/floatingText";
+import { ignoreOnUICameras } from "@/utils/camera";
 
 /**
  * Boar entity - wanders horizontally and jumps when hitting obstacles.
@@ -171,6 +173,16 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
   private handleLifeLoss(lifeLoss: number): void {
     this.life -= lifeLoss;
+
+    // Show floating damage text above the boar
+    const damageText = createFloatingText(
+      this.scene,
+      this.x,
+      this.y - 20,
+      `-${lifeLoss}`,
+      "#ff4444",
+    );
+    ignoreOnUICameras(this.scene, damageText);
 
     if (this.life === this.maxLife) return;
 

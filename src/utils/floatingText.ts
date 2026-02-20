@@ -22,7 +22,7 @@ export function createFloatingText(
   color: string = "#ffffff",
 ): Phaser.GameObjects.Text {
   const floatingText = scene.add.text(x, y, text, {
-    fontSize: "16px",
+    fontSize: "20px",
     color: color,
     stroke: "#000000",
     strokeThickness: 4,

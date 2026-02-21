@@ -24,6 +24,7 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   private maxLife: number = 100;
   private life: number = this.maxLife;
   private healthBar: Phaser.GameObjects.Image;
+  private sounds?: GameSounds;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, "boar_spritesheet", 0);
@@ -152,9 +153,10 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
     const now = this.scene.time.now;
     if (this.isOnCooldown()) return;
     this.lastHitTime = now;
+    this.sounds = sounds;
 
     // Play hit sound
-    sounds?.pickaxeHit.play();
+    sounds?.boarTakingHit.play();
 
     // Knockback away from attacker
     const knockbackDir = this.x > fromX ? 1 : -1;
@@ -223,6 +225,7 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   }
 
   private handleDeath(): void {
+    this.sounds?.boarDying.play();
     this.healthBar.destroy();
     this.destroy();
   }

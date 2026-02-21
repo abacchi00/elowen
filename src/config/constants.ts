@@ -116,6 +116,8 @@ export const SOUND_CONFIGS: Record<keyof GameSounds, SoundConfig> = {
   pickaxeHit: { key: "pickaxe_hit", volume: 0.2 },
   itemPickup: { key: "item_pickup", volume: 0.4 },
   backgroundMusic: { key: "background_music", loop: true, volume: 0.15 },
+  boarTakingHit: { key: "boar_taking_hit", volume: 0.3 },
+  boarDying: { key: "boar_dying", volume: 0.4 },
 };
 
 // ============================================================================
@@ -184,6 +186,8 @@ export const AUDIO_ASSETS: AssetConfig[] = [
     key: "background_music",
     path: "./assets/audio/background_music.mp3",
   },
+  { key: "boar_taking_hit", path: "./assets/audio/boar_taking_hit.mp3" },
+  { key: "boar_dying", path: "./assets/audio/boar_dying.mp3" },
 ];
 
 // ============================================================================

@@ -51,6 +51,8 @@ export interface GameSounds {
   pickaxeHit: Phaser.Sound.BaseSound;
   itemPickup: Phaser.Sound.BaseSound;
   backgroundMusic: Phaser.Sound.BaseSound;
+  boarTakingHit: Phaser.Sound.BaseSound;
+  boarDying: Phaser.Sound.BaseSound;
 }
 
 export interface SoundConfig {

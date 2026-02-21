@@ -1,6 +1,20 @@
 import Phaser from "phaser";
 import { ItemType } from "@/types";
-import { BLOCK_SIZE, ITEM_CONFIGS } from "@/config/constants";
+import {
+  BLOCK_SIZE,
+  ITEM_CONFIGS,
+  ITEM_DROP_PICKUP_RADIUS,
+  ITEM_DROP_MAGNET_SPEED,
+  ITEM_DROP_ATTRACTION_SPEED,
+  ITEM_DROP_ATTRACTION_RADIUS,
+  ITEM_DROP_MERGE_RADIUS,
+  ITEM_DROP_PICKUP_COOLDOWN,
+  ITEM_DROP_STACK_COOLDOWN,
+  ITEM_DROP_GRAVITY,
+  ITEM_DROP_BOUNCE,
+  ITEM_DROP_DRAG,
+  ITEM_DROP_DISPLAY_SCALE,
+} from "@/config/constants";
 import { ignoreOnUICameras } from "@/utils";
 
 /**
@@ -9,14 +23,7 @@ import { ignoreOnUICameras } from "@/utils";
 export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
   public itemType: ItemType;
   public quantity: number;
-  private pickupRadius: number = BLOCK_SIZE * 4; // Distance at which item can be picked up
-  private magnetSpeed: number = 200; // Speed at which item moves toward player when in range
-  private itemAttractionSpeed: number = 100; // Speed at which item moves toward other items
-  private itemAttractionRadius: number = BLOCK_SIZE * 2; // Distance to attract to other items
-  private mergeRadius: number = BLOCK_SIZE * 0.5; // Distance to merge with other items
-  private creationTime: number; // Timestamp when item was created
-  private readonly PICKUP_COOLDOWN = 100; // Milliseconds before item can be picked up
-  private readonly STACK_COOLDOWN = 200; // Milliseconds before item can stack with others
+  private creationTime: number;
   private outline: Phaser.GameObjects.Graphics | null = null;
 
   constructor(
@@ -31,99 +38,61 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
 
     this.itemType = itemType;
     this.quantity = quantity;
-    this.creationTime = scene.time.now; // Record creation time
+    this.creationTime = scene.time.now;
 
-    // Add to scene and enable physics
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    // Set display properties
-    this.setDisplaySize(BLOCK_SIZE * 0.75, BLOCK_SIZE * 0.75);
-    this.setDepth(100); // Render above blocks but below UI
+    this.setDisplaySize(
+      BLOCK_SIZE * ITEM_DROP_DISPLAY_SCALE,
+      BLOCK_SIZE * ITEM_DROP_DISPLAY_SCALE,
+    );
+    this.setDepth(100);
 
-    this.setOutline();
-
+    this.createOutline();
     ignoreOnUICameras(this.scene, this);
 
-    // Physics properties
-    if (this.body) {
-      const body = this.body as Phaser.Physics.Arcade.Body;
-
-      body.setCollideWorldBounds(false);
-      body.setGravityY(200);
-      body.setBounce(0.5);
-      body.setDragX(100);
-    }
+    this.setupPhysics();
   }
 
-  /**
-   * Checks if the player is within pickup range.
-   */
+  // ============================================================================
+  // Player Interaction
+  // ============================================================================
+
   isPlayerInRange(player: Phaser.GameObjects.GameObject): boolean {
-    // Don't allow pickup if item was just created (cooldown)
-    if (this.scene.time.now - this.creationTime < this.PICKUP_COOLDOWN) {
+    if (this.scene.time.now - this.creationTime < ITEM_DROP_PICKUP_COOLDOWN) {
       return false;
     }
 
-    const distance = Phaser.Math.Distance.Between(
-      this.x,
-      this.y,
-      (player as Phaser.Physics.Arcade.Sprite).x,
-      (player as Phaser.Physics.Arcade.Sprite).y,
-    );
-    return distance <= this.pickupRadius;
-  }
-
-  /**
-   * Moves the item toward the player when in range (magnet effect).
-   */
-  moveTowardPlayer(player: Phaser.GameObjects.GameObject): void {
-    if (!this.body) return;
-
     const playerSprite = player as Phaser.Physics.Arcade.Sprite;
-    const angle = Phaser.Math.Angle.Between(
+    const distance = Phaser.Math.Distance.Between(
       this.x,
       this.y,
       playerSprite.x,
       playerSprite.y,
     );
-
-    const velocityX = Math.cos(angle) * this.magnetSpeed;
-    const velocityY = Math.sin(angle) * this.magnetSpeed;
-
-    (this.body as Phaser.Physics.Arcade.Body).setVelocity(velocityX, velocityY);
+    return distance <= ITEM_DROP_PICKUP_RADIUS;
   }
 
-  /**
-   * Moves the item toward another item of the same type (stacking attraction).
-   * Only applies if not being attracted to player (player takes priority).
-   */
-  moveTowardItem(otherItem: ItemDrop): void {
-    if (!this.body) return;
-
-    const angle = Phaser.Math.Angle.Between(
-      this.x,
-      this.y,
-      otherItem.x,
-      otherItem.y,
+  moveTowardPlayer(player: Phaser.GameObjects.GameObject): void {
+    this.moveToward(
+      player as Phaser.Physics.Arcade.Sprite,
+      ITEM_DROP_MAGNET_SPEED,
     );
-
-    const velocityX = Math.cos(angle) * this.itemAttractionSpeed;
-    const velocityY = Math.sin(angle) * this.itemAttractionSpeed;
-
-    // Set velocity directly (player attraction will override this if active)
-    (this.body as Phaser.Physics.Arcade.Body).setVelocity(velocityX, velocityY);
   }
 
-  /**
-   * Checks if this item can merge with another item (close enough and same type).
-   */
+  // ============================================================================
+  // Item-to-Item Interaction
+  // ============================================================================
+
+  moveTowardItem(otherItem: ItemDrop): void {
+    this.moveToward(otherItem, ITEM_DROP_ATTRACTION_SPEED);
+  }
+
   canMergeWith(otherItem: ItemDrop): boolean {
-    // Don't merge if item was just created (cooldown)
-    if (this.scene.time.now - this.creationTime < this.STACK_COOLDOWN) {
+    if (this.scene.time.now - this.creationTime < ITEM_DROP_STACK_COOLDOWN) {
       return false;
     }
-
     if (this.itemType !== otherItem.itemType) return false;
 
     const distance = Phaser.Math.Distance.Between(
@@ -132,11 +101,58 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
       otherItem.x,
       otherItem.y,
     );
-
-    return distance <= this.mergeRadius;
+    return distance <= ITEM_DROP_MERGE_RADIUS;
   }
 
-  private setOutline(): void {
+  getItemAttractionRadius(): number {
+    return ITEM_DROP_ATTRACTION_RADIUS;
+  }
+
+  // ============================================================================
+  // Lifecycle
+  // ============================================================================
+
+  preUpdate(time: number, delta: number): void {
+    super.preUpdate(time, delta);
+    if (this.outline && this.active) {
+      this.outline.setPosition(this.x, this.y);
+    }
+  }
+
+  destroy(fromScene?: boolean): void {
+    this.destroyOutline();
+    super.destroy(fromScene);
+  }
+
+  // ============================================================================
+  // Private
+  // ============================================================================
+
+  private moveToward(
+    target: Phaser.Physics.Arcade.Sprite,
+    speed: number,
+  ): void {
+    if (!this.body) return;
+
+    const angle = Phaser.Math.Angle.Between(this.x, this.y, target.x, target.y);
+
+    (this.body as Phaser.Physics.Arcade.Body).setVelocity(
+      Math.cos(angle) * speed,
+      Math.sin(angle) * speed,
+    );
+  }
+
+  private setupPhysics(): void {
+    if (!this.body) return;
+
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    body.setCollideWorldBounds(false);
+    body.setGravityY(ITEM_DROP_GRAVITY);
+    body.setBounce(ITEM_DROP_BOUNCE);
+    body.setDragX(ITEM_DROP_DRAG);
+  }
+
+  private createOutline(): void {
     this.outline = this.scene.add.graphics();
     this.outline.lineStyle(2, 0x222222, 1);
     this.outline.strokeRect(
@@ -148,48 +164,15 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     this.outline.setPosition(this.x, this.y);
     this.outline.setDepth(this.depth + 1);
     this.outline.setScrollFactor(1, 1);
-    this.outline.setScale(0.75);
+    this.outline.setScale(ITEM_DROP_DISPLAY_SCALE);
 
     ignoreOnUICameras(this.scene, this.outline);
   }
 
-  private clearOutline(): void {
+  private destroyOutline(): void {
     if (this.outline) {
       this.outline.destroy();
       this.outline = null;
     }
-  }
-
-  /**
-   * Updates the outline position to follow the item.
-   */
-  preUpdate(time: number, delta: number): void {
-    super.preUpdate(time, delta);
-
-    if (this.outline && this.active) {
-      this.outline.setPosition(this.x, this.y);
-    }
-  }
-
-  /**
-   * Cleans up the outline when the item is destroyed.
-   */
-  destroy(fromScene?: boolean): void {
-    this.clearOutline();
-    super.destroy(fromScene);
-  }
-
-  /**
-   * Gets the attraction radius for item-to-item stacking.
-   */
-  getItemAttractionRadius(): number {
-    return this.itemAttractionRadius;
-  }
-
-  /**
-   * Gets the pickup radius for collision detection.
-   */
-  getPickupRadius(): number {
-    return this.pickupRadius;
   }
 }

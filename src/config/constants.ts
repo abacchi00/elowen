@@ -113,6 +113,23 @@ export const BOAR_SPAWN_X_POSITIONS = [
 ];
 
 // ============================================================================
+// Item Drop Constants
+// ============================================================================
+
+export const ITEM_DROP_PICKUP_RADIUS = BLOCK_SIZE * 4;
+export const ITEM_DROP_MAGNET_SPEED = 200;
+export const ITEM_DROP_ATTRACTION_SPEED = 100;
+export const ITEM_DROP_ATTRACTION_RADIUS = BLOCK_SIZE * 2;
+export const ITEM_DROP_MERGE_RADIUS = BLOCK_SIZE * 0.5;
+export const ITEM_DROP_PICKUP_COOLDOWN = 100; // ms before item can be picked up
+export const ITEM_DROP_STACK_COOLDOWN = 200; // ms before item can stack
+export const ITEM_DROP_GRAVITY = 200;
+export const ITEM_DROP_BOUNCE = 0.5;
+export const ITEM_DROP_DRAG = 100;
+export const ITEM_DROP_DISPLAY_SCALE = 0.75;
+export const ITEM_DROP_PICKUP_DISTANCE = 20;
+
+// ============================================================================
 // Sound Constants
 // ============================================================================
 

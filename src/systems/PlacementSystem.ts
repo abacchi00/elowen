@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { BLOCK_SIZE } from "../config/constants";
-import { GameContext, BlockType } from "../types";
+import { GameContext, BlockType, BLOCK_TYPES } from "../types";
 import { ignoreOnUICameras } from "../utils";
 
 /**
@@ -84,11 +84,8 @@ export class PlacementSystem {
     this.ctx.world.placeBlock(gridPos, blockType);
   }
 
-  // TODO: refactor this to use a more generic approach
   private isBlockType(type: string): type is BlockType {
-    return ["grass_block", "dirt_block", "stone_block", "wood_block"].includes(
-      type,
-    );
+    return (BLOCK_TYPES as readonly string[]).includes(type);
   }
 
   destroy(): void {

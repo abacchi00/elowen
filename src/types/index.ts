@@ -1,5 +1,3 @@
-// TODO: create file structure for types
-
 import { BlockConstructorProps } from "@/blocks/Block";
 import Phaser from "phaser";
 
@@ -23,11 +21,14 @@ export interface SpritesheetConfig {
 // Game Types
 // ============================================================================
 
-export type BlockType =
-  | "grass_block"
-  | "dirt_block"
-  | "stone_block"
-  | "wood_block";
+export const BLOCK_TYPES = [
+  "grass_block",
+  "dirt_block",
+  "stone_block",
+  "wood_block",
+] as const;
+
+export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export type BlockMatrix = (BlockType | null)[][];
 

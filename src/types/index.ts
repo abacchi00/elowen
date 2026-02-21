@@ -110,13 +110,15 @@ export interface IHoldable {
 // Inventory Types
 // ============================================================================
 
-export type HoldableType = "block" | "pickaxe" | "sword" | "food";
+export type HoldableType = "block" | "pickaxe" | "sword" | "food" | "misc";
 
 export type ToolType = "pickaxe" | "sword";
 
 export type FoodType = "boarMeat";
 
-export type ItemType = BlockType | ToolType | FoodType;
+export type MiscType = "slimeGoo";
+
+export type ItemType = BlockType | ToolType | FoodType | MiscType;
 
 export interface InventoryItem {
   holdable: IHoldable;

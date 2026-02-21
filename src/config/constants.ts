@@ -1,6 +1,7 @@
 import {
   BlockHoldable,
   FoodHoldable,
+  MiscHoldable,
   PickaxeHoldable,
   SwordHoldable,
 } from "@/holdables";
@@ -134,6 +135,7 @@ export const SLIME_HIT_KNOCKBACK_Y = BLOCK_SIZE * 20;
 export const SLIME_HIT_COOLDOWN = 800;
 export const SLIME_MAX_LIFE = 50;
 export const SLIME_SPAWN_X_POSITIONS = [-800, -400, 200, 600, 1200];
+export const SLIME_GOO_DROP_QUANTITY = 1;
 
 // ============================================================================
 // Item Drop Constants
@@ -230,6 +232,7 @@ export const IMAGE_ASSETS: AssetConfig[] = [
   { key: "cloud_1", path: "./assets/images/cloud_1.png" },
   { key: "sword", path: "./assets/images/sword.png" },
   { key: "boar_meat", path: "./assets/images/boar_meat.png" },
+  { key: "slime_goo", path: "./assets/images/slime_goo.png" },
 ];
 
 export const AUDIO_ASSETS: AssetConfig[] = [
@@ -317,6 +320,14 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     texture: "boar_meat",
     frame: 0,
     holdable: new FoodHoldable("boar_meat"),
+    hasOutline: false,
+    dropDisplayScale: 1.25,
+  },
+  slimeGoo: {
+    maxStack: 64,
+    texture: "slime_goo",
+    frame: 0,
+    holdable: new MiscHoldable("slime_goo"),
     hasOutline: false,
     dropDisplayScale: 1.25,
   },

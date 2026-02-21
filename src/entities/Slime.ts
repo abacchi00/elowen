@@ -7,6 +7,7 @@ import {
   SLIME_HIT_COOLDOWN,
   SLIME_MAX_LIFE,
   SOUND_CONFIGS,
+  SLIME_GOO_DROP_QUANTITY,
 } from "@/config/constants";
 import { Mob } from "./Mob";
 
@@ -29,7 +30,7 @@ export class Slime extends Mob {
       maxLife: SLIME_MAX_LIFE,
       hitCooldown: SLIME_HIT_COOLDOWN,
       knockback: { x: SLIME_HIT_KNOCKBACK_X, y: SLIME_HIT_KNOCKBACK_Y },
-      // dropConfig: { type: "slimeGoo", quantity: SLIME_GOO_DROP_QUANTITY },
+      dropConfig: { type: "slimeGoo", quantity: SLIME_GOO_DROP_QUANTITY },
       hitSound: {
         key: "slime_taking_hit",
         volume: SOUND_CONFIGS.slimeTakingHit.volume,

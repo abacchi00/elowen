@@ -1,7 +1,6 @@
 import { ITEM_DROP_PICKUP_DISTANCE } from "@/config/constants";
 import { GameContext } from "../types";
 import { ItemDrop } from "../entities/ItemDrop";
-import { formatItemName } from "../utils/floatingText";
 import { ignoreOnUICameras } from "../utils/camera";
 
 const TEXT_SPACING = 30;
@@ -145,8 +144,8 @@ export class PickupSystem {
       this.ctx.sounds?.itemPickup.play();
       const label =
         actualAdded > 1
-          ? `+${actualAdded} ${formatItemName(itemType)}`
-          : `+${formatItemName(itemType)}`;
+          ? `+${actualAdded} ${item.labelText}`
+          : `+${item.labelText}`;
       const pos = this.getPlayerCenter();
       this.showStackedFloatingText(pos.x, pos.y, label);
     }

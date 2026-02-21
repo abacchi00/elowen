@@ -274,6 +274,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new BlockHoldable("grass_block"),
     hasOutline: true,
     dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
+    labelText: "Grass Block",
   },
   dirt_block: {
     maxStack: 64,
@@ -282,6 +283,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new BlockHoldable("dirt_block"),
     hasOutline: true,
     dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
+    labelText: "Dirt Block",
   },
   stone_block: {
     maxStack: 64,
@@ -290,6 +292,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new BlockHoldable("stone_block"),
     hasOutline: true,
     dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
+    labelText: "Stone Block",
   },
   wood_block: {
     maxStack: 64,
@@ -298,6 +301,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new BlockHoldable("wood_block"),
     hasOutline: true,
     dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
+    labelText: "Wood Block",
   },
   pickaxe: {
     maxStack: 1,
@@ -306,6 +310,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new PickaxeHoldable(),
     hasOutline: false,
     dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
+    labelText: "Pickaxe",
   },
   sword: {
     maxStack: 1,
@@ -314,6 +319,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new SwordHoldable(),
     hasOutline: false,
     dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
+    labelText: "Sword",
   },
   boarMeat: {
     maxStack: 64,
@@ -322,6 +328,7 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new FoodHoldable("boar_meat"),
     hasOutline: false,
     dropDisplayScale: 1.25,
+    labelText: "Boar Meat",
   },
   slimeGoo: {
     maxStack: 64,
@@ -330,5 +337,6 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     holdable: new MiscHoldable("slime_goo"),
     hasOutline: false,
     dropDisplayScale: 1.25,
+    labelText: "Slime Goo",
   },
 };

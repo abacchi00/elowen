@@ -22,6 +22,7 @@ import { ignoreOnUICameras } from "@/utils";
 export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
   public itemType: ItemType;
   public quantity: number;
+  public labelText: string;
   private creationTime: number;
   private outline: Phaser.GameObjects.Graphics | null = null;
   private shouldCreateOutline: boolean = false;
@@ -39,6 +40,7 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
 
     this.itemType = itemType;
     this.quantity = quantity;
+    this.labelText = config.labelText;
     this.creationTime = scene.time.now;
     this.shouldCreateOutline = config.hasOutline;
 

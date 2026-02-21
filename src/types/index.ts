@@ -142,6 +142,7 @@ export interface ItemConfig {
   holdable: IHoldable;
   hasOutline: boolean;
   dropDisplayScale: number;
+  labelText: string;
 }
 
 // Re-export GameContext

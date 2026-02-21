@@ -233,6 +233,7 @@ export const IMAGE_ASSETS: AssetConfig[] = [
   { key: "sword", path: "./assets/images/sword.png" },
   { key: "boar_meat", path: "./assets/images/boar_meat.png" },
   { key: "slime_goo", path: "./assets/images/slime_goo.png" },
+  { key: "tree_seed", path: "./assets/images/tree_seed.png" },
 ];
 
 export const AUDIO_ASSETS: AssetConfig[] = [
@@ -338,5 +339,14 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     hasOutline: false,
     dropDisplayScale: 1.25,
     labelText: "Slime Goo",
+  },
+  treeSeed: {
+    maxStack: 64,
+    texture: "tree_seed",
+    frame: 0,
+    holdable: new MiscHoldable("tree_seed"),
+    hasOutline: false,
+    dropDisplayScale: 1.25,
+    labelText: "Tree Seed",
   },
 };

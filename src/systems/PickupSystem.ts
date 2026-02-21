@@ -135,7 +135,7 @@ export class PickupSystem {
     // Drop back overflow
     if (remaining > 0) {
       const pos = this.getPlayerCenter();
-      this.ctx.items.dropItem(pos.x, pos.y, itemType, remaining);
+      this.ctx.items.dropItem(pos, itemType, remaining);
     }
 
     // Show pickup feedback

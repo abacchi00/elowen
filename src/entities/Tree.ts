@@ -11,6 +11,7 @@ import {
 } from "../config/constants";
 import { IMineable, IHoverable } from "../types";
 import { ignoreOnUICameras } from "../utils";
+import { getRandomIntegerFrom } from "@/utils/math";
 
 /**
  * Tree entity - passable but minable.
@@ -23,7 +24,7 @@ export class Tree
   public maxLife: number;
   public miningSound: IMineable["miningSound"] = "pickaxeHit";
   public hoverOutline: Phaser.GameObjects.Graphics | null = null;
-  public drop: IMineable["drop"];
+  public drops: IMineable["drops"];
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, "tree");
@@ -31,11 +32,18 @@ export class Tree
     this.maxLife = TREE_MAX_LIFE;
     this.life = this.maxLife;
 
-    this.drop = {
-      type: "wood_block",
-      quantity: Math.floor(Math.random() * 3) + 1,
-      position: { x, y: y - TREE_DISPLAY_HEIGHT / 2 },
-    };
+    this.drops = [
+      {
+        type: "wood_block",
+        quantity: getRandomIntegerFrom(3).to(6),
+        position: { x: x - 2, y: y - TREE_DISPLAY_HEIGHT / 2 },
+      },
+      {
+        type: "treeSeed",
+        quantity: getRandomIntegerFrom(1).to(2),
+        position: { x: x + 2, y: y - TREE_DISPLAY_HEIGHT / 4 },
+      },
+    ];
 
     // Add to scene
     scene.add.existing(this);

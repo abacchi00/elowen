@@ -24,7 +24,7 @@ export abstract class Block
   public miningSound: IMineable["miningSound"] = "pickaxeHit";
   public config: BlockConfig;
   public matrixPosition: MatrixPosition;
-  public drop: IMineable["drop"];
+  public drops: IMineable["drops"];
   public neighbours: {
     left: boolean;
     right: boolean;
@@ -50,11 +50,13 @@ export abstract class Block
     this.matrixPosition = matrixPosition;
     this.config = config;
     this.position = position;
-    this.drop = {
-      type: config.type,
-      quantity: 1,
-      position: position,
-    };
+    this.drops = [
+      {
+        type: config.type,
+        quantity: 1,
+        position: position,
+      },
+    ];
 
     scene.add.existing(this);
 

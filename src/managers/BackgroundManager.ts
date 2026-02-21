@@ -5,7 +5,7 @@ import {
   BLOCK_SIZE,
 } from "../config/constants";
 import { SKY_COLOR_LIGHT, SKY_COLOR_DARK, SKY_DEPTH } from "@/config/constants";
-import { ignoreOnUICameras, MathUtils } from "@/utils";
+import { ignoreOnUICameras, getRandomFloatFrom } from "@/utils";
 import { IUpdatable } from "@/types";
 
 /**
@@ -47,11 +47,11 @@ export class BackgroundManager implements IUpdatable {
     const cloud = scene.add.image(0, 0, textureKey);
 
     cloud.setPosition(
-      MathUtils.getRandomArbitrary(-worldHalfWidth, worldHalfWidth),
-      MathUtils.getRandomArbitrary(-BLOCK_SIZE * 19, -BLOCK_SIZE * 16),
+      getRandomFloatFrom(-worldHalfWidth).to(worldHalfWidth),
+      getRandomFloatFrom(-BLOCK_SIZE * 19).to(-BLOCK_SIZE * 16),
     );
 
-    const randomScale = MathUtils.getRandomArbitrary(2, 6);
+    const randomScale = getRandomFloatFrom(2).to(6);
 
     cloud.setScrollFactor(randomScale / 8, randomScale / 8);
     cloud.setOrigin(0, 0);

@@ -78,11 +78,12 @@ export class MiningSystem {
   }
 
   private destroyTarget(target: MineableTarget): void {
-    this.ctx.items.dropItem(
-      target.drop.position.x,
-      target.drop.position.y,
-      target.drop.type,
-      target.drop.quantity,
+    this.ctx.items.dropItems(
+      target.drops.map(drop => ({
+        position: drop.position,
+        type: drop.type,
+        quantity: drop.quantity,
+      })),
     );
 
     this.ctx.world.remove(target);

@@ -79,8 +79,7 @@ export class CombatSystem {
           const dropConfig = mob.getDropConfig();
           if (dropConfig) {
             this.itemManager.dropItem(
-              deathPos.x,
-              deathPos.y,
+              deathPos,
               dropConfig.type,
               dropConfig.quantity,
             );

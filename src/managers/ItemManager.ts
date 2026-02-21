@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { ItemType } from "@/types";
+import { ItemType, Position } from "@/types";
 import { ItemDrop } from "@/entities";
 
 /**
@@ -15,15 +15,28 @@ export class ItemManager {
   }
 
   /**
+   * Drops multiple items at the specified world positions.
+   */
+  dropItems(
+    items: Array<{ position: Position; type: ItemType; quantity: number }>,
+  ): void {
+    items.forEach(item => {
+      this.dropItem(item.position, item.type, item.quantity);
+    });
+  }
+
+  /**
    * Drops an item at the specified world position.
    */
-  dropItem(
-    worldX: number,
-    worldY: number,
-    itemType: ItemType,
-    quantity: number = 1,
-  ): void {
-    const item = new ItemDrop(this.scene, worldX, worldY, itemType, quantity);
+  dropItem(position: Position, itemType: ItemType, quantity: number = 1): void {
+    const item = new ItemDrop(
+      this.scene,
+      position.x,
+      position.y,
+      itemType,
+      quantity,
+    );
+
     this.droppedItems.add(item);
   }
 

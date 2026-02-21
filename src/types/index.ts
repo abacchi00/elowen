@@ -72,11 +72,11 @@ export interface IMineable {
   life: number;
   maxLife: number;
   miningSound: keyof GameSounds;
-  drop: {
+  drops: Array<{
     type: ItemType;
     quantity: number;
     position: Position;
-  };
+  }>;
   takeDamage(damage: number): { destroyed: boolean };
   mine(): void;
 }
@@ -116,7 +116,7 @@ export type ToolType = "pickaxe" | "sword";
 
 export type FoodType = "boarMeat";
 
-export type MiscType = "slimeGoo";
+export type MiscType = "slimeGoo" | "treeSeed";
 
 export type ItemType = BlockType | ToolType | FoodType | MiscType;
 

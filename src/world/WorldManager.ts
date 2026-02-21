@@ -390,6 +390,39 @@ export class WorldManager {
     return this.maxHeight;
   }
 
+  /**
+   * Returns the world-Y of the highest terrain surface across a horizontal span
+   * centered at worldX. Checks all columns the body could overlap so mobs
+   * never spawn inside a mountain slope.
+   */
+  getSurfaceWorldY(worldX: number, bodyWidth: number = BLOCK_SIZE * 3): number {
+    const halfWidth = Math.ceil(bodyWidth / 2);
+    let highestSurfaceY = Infinity;
+
+    for (let dx = -halfWidth; dx <= halfWidth; dx += BLOCK_SIZE) {
+      const matrixX =
+        Math.floor((worldX + dx) / BLOCK_SIZE) +
+        Math.floor(WORLD_WIDTH_BLOCKS / 2);
+
+      if (matrixX < 0 || matrixX >= this.mapMatrix.length) continue;
+
+      for (
+        let matrixY = 0;
+        matrixY < this.mapMatrix[matrixX].length;
+        matrixY++
+      ) {
+        if (this.mapMatrix[matrixX][matrixY] !== null) {
+          const topEdgeY =
+            this.matrixToWorld({ matrixX, matrixY }).y - BLOCK_SIZE / 2;
+          highestSurfaceY = Math.min(highestSurfaceY, topEdgeY);
+          break;
+        }
+      }
+    }
+
+    return highestSurfaceY === Infinity ? 0 : highestSurfaceY;
+  }
+
   getMatrix(): BlockMatrix {
     return this.mapMatrix;
   }

@@ -91,7 +91,7 @@ export class GameScene extends Phaser.Scene {
     this.worldManager.generate();
 
     this.itemManager = new ItemManager(this);
-    this.mobManager = new MobManager(this);
+    this.mobManager = new MobManager(this, this.worldManager);
 
     this.ctx = {
       scene: this,

@@ -8,6 +8,7 @@ const SLOT_PADDING = 4;
 const SLOT_BORDER_WIDTH = 2;
 const HOTBAR_PADDING = 16;
 const FONT_SIZE = 14;
+const ITEM_QUANTITY_TEXT_STROKE_THICKNESS = 4;
 
 const COLORS = {
   slotBackground: 0x333333,
@@ -92,7 +93,7 @@ export class Hotbar {
         fontSize: `${FONT_SIZE}px`,
         color: COLORS.textColor,
         stroke: COLORS.textStroke,
-        strokeThickness: 4,
+        strokeThickness: ITEM_QUANTITY_TEXT_STROKE_THICKNESS,
       });
       text.setOrigin(1, 1);
       this.container.add(text);

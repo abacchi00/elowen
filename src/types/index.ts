@@ -99,7 +99,7 @@ export interface IHoldable {
   displaySize: { width: number; height: number };
   texture: string;
   frame: number;
-  events: Phaser.Events.EventEmitter;
+  events?: Phaser.Events.EventEmitter;
   rotationOffset?: number;
   type: HoldableType;
 }
@@ -108,11 +108,13 @@ export interface IHoldable {
 // Inventory Types
 // ============================================================================
 
-export type HoldableType = "block" | "pickaxe" | "sword";
+export type HoldableType = "block" | "pickaxe" | "sword" | "food";
 
 export type ToolType = "pickaxe" | "sword";
 
-export type ItemType = BlockType | ToolType;
+export type FoodType = "boarMeat";
+
+export type ItemType = BlockType | ToolType | FoodType;
 
 export interface InventoryItem {
   holdable: IHoldable;
@@ -132,8 +134,10 @@ export interface InventorySlot {
 export interface ItemConfig {
   maxStack: number;
   texture: string;
-  frame?: number; // Optional frame index for spritesheet textures
+  frame: number;
   holdable: IHoldable;
+  hasOutline: boolean;
+  dropDisplayScale: number;
 }
 
 // Re-export GameContext

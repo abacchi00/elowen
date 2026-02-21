@@ -1,4 +1,9 @@
-import { BlockHoldable, PickaxeHoldable, SwordHoldable } from "@/holdables";
+import {
+  BlockHoldable,
+  FoodHoldable,
+  PickaxeHoldable,
+  SwordHoldable,
+} from "@/holdables";
 import {
   AssetConfig,
   GameSounds,
@@ -108,6 +113,7 @@ export const BOAR_HIT_KNOCKBACK_Y = BLOCK_SIZE * 40; // Upward knockback speed
 export const BOAR_HIT_TINT = 0xff0000; // Red tint on hit
 export const BOAR_HIT_TINT_DURATION = 200; // ms the red tint lasts
 export const BOAR_HIT_COOLDOWN = 1000; // ms before the boar can be hit again
+export const BOAR_MEAT_DROP_QUANTITY = 2;
 export const BOAR_SPAWN_X_POSITIONS = [
   -1500, -1000, -500, -100, 100, 500, 1000, 1500,
 ];
@@ -126,7 +132,7 @@ export const ITEM_DROP_STACK_COOLDOWN = 200; // ms before item can stack
 export const ITEM_DROP_GRAVITY = 200;
 export const ITEM_DROP_BOUNCE = 0.5;
 export const ITEM_DROP_DRAG = 100;
-export const ITEM_DROP_DISPLAY_SCALE = 0.75;
+export const ITEM_DROP_BASE_DISPLAY_SCALE = 0.75;
 export const ITEM_DROP_PICKUP_DISTANCE = 20;
 
 // ============================================================================
@@ -198,6 +204,7 @@ export const IMAGE_ASSETS: AssetConfig[] = [
   { key: "tree_variant_2", path: "./assets/images/tree_variant_2.png" },
   { key: "cloud_1", path: "./assets/images/cloud_1.png" },
   { key: "sword", path: "./assets/images/sword.png" },
+  { key: "boar_meat", path: "./assets/images/boar_meat.png" },
 ];
 
 export const AUDIO_ASSETS: AssetConfig[] = [
@@ -235,35 +242,55 @@ export const ITEM_CONFIGS: Record<ItemType, ItemConfig> = {
     texture: "grass_block_spritesheet",
     frame: 0,
     holdable: new BlockHoldable("grass_block"),
+    hasOutline: true,
+    dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
   },
   dirt_block: {
     maxStack: 64,
     texture: "dirt_block_spritesheet",
     frame: 0,
     holdable: new BlockHoldable("dirt_block"),
+    hasOutline: true,
+    dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
   },
   stone_block: {
     maxStack: 64,
     texture: "stone_block_spritesheet",
     frame: 0,
     holdable: new BlockHoldable("stone_block"),
+    hasOutline: true,
+    dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
   },
   wood_block: {
     maxStack: 64,
     texture: "wood_block_spritesheet",
     frame: 0,
     holdable: new BlockHoldable("wood_block"),
+    hasOutline: true,
+    dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
   },
   pickaxe: {
     maxStack: 1,
     texture: "pickaxe",
     frame: 0,
     holdable: new PickaxeHoldable(),
+    hasOutline: false,
+    dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
   },
   sword: {
     maxStack: 1,
     texture: "sword",
     frame: 0,
     holdable: new SwordHoldable(),
+    hasOutline: false,
+    dropDisplayScale: ITEM_DROP_BASE_DISPLAY_SCALE,
+  },
+  boarMeat: {
+    maxStack: 64,
+    texture: "boar_meat",
+    frame: 0,
+    holdable: new FoodHoldable("boar_meat"),
+    hasOutline: false,
+    dropDisplayScale: 1.25,
   },
 };

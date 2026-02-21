@@ -114,8 +114,14 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   // Combat
   // ============================================================================
 
-  public takeHit(fromX: number, damage: number, sounds?: GameSounds): void {
-    if (!this.active || !this.body || this.isOnCooldown()) return;
+  public takeHit(
+    fromX: number,
+    damage: number,
+    sounds?: GameSounds,
+  ): { died: boolean } {
+    if (!this.active || !this.body || this.isOnCooldown()) {
+      return { died: false };
+    }
 
     this.lastHitTime = this.scene.time.now;
     this.sounds = sounds;
@@ -134,10 +140,10 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
       if (this.active) this.clearTint();
     });
 
-    this.applyDamage(damage);
+    return this.applyDamage(damage);
   }
 
-  private applyDamage(amount: number): void {
+  private applyDamage(amount: number): { died: boolean } {
     this.life -= amount;
 
     const damageText = createFloatingText(
@@ -151,10 +157,11 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
     if (this.life <= 0) {
       this.die();
-      return;
+      return { died: true };
     }
 
     this.updateHealthBar();
+    return { died: false };
   }
 
   private updateHealthBar(): void {

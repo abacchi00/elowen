@@ -13,7 +13,6 @@ import {
   ITEM_DROP_GRAVITY,
   ITEM_DROP_BOUNCE,
   ITEM_DROP_DRAG,
-  ITEM_DROP_DISPLAY_SCALE,
 } from "@/config/constants";
 import { ignoreOnUICameras } from "@/utils";
 
@@ -25,6 +24,8 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
   public quantity: number;
   private creationTime: number;
   private outline: Phaser.GameObjects.Graphics | null = null;
+  private shouldCreateOutline: boolean = false;
+  private dropDisplayScale: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -39,20 +40,22 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     this.itemType = itemType;
     this.quantity = quantity;
     this.creationTime = scene.time.now;
+    this.shouldCreateOutline = config.hasOutline;
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    this.dropDisplayScale = config.dropDisplayScale;
+
     this.setDisplaySize(
-      BLOCK_SIZE * ITEM_DROP_DISPLAY_SCALE,
-      BLOCK_SIZE * ITEM_DROP_DISPLAY_SCALE,
+      BLOCK_SIZE * config.dropDisplayScale,
+      BLOCK_SIZE * config.dropDisplayScale,
     );
     this.setDepth(100);
-
-    this.createOutline();
     ignoreOnUICameras(this.scene, this);
 
     this.setupPhysics();
+    this.createOutline();
   }
 
   // ============================================================================
@@ -153,6 +156,8 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
   }
 
   private createOutline(): void {
+    if (!this.shouldCreateOutline) return;
+
     this.outline = this.scene.add.graphics();
     this.outline.lineStyle(2, 0x222222, 1);
     this.outline.strokeRect(
@@ -164,7 +169,7 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     this.outline.setPosition(this.x, this.y);
     this.outline.setDepth(this.depth + 1);
     this.outline.setScrollFactor(1, 1);
-    this.outline.setScale(ITEM_DROP_DISPLAY_SCALE);
+    this.outline.setScale(this.dropDisplayScale);
 
     ignoreOnUICameras(this.scene, this.outline);
   }

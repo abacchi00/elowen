@@ -96,7 +96,7 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
     // Clean up event forwarding from the old held item
     if (this.heldItem) {
       for (const { event, fn } of this.eventForwarders) {
-        this.heldItem.events.off(event, fn);
+        this.heldItem.events?.off(event, fn);
       }
       this.eventForwarders = [];
     }
@@ -130,7 +130,7 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
     const fn = (...args: unknown[]) => {
       this.ctx.scene.events.emit(event, ...args);
     };
-    holdable.events.on(event, fn);
+    holdable.events?.on(event, fn);
     this.eventForwarders.push({ event, fn });
   }
 }

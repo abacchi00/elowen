@@ -4,9 +4,11 @@ import {
   PICKAXE_HIT_RANGE,
   SWORD_DAMAGE,
   SWORD_HIT_RANGE,
+  BOAR_MEAT_DROP_QUANTITY,
 } from "@/config";
 import { GameSounds, HoldableType } from "@/types";
 import { Boar } from "@/entities";
+import { ItemManager } from "@/managers";
 import { getMouseWorldPosition } from "@/utils";
 import { HeldItemSystem } from "./HeldItemSystem";
 
@@ -22,12 +24,14 @@ const WEAPON_CONFIGS: Record<string, WeaponConfig> = {
 
 /**
  * Handles weapon swing hit detection against mobs.
+ * When a mob dies, drops its loot — same pattern as MiningSystem.
  */
 export class CombatSystem {
   private scene: Phaser.Scene;
   private boars: Phaser.GameObjects.Group;
   private player: Phaser.Physics.Arcade.Sprite;
   private heldItemSystem: HeldItemSystem;
+  private itemManager: ItemManager;
   private sounds?: GameSounds;
 
   constructor(
@@ -35,12 +39,14 @@ export class CombatSystem {
     boars: Phaser.GameObjects.Group,
     player: Phaser.Physics.Arcade.Sprite,
     heldItemSystem: HeldItemSystem,
+    itemManager: ItemManager,
     sounds?: GameSounds,
   ) {
     this.scene = scene;
     this.boars = boars;
     this.player = player;
     this.heldItemSystem = heldItemSystem;
+    this.itemManager = itemManager;
     this.sounds = sounds;
   }
 
@@ -70,7 +76,17 @@ export class CombatSystem {
       );
 
       if (distance <= range) {
-        boar.takeHit(playerPos.x, damage, this.sounds);
+        const deathPos = { x: boar.x, y: boar.y };
+        const { died } = boar.takeHit(playerPos.x, damage, this.sounds);
+
+        if (died) {
+          this.itemManager.dropItem(
+            deathPos.x,
+            deathPos.y,
+            "boarMeat",
+            BOAR_MEAT_DROP_QUANTITY,
+          );
+        }
       }
 
       return true;

@@ -90,8 +90,8 @@ export class GameScene extends Phaser.Scene {
     this.worldManager = new WorldManager(this, sounds);
     this.worldManager.generate();
 
-    this.mobManager = new MobManager(this);
     this.itemManager = new ItemManager(this);
+    this.mobManager = new MobManager(this);
 
     this.ctx = {
       scene: this,
@@ -132,6 +132,7 @@ export class GameScene extends Phaser.Scene {
       this.mobManager.getBoars(),
       this.player,
       this.heldItemSystem,
+      this.itemManager,
       this.ctx.sounds,
     );
   }

@@ -92,7 +92,7 @@ export class Hotbar {
         fontSize: `${FONT_SIZE}px`,
         color: COLORS.textColor,
         stroke: COLORS.textStroke,
-        strokeThickness: 2,
+        strokeThickness: 4,
       });
       text.setOrigin(1, 1);
       this.container.add(text);

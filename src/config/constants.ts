@@ -46,6 +46,8 @@ export const GRAVITY = BLOCK_SIZE * 200;
 
 export const PICKAXE_SWING_SPEED = 0.0035;
 export const PICKAXE_SWING_AMPLITUDE = 1.2;
+export const PICKAXE_DAMAGE = 5;
+export const PICKAXE_HIT_RANGE = BLOCK_SIZE * 5;
 
 // ============================================================================
 // Sword Constants
@@ -53,6 +55,8 @@ export const PICKAXE_SWING_AMPLITUDE = 1.2;
 
 export const SWORD_SWING_SPEED = 0.004; // How fast the swing progresses (lower = slower)
 export const SWORD_SWING_AMPLITUDE = 1.0; // Max rotation in radians
+export const SWORD_DAMAGE = 10;
+export const SWORD_HIT_RANGE = BLOCK_SIZE * 5;
 
 // ============================================================================
 // Mining Constants
@@ -104,7 +108,6 @@ export const BOAR_HIT_KNOCKBACK_Y = BLOCK_SIZE * 40; // Upward knockback speed
 export const BOAR_HIT_TINT = 0xff0000; // Red tint on hit
 export const BOAR_HIT_TINT_DURATION = 200; // ms the red tint lasts
 export const BOAR_HIT_COOLDOWN = 1000; // ms before the boar can be hit again
-export const SWORD_HIT_RANGE = BLOCK_SIZE * 5; // Distance from player to hit a boar
 
 // ============================================================================
 // Sound Constants

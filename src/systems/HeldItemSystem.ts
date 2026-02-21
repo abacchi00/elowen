@@ -1,5 +1,5 @@
 import { BLOCK_SIZE } from "@/config";
-import { GameContext, IHoldable, Position } from "@/types";
+import { GameContext, HoldableType, IHoldable, Position } from "@/types";
 import { getMouseWorldPosition } from "@/utils/camera";
 
 export class HeldItemSystem extends Phaser.GameObjects.Image {
@@ -11,6 +11,7 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
     event: string;
     fn: (...args: unknown[]) => void;
   }[] = [];
+  private events: Phaser.Events.EventEmitter = new Phaser.Events.EventEmitter();
 
   constructor(ctx: GameContext) {
     super(ctx.scene, 0, 0, "TODO change this", 0);
@@ -75,6 +76,20 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
 
       this.secondaryActionActive = false;
     }
+
+    if (this.heldItem && (this.heldItem?.rotationOffset ?? 0) !== 0) {
+      this.events.emit("swinging", this.heldItem.type);
+    }
+  }
+
+  /**
+   * Returns the held item type if currently swinging, or null otherwise.
+   */
+  isSwinging(): HoldableType | null {
+    if (this.heldItem && (this.heldItem.rotationOffset ?? 0) !== 0) {
+      return this.heldItem.type;
+    }
+    return null;
   }
 
   private setHeldItem(item: IHoldable | null): void {
@@ -109,13 +124,6 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
       this.heldItem.displaySize.width,
       this.heldItem.displaySize.height,
     );
-  }
-
-  /**
-   * Returns true if the held item is currently mid-swing.
-   */
-  isSwinging(): boolean {
-    return (this.heldItem?.rotationOffset ?? 0) !== 0;
   }
 
   private forwardEvent(holdable: IHoldable, event: string): void {

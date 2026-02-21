@@ -3,7 +3,7 @@ import {
   PICKAXE_SWING_SPEED,
   PICKAXE_SWING_AMPLITUDE,
 } from "@/config";
-import { IHoldable } from "@/types";
+import { HoldableType, IHoldable } from "@/types";
 
 export class PickaxeHoldable implements IHoldable {
   events: Phaser.Events.EventEmitter = new Phaser.Events.EventEmitter();
@@ -14,6 +14,7 @@ export class PickaxeHoldable implements IHoldable {
   texture: string = "pickaxe";
   frame: number = 0;
   rotationOffset: number = 0;
+  type: HoldableType = "pickaxe";
 
   private swingProgress: number = 0;
   private isSwinging: boolean = false;

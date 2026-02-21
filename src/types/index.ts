@@ -100,11 +100,14 @@ export interface IHoldable {
   frame: number;
   events: Phaser.Events.EventEmitter;
   rotationOffset?: number;
+  type: HoldableType;
 }
 
 // ============================================================================
 // Inventory Types
 // ============================================================================
+
+export type HoldableType = "block" | "pickaxe" | "sword";
 
 export type ToolType = "pickaxe" | "sword";
 

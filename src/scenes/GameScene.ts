@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { SCREEN_HEIGHT, SWORD_HIT_RANGE } from "@/config/constants";
+import { SCREEN_HEIGHT } from "@/config/constants";
 import { GameContext } from "@/types";
 import { Player, Boar } from "@/entities";
 import {
@@ -15,10 +15,10 @@ import {
   PlacementSystem,
   PickupSystem,
   HeldItemSystem,
+  CombatSystem,
 } from "@/systems";
 import { WorldManager } from "@/world";
 import { Hotbar } from "@/ui";
-import { getMouseWorldPosition } from "@/utils";
 
 /**
  * Main game scene - simplified using WorldManager and GameContext.
@@ -42,6 +42,7 @@ export class GameScene extends Phaser.Scene {
   private placementSystem!: PlacementSystem;
   private pickupSystem!: PickupSystem;
   private heldItemSystem!: HeldItemSystem;
+  private combatSystem!: CombatSystem;
 
   // UI
   private hotbar!: Hotbar;
@@ -109,6 +110,13 @@ export class GameScene extends Phaser.Scene {
     this.heldItemSystem = new HeldItemSystem(this.ctx);
     this.placementSystem = new PlacementSystem(this.ctx);
     this.pickupSystem = new PickupSystem(this.ctx, this.player);
+    this.combatSystem = new CombatSystem(
+      this,
+      this.boars,
+      this.player,
+      this.heldItemSystem,
+      sounds,
+    );
 
     // 10. Create UI
     this.hotbar = new Hotbar(this, inventory);
@@ -132,44 +140,9 @@ export class GameScene extends Phaser.Scene {
     this.placementSystem.update();
     this.pickupSystem.update();
     this.heldItemSystem.update(delta, this.player.getBodyCenter());
-    this.checkWeaponHits();
+    this.combatSystem.update();
     this.backgroundManager.update(undefined, delta);
     this.worldManager.updateHoverHighlight();
     this.performanceManager.update(this);
-  }
-
-  /**
-   * Checks if the held weapon is swinging and hits any boar within range.
-   */
-  private checkWeaponHits(): void {
-    if (!this.heldItemSystem.isSwinging()) return;
-
-    const playerPos = this.player.getBodyCenter();
-    const mouseWorld = getMouseWorldPosition(this);
-    const swingToRight = mouseWorld.x >= playerPos.x;
-
-    this.boars.children.each(child => {
-      const boar = child as Boar;
-      if (!boar.active) return true;
-
-      // Only hit boars on the same side as the mouse pointer
-      const boarIsRight = boar.x >= playerPos.x;
-      if (boarIsRight !== swingToRight) return true;
-
-      const dist = Phaser.Math.Distance.Between(
-        playerPos.x,
-        playerPos.y,
-        boar.x,
-        boar.y,
-      );
-
-      const SWORD_DAMAGE = 10;
-
-      if (dist <= SWORD_HIT_RANGE) {
-        boar.takeHit(playerPos.x, SWORD_DAMAGE, this.ctx.sounds);
-      }
-
-      return true;
-    });
   }
 }

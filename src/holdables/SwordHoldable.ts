@@ -1,5 +1,5 @@
 import { BLOCK_SIZE, SWORD_SWING_SPEED, SWORD_SWING_AMPLITUDE } from "@/config";
-import { IHoldable } from "@/types";
+import { HoldableType, IHoldable } from "@/types";
 
 export class SwordHoldable implements IHoldable {
   events: Phaser.Events.EventEmitter = new Phaser.Events.EventEmitter();
@@ -10,6 +10,7 @@ export class SwordHoldable implements IHoldable {
   texture: string = "sword";
   frame: number = 0;
   rotationOffset: number = 0;
+  type: HoldableType = "sword";
 
   private swingProgress: number = 0;
   private isSwinging: boolean = false;

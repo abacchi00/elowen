@@ -1,5 +1,5 @@
 import { BLOCK_SIZE } from "@/config";
-import { BlockType, IHoldable } from "@/types";
+import { BlockType, HoldableType, IHoldable } from "@/types";
 
 export class BlockHoldable implements IHoldable {
   events: Phaser.Events.EventEmitter = new Phaser.Events.EventEmitter();
@@ -10,6 +10,7 @@ export class BlockHoldable implements IHoldable {
   private blockType: BlockType;
   texture: string;
   frame: number = 0;
+  type: HoldableType = "block";
 
   constructor(blockType: BlockType) {
     this.blockType = blockType;

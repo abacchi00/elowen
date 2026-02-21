@@ -54,6 +54,8 @@ export interface GameSounds {
   backgroundMusic: Phaser.Sound.BaseSound;
   boarTakingHit: Phaser.Sound.BaseSound;
   boarDying: Phaser.Sound.BaseSound;
+  slimeTakingHit: Phaser.Sound.BaseSound;
+  slimeDying: Phaser.Sound.BaseSound;
 }
 
 export interface SoundConfig {

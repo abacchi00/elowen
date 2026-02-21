@@ -99,6 +99,12 @@ export const TREE_DISPLAY_HEIGHT = BLOCK_SIZE * 6;
 export const TREE_DARK_TINT = 0xbbbbbb;
 
 // ============================================================================
+// Mob Constants
+// ============================================================================
+
+export const MOB_OUT_OF_BOUNDS_Y = BLOCK_SIZE * 200; // Destroy mob if it falls this far
+
+// ============================================================================
 // Boar Constants
 // ============================================================================
 
@@ -107,16 +113,27 @@ export const BOAR_JUMP_VELOCITY = BLOCK_SIZE * 40;
 export const BOAR_JUMP_ON_COLLISION_PROBABILITY = 0.8;
 export const BOAR_DISPLAY_WIDTH = BLOCK_SIZE * 3;
 export const BOAR_DISPLAY_HEIGHT = BLOCK_SIZE * 2;
-export const BOAR_OUT_OF_BOUNDS_Y = BLOCK_SIZE * 200; // Destroy boar if it falls this far
 export const BOAR_HIT_KNOCKBACK_X = BLOCK_SIZE * 60; // Horizontal knockback speed
 export const BOAR_HIT_KNOCKBACK_Y = BLOCK_SIZE * 40; // Upward knockback speed
-export const BOAR_HIT_TINT = 0xff0000; // Red tint on hit
-export const BOAR_HIT_TINT_DURATION = 200; // ms the red tint lasts
 export const BOAR_HIT_COOLDOWN = 1000; // ms before the boar can be hit again
+export const BOAR_MAX_LIFE = 100;
 export const BOAR_MEAT_DROP_QUANTITY = 2;
 export const BOAR_SPAWN_X_POSITIONS = [
   -1500, -1000, -500, -100, 100, 500, 1000, 1500,
 ];
+
+// ============================================================================
+// Slime Constants
+// ============================================================================
+
+export const SLIME_SPEED = BLOCK_SIZE * 1.5;
+export const SLIME_DISPLAY_WIDTH = BLOCK_SIZE * 1.5;
+export const SLIME_DISPLAY_HEIGHT = BLOCK_SIZE * 1.5;
+export const SLIME_HIT_KNOCKBACK_X = BLOCK_SIZE * 30;
+export const SLIME_HIT_KNOCKBACK_Y = BLOCK_SIZE * 20;
+export const SLIME_HIT_COOLDOWN = 800;
+export const SLIME_MAX_LIFE = 50;
+export const SLIME_SPAWN_X_POSITIONS = [-800, -400, 200, 600, 1200];
 
 // ============================================================================
 // Item Drop Constants
@@ -145,8 +162,10 @@ export const SOUND_CONFIGS: Record<keyof GameSounds, SoundConfig> = {
   pickaxeHit: { key: "pickaxe_hit", volume: 0.2 },
   itemPickup: { key: "item_pickup", volume: 0.4 },
   backgroundMusic: { key: "background_music", loop: true, volume: 0.15 },
-  boarTakingHit: { key: "boar_taking_hit", volume: 0.3 },
-  boarDying: { key: "boar_dying", volume: 0.4 },
+  boarTakingHit: { key: "boar_taking_hit", volume: 0.5 },
+  boarDying: { key: "boar_dying", volume: 0.5 },
+  slimeTakingHit: { key: "slime_taking_hit", volume: 0.1 },
+  slimeDying: { key: "slime_dying", volume: 0.1 },
 };
 
 // ============================================================================
@@ -191,6 +210,12 @@ export const SPRITESHEET_ASSETS: SpritesheetConfig[] = [
     frameHeight: 32,
   },
   {
+    key: "slime_spritesheet",
+    path: "/assets/spritesheets/slime_spritesheet.png",
+    frameWidth: 24,
+    frameHeight: 24,
+  },
+  {
     key: "mob_health_bar_spritesheet",
     path: "/assets/spritesheets/mob_health_bar_spritesheet.png",
     frameWidth: 32,
@@ -218,6 +243,8 @@ export const AUDIO_ASSETS: AssetConfig[] = [
   },
   { key: "boar_taking_hit", path: "./assets/audio/boar_taking_hit.mp3" },
   { key: "boar_dying", path: "./assets/audio/boar_dying.mp3" },
+  { key: "slime_taking_hit", path: "./assets/audio/slime_taking_hit.mp3" },
+  { key: "slime_dying", path: "./assets/audio/slime_dying.mp3" },
 ];
 
 // ============================================================================

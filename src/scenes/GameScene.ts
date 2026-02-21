@@ -129,11 +129,10 @@ export class GameScene extends Phaser.Scene {
     this.pickupSystem = new PickupSystem(this.ctx, this.player);
     this.combatSystem = new CombatSystem(
       this,
-      this.mobManager.getBoars(),
+      this.mobManager.getMobs(),
       this.player,
       this.heldItemSystem,
       this.itemManager,
-      this.ctx.sounds,
     );
   }
 

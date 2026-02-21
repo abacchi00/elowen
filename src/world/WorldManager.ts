@@ -16,14 +16,12 @@ import {
   MatrixPosition,
 } from "../types";
 import { BlockFactory } from "../blocks";
-import { Tree, ItemDrop } from "../entities";
+import { Tree } from "../entities";
 import { TerrainGenerator } from "../terrain";
 import { Block } from "@/blocks/Block";
-import { ItemType } from "../types";
 
 /**
- * Manages the game world: terrain, blocks, and coordinate conversions.
- * Centralizes all world-related operations.
+ * Manages the game world: terrain, blocks, trees, and coordinate conversions.
  */
 export class WorldManager {
   private scene: Phaser.Scene;
@@ -31,9 +29,8 @@ export class WorldManager {
   // Block data
   private mapMatrix: BlockMatrix = [];
   private blocks: Phaser.Physics.Arcade.StaticGroup;
-  private blockMap: Map<string, Block> = new Map(); // matrixX,matrixY -> Block
+  private blockMap: Map<string, Block> = new Map();
   private trees: Phaser.GameObjects.Group;
-  private droppedItems: Phaser.GameObjects.Group;
   private blockFactory: BlockFactory;
 
   // Single shared Graphics for all block outlines
@@ -52,7 +49,6 @@ export class WorldManager {
     this.scene = scene;
     this.blocks = scene.physics.add.staticGroup();
     this.trees = scene.add.group();
-    this.droppedItems = scene.add.group();
 
     this.blockFactory = new BlockFactory(scene);
     this.blockOutlines = scene.add.graphics();
@@ -63,9 +59,10 @@ export class WorldManager {
     this.hoverHighlight.setVisible(false);
   }
 
-  /**
-   * Generates and creates the world terrain.
-   */
+  // ============================================================================
+  // Generation
+  // ============================================================================
+
   generate(): void {
     const generator = new TerrainGenerator();
     this.mapMatrix = generator.generate();
@@ -111,14 +108,17 @@ export class WorldManager {
     );
   }
 
+  private createTree(worldX: number, worldY: number, blockDepth: number): void {
+    const tree = new Tree(this.scene, worldX, worldY - BLOCK_SIZE / 2);
+    const randomZOffset = (Math.random() - 0.5) * 1;
+    tree.setDepth(blockDepth - 1 + randomZOffset);
+    this.trees.add(tree);
+  }
+
   // ============================================================================
-  // Block Outlines (single shared Graphics object)
+  // Block Outlines
   // ============================================================================
 
-  /**
-   * Redraws all block outlines on the single shared Graphics object.
-   * Called once after generation and again when blocks change.
-   */
   drawBlockOutlines(): void {
     this.blockOutlines.clear();
     this.blockOutlines.lineStyle(2, 0x111111, 1);
@@ -166,21 +166,10 @@ export class WorldManager {
     }
   }
 
-  private createTree(worldX: number, worldY: number, blockDepth: number): void {
-    const tree = new Tree(this.scene, worldX, worldY - BLOCK_SIZE / 2);
-    // Add random Z position variation (-0.5 to 0.5) for depth layering
-    const randomZOffset = (Math.random() - 0.5) * 1;
-    tree.setDepth(blockDepth - 1 + randomZOffset);
-    this.trees.add(tree);
-  }
-
   // ============================================================================
   // Coordinate Conversions
   // ============================================================================
 
-  /**
-   * Converts matrix coordinates to world coordinates.
-   */
   matrixToWorld({ matrixX, matrixY }: MatrixPosition): Position {
     const worldX =
       (matrixX - Math.floor(WORLD_WIDTH_BLOCKS / 2)) * BLOCK_SIZE +
@@ -190,9 +179,6 @@ export class WorldManager {
     return { x: worldX, y: worldY };
   }
 
-  /**
-   * Converts world coordinates to matrix coordinates.
-   */
   worldToMatrix(worldX: number, worldY: number): MatrixPosition {
     const matrixX =
       Math.floor(worldX / BLOCK_SIZE) + Math.floor(WORLD_WIDTH_BLOCKS / 2);
@@ -205,9 +191,6 @@ export class WorldManager {
   // Block Queries
   // ============================================================================
 
-  /**
-   * Gets the block at the given matrix position.
-   */
   getBlockAt({ matrixX, matrixY }: MatrixPosition): Block | null {
     return this.blockMap.get(`${matrixX},${matrixY}`) ?? null;
   }
@@ -274,28 +257,18 @@ export class WorldManager {
     };
   }
 
-  /**
-   * Checks if there's a block at the given matrix position.
-   */
   hasBlockAt(matrixX: number, matrixY: number): boolean {
     if (matrixX < 0 || matrixX >= this.mapMatrix.length) return false;
     if (matrixY < 0 || matrixY >= this.mapMatrix[matrixX].length) return false;
     return this.mapMatrix[matrixX][matrixY] !== null;
   }
 
-  /**
-   * Finds a block at world coordinates.
-   * Uses O(1) matrix lookup instead of iterating all blocks.
-   */
   findBlockAtWorld(worldX: number, worldY: number): Block | null {
     const { matrixX, matrixY } = this.worldToMatrix(worldX, worldY);
     const block = this.getBlockAt({ matrixX, matrixY });
     return block?.active ? block : null;
   }
 
-  /**
-   * Finds a tree at world coordinates.
-   */
   findTreeAtWorld(worldX: number, worldY: number): Tree | null {
     let foundTree: Tree | null = null;
 
@@ -317,9 +290,6 @@ export class WorldManager {
   // Block Modifications
   // ============================================================================
 
-  /**
-   * Places a block at the given matrix position.
-   */
   placeBlock(matrixPosition: MatrixPosition, type: BlockType): Block | null {
     if (!this.canPlaceAt(matrixPosition)) return null;
 
@@ -362,14 +332,10 @@ export class WorldManager {
     }
   }
 
-  /**
-   * Removes a block from the world.
-   */
   private removeBlock(block: Block): void {
     const minedMatrixX = block.matrixPosition.matrixX;
     const minedMatrixY = block.matrixPosition.matrixY;
 
-    // Update neighbours
     const { left, right, top, bottom } = this.blockAt(
       block.matrixPosition,
     ).getNeighboursCoordinates();
@@ -384,86 +350,28 @@ export class WorldManager {
     topBlock?.updateNeighbours({ bottom: false });
     bottomBlock?.updateNeighbours({ top: false });
 
-    // Update matrix
     this.mapMatrix[minedMatrixX][minedMatrixY] = null;
 
-    // Remove from physics group and block map
     this.blocks.remove(block, true, true);
     this.blockMap.delete(
       `${block.matrixPosition.matrixX},${block.matrixPosition.matrixY}`,
     );
 
-    // Destroy the block
     block.mine();
 
     this.drawBlockOutlines();
   }
 
-  /**
-   * Removes a tree from the world.
-   */
   private removeTree(tree: Tree): void {
     this.trees.remove(tree, true, true);
     tree.mine();
   }
 
-  /**
-   * Checks if a block can be placed at the given position.
-   */
   canPlaceAt({ matrixX, matrixY }: MatrixPosition): boolean {
-    // Check bounds
     if (matrixX < 0 || matrixX >= this.mapMatrix.length) return false;
     if (matrixY < 0 || matrixY >= this.mapMatrix[matrixX].length) return false;
-
-    // Check if slot is empty
     if (this.mapMatrix[matrixX][matrixY] !== null) return false;
-
-    // Check if there's an adjacent block
     return this.blockAt({ matrixX, matrixY }).hasNeighbours();
-  }
-
-  // ============================================================================
-  // Item Management
-  // ============================================================================
-
-  /**
-   * Drops an item at the specified world position.
-   * Items will be attracted to each other and merge when close enough.
-   */
-  dropItem(
-    worldX: number,
-    worldY: number,
-    itemType: ItemType,
-    quantity: number = 1,
-  ): void {
-    // Always create a new item - items will attract to each other and merge
-    const item = new ItemDrop(this.scene, worldX, worldY, itemType, quantity);
-    this.droppedItems.add(item);
-  }
-
-  /**
-   * Merges two items together, transferring quantity from source to target.
-   * Returns true if merge was successful.
-   */
-  mergeItems(sourceItem: ItemDrop, targetItem: ItemDrop): boolean {
-    if (!sourceItem.active || !targetItem.active) return false;
-    if (sourceItem.itemType !== targetItem.itemType) return false;
-
-    // Transfer quantity
-    targetItem.quantity += sourceItem.quantity;
-
-    // Remove and destroy source item
-    this.removeDroppedItem(sourceItem);
-    sourceItem.destroy();
-
-    return true;
-  }
-
-  /**
-   * Removes a dropped item from the world.
-   */
-  removeDroppedItem(item: ItemDrop): void {
-    this.droppedItems.remove(item, true, true);
   }
 
   // ============================================================================
@@ -486,14 +394,10 @@ export class WorldManager {
     return this.mapMatrix;
   }
 
-  getDroppedItems(): Phaser.GameObjects.Group {
-    return this.droppedItems;
-  }
+  // ============================================================================
+  // Hover Highlight
+  // ============================================================================
 
-  /**
-   * Updates the shared hover highlight based on the current pointer position.
-   * Call this from the scene's update loop.
-   */
   updateHoverHighlight(): void {
     const pointer = this.scene.input.activePointer;
     const cam = this.scene.cameras.main;
@@ -508,7 +412,6 @@ export class WorldManager {
       return;
     }
 
-    // Only redraw the rect shape when hovering a different block
     if (block !== this.lastHoveredBlock) {
       this.lastHoveredBlock = block;
       this.hoverHighlight.clear();
@@ -517,7 +420,6 @@ export class WorldManager {
         MINEABLE_OUTLINE_COLOR,
         1,
       );
-      // Draw centered at origin so we can position + scale the Graphics object
       this.hoverHighlight.strokeRect(
         -BLOCK_SIZE / 2,
         -BLOCK_SIZE / 2,
@@ -526,7 +428,6 @@ export class WorldManager {
       );
     }
 
-    // Update every frame so position, scale, and depth follow the mining tween
     this.hoverHighlight.setPosition(block.x, block.y);
     const scaleRatio = block.displayWidth / BLOCK_SIZE;
     this.hoverHighlight.setScale(scaleRatio);

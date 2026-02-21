@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { WorldManager } from "../world";
 import { InventorySystem, CameraSystem } from "../systems";
+import { ItemManager } from "../managers/ItemManager";
 import { GameSounds } from "./index";
 
 /**
@@ -10,6 +11,7 @@ import { GameSounds } from "./index";
 export interface GameContext {
   scene: Phaser.Scene;
   world: WorldManager;
+  items: ItemManager;
   inventory: InventorySystem;
   camera: CameraSystem;
   sounds: GameSounds;

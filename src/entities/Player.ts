@@ -17,31 +17,126 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
 
   private isOnGround: boolean = false;
   private wasMoving: boolean = false;
+  private sounds: GameSounds | null;
 
-  public sounds: GameSounds | null = null;
-
-  constructor(scene: Phaser.Scene, x: number, y: number) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    sounds: GameSounds | null = null,
+  ) {
     super(scene, x, y, "player_spritesheet");
 
-    // Add to scene and enable physics
+    this.sounds = sounds;
+
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    // Create walking animation
-    this.createAnimations(scene);
+    this.registerAnimations(scene);
 
-    // Set display properties
     this.setDisplaySize(BLOCK_SIZE * 2, BLOCK_SIZE * 3);
     this.setCollideWorldBounds(false);
     this.setBounce(0);
 
-    // Setup input controls
     this.cursors = scene.input.keyboard!.createCursorKeys();
     this.wasd = scene.input.keyboard!.addKeys("W,S,A,D") as typeof this.wasd;
   }
 
-  private createAnimations(scene: Phaser.Scene): void {
-    // Only create animation if it doesn't exist
+  // ============================================================================
+  // Update
+  // ============================================================================
+
+  update(): void {
+    this.updateGroundState();
+    this.handleHorizontalMovement();
+    this.handleMousePosition();
+    this.handleJump();
+  }
+
+  private updateGroundState(): void {
+    this.isOnGround = this.body?.touching.down ?? false;
+  }
+
+  private handleHorizontalMovement(): void {
+    this.setVelocityX(0);
+
+    const isMovingLeft = this.cursors.left.isDown || this.wasd.A.isDown;
+    const isMovingRight = this.cursors.right.isDown || this.wasd.D.isDown;
+    const isMoving = (isMovingLeft || isMovingRight) && this.isOnGround;
+
+    if (isMovingLeft) {
+      this.setVelocityX(-PLAYER_SPEED);
+      this.setFlipX(true);
+    } else if (isMovingRight) {
+      this.setVelocityX(PLAYER_SPEED);
+      this.setFlipX(false);
+    }
+
+    if (isMoving) {
+      this.play("player_walk", true);
+    } else {
+      this.play("player_idle", true);
+    }
+
+    this.updateWalkingSound(isMoving);
+  }
+
+  private handleMousePosition(): void {
+    const { x: playerX } = this.getBodyCenter();
+    const mouseWorld = getMouseWorldPosition(this.scene);
+    this.setFlipX(mouseWorld.x < playerX);
+  }
+
+  private handleJump(): void {
+    const isJumpPressed =
+      this.cursors.up.isDown ||
+      this.wasd.W.isDown ||
+      this.cursors.space?.isDown;
+
+    if (isJumpPressed && this.isOnGround) {
+      this.setVelocityY(-JUMP_SPEED);
+      this.isOnGround = false;
+
+      this.sounds?.jump.play();
+      this.sounds?.running.stop();
+      this.wasMoving = false;
+    }
+  }
+
+  // ============================================================================
+  // Sound
+  // ============================================================================
+
+  private updateWalkingSound(isMoving: boolean): void {
+    if (isMoving && this.isOnGround) {
+      if (!this.wasMoving) {
+        this.sounds?.running.play();
+      }
+      this.wasMoving = true;
+    } else {
+      if (this.wasMoving) {
+        this.sounds?.running.stop();
+      }
+      this.wasMoving = false;
+    }
+  }
+
+  // ============================================================================
+  // Public API
+  // ============================================================================
+
+  getBodyCenter(): { x: number; y: number } {
+    if (this.body) {
+      return { x: this.body.center.x, y: this.body.center.y };
+    }
+    return { x: this.x, y: this.y };
+  }
+
+  // ============================================================================
+  // Animations
+  // ============================================================================
+
+  private registerAnimations(scene: Phaser.Scene): void {
     if (!scene.anims.exists("player_walk")) {
       scene.anims.create({
         key: "player_walk",
@@ -61,101 +156,5 @@ export class Player extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
         frameRate: 1,
       });
     }
-  }
-
-  update(): void {
-    this.updateGroundState();
-    this.handleHorizontalMovement();
-    this.handleMousePosition();
-    this.handleJump();
-  }
-
-  private handleMousePosition(): void {
-    const { x: playerX } = this.getBodyCenter();
-    const mouseWorld = getMouseWorldPosition(this.scene);
-    const isMouseOnLeft = mouseWorld.x < playerX;
-
-    if (isMouseOnLeft) {
-      this.setFlipX(true);
-    } else {
-      this.setFlipX(false);
-    }
-  }
-
-  private updateGroundState(): void {
-    this.isOnGround = this.body?.touching.down ?? false;
-  }
-
-  private handleHorizontalMovement(): void {
-    // Reset horizontal velocity
-    this.setVelocityX(0);
-
-    const isMovingLeft = this.cursors.left.isDown || this.wasd.A.isDown;
-    const isMovingRight = this.cursors.right.isDown || this.wasd.D.isDown;
-    const isMoving = (isMovingLeft || isMovingRight) && this.isOnGround;
-
-    if (isMovingLeft) {
-      this.setVelocityX(-PLAYER_SPEED);
-      this.setFlipX(true);
-    } else if (isMovingRight) {
-      this.setVelocityX(PLAYER_SPEED);
-      this.setFlipX(false);
-    }
-
-    // Play walk animation when moving on ground, idle otherwise
-    if (isMoving) {
-      this.play("player_walk", true);
-    } else {
-      this.play("player_idle", true);
-    }
-
-    this.handleWalkingSound(isMoving);
-  }
-
-  private handleWalkingSound(isMoving: boolean): void {
-    if (isMoving && this.isOnGround) {
-      if (!this.wasMoving && this.sounds?.running) {
-        this.sounds.running.play();
-      }
-      this.wasMoving = true;
-    } else {
-      if (this.wasMoving && this.sounds?.running) {
-        this.sounds.running.stop();
-      }
-      this.wasMoving = false;
-    }
-  }
-
-  private handleJump(): void {
-    const isJumpPressed =
-      this.cursors.up.isDown ||
-      this.wasd.W.isDown ||
-      this.cursors.space?.isDown;
-
-    if (isJumpPressed && this.isOnGround) {
-      this.setVelocityY(-JUMP_SPEED);
-      this.isOnGround = false;
-
-      // Play jump sound
-      if (this.sounds?.jump) {
-        this.sounds.jump.play();
-      }
-
-      // Stop running sound when jumping
-      if (this.sounds?.running) {
-        this.sounds.running.stop();
-      }
-      this.wasMoving = false;
-    }
-  }
-
-  getBodyCenter(): { x: number; y: number } {
-    if (this.body) {
-      return {
-        x: this.body.center.x,
-        y: this.body.center.y,
-      };
-    }
-    return { x: this.x, y: this.y };
   }
 }

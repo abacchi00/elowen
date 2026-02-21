@@ -32,7 +32,7 @@ export class PickupSystem {
       }
     });
 
-    const droppedItems = this.ctx.world.getDroppedItems();
+    const droppedItems = this.ctx.items.getDroppedItems();
 
     // Create a snapshot array to avoid iteration issues when items are destroyed
     const itemsSnapshot = droppedItems.children
@@ -91,7 +91,7 @@ export class PickupSystem {
     // Merge items that are close enough
     itemsToMerge.forEach(({ source, target }) => {
       if (source.active && target.active) {
-        this.ctx.world.mergeItems(source, target);
+        this.ctx.items.mergeItems(source, target);
       }
     });
 
@@ -156,7 +156,7 @@ export class PickupSystem {
     item.setActive(false);
 
     // Remove from world group immediately
-    this.ctx.world.removeDroppedItem(item);
+    this.ctx.items.removeDroppedItem(item);
 
     // Add item to inventory BEFORE destroying to ensure it only happens once
     const remaining = this.ctx.inventory.addItem(itemType, quantityPickedUp);
@@ -177,7 +177,7 @@ export class PickupSystem {
         ? (this.player.body as Phaser.Physics.Arcade.Body).center.y
         : this.player.y;
 
-      this.ctx.world.dropItem(playerX, playerY, itemType, remaining);
+      this.ctx.items.dropItem(playerX, playerY, itemType, remaining);
     }
 
     // Only show text and play sound if items were actually added

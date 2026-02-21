@@ -108,6 +108,9 @@ export const BOAR_HIT_KNOCKBACK_Y = BLOCK_SIZE * 40; // Upward knockback speed
 export const BOAR_HIT_TINT = 0xff0000; // Red tint on hit
 export const BOAR_HIT_TINT_DURATION = 200; // ms the red tint lasts
 export const BOAR_HIT_COOLDOWN = 1000; // ms before the boar can be hit again
+export const BOAR_SPAWN_X_POSITIONS = [
+  -1500, -1000, -500, -100, 100, 500, 1000, 1500,
+];
 
 // ============================================================================
 // Sound Constants

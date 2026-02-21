@@ -15,8 +15,10 @@ import { GameSounds, IUpdatable } from "@/types";
 import { createFloatingText } from "@/utils/floatingText";
 import { ignoreOnUICameras } from "@/utils/camera";
 
+type BoarState = "wandering" | "fleeing";
+
 /**
- * Boar entity - wanders horizontally and jumps when hitting obstacles.
+ * Boar entity — simple mob that wanders, flees when hit, and dies.
  */
 export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   private direction: number = 1;
@@ -25,6 +27,7 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
   private life: number = this.maxLife;
   private healthBar: Phaser.GameObjects.Image;
   private sounds?: GameSounds;
+  private behavior: BoarState = "wandering";
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, "boar_spritesheet", 0);
@@ -42,120 +45,81 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
     this.setCollideWorldBounds(false);
     this.setBounce(0);
 
-    // Create walking animation
-    this.createAnimations(scene);
+    this.registerAnimations(scene);
 
-    // Random initial direction
     this.direction = Math.random() < 0.5 ? -1 : 1;
     this.setVelocityX(BOAR_SPEED * this.direction);
     this.setFlipX(this.direction < 0);
   }
 
+  // ============================================================================
+  // Update
+  // ============================================================================
+
   public update(): void {
     if (!this.body || !this.active) return;
 
-    // Die if fallen out of bounds
     if (this.y > BOAR_OUT_OF_BOUNDS_Y) {
-      this.handleDeath();
+      this.die();
       return;
     }
 
-    const body = this.body as Phaser.Physics.Arcade.Body;
-
-    if (body.blocked.left) {
-      this.handleCollision("left");
-    } else if (body.blocked.right) {
-      this.handleCollision("right");
-    }
-
-    // Play walk animation when moving on ground, idle otherwise
-    if (body.velocity.x !== 0 && !this.isOnCooldown()) {
-      this.play("boar_walk", true);
-    } else if (body.velocity.x !== 0 && this.isOnCooldown()) {
-      this.play("boar_run", true);
-    } else {
-      this.play("boar_idle", true);
-    }
-
-    if (this.isOnCooldown()) {
-      this.setVelocityX(BOAR_SPEED * this.direction * 4);
-    } else {
-      this.setVelocityX(BOAR_SPEED * this.direction);
-    }
-
-    this.setFlipX(this.direction < 0);
-
+    this.updateState();
+    this.handleWallCollisions();
+    this.applyMovement();
+    this.updateAnimation();
     this.healthBar.setPosition(this.x, this.y + 24);
   }
 
-  private createAnimations(scene: Phaser.Scene): void {
-    this.createWalkingAnimation(scene);
-    this.createIdleAnimation(scene);
-    this.createRunningAnimation(scene);
+  private updateState(): void {
+    this.behavior = this.isOnCooldown() ? "fleeing" : "wandering";
   }
 
-  private createWalkingAnimation(scene: Phaser.Scene): void {
-    if (!scene.anims.exists("boar_walk")) {
-      scene.anims.create({
-        key: "boar_walk",
-        frames: scene.anims.generateFrameNumbers("boar_spritesheet", {
-          start: 0,
-          end: 1,
-        }),
-        frameRate: 4,
-        repeat: -1,
-      });
+  private handleWallCollisions(): void {
+    const body = this.body as Phaser.Physics.Arcade.Body;
+
+    if (body.blocked.left) {
+      this.onWallHit("left");
+    } else if (body.blocked.right) {
+      this.onWallHit("right");
     }
   }
 
-  private createRunningAnimation(scene: Phaser.Scene): void {
-    if (!scene.anims.exists("boar_run")) {
-      scene.anims.create({
-        key: "boar_run",
-        frames: scene.anims.generateFrameNumbers("boar_spritesheet", {
-          start: 0,
-          end: 1,
-        }),
-        frameRate: 16,
-        repeat: -1,
-      });
-    }
-  }
-
-  private createIdleAnimation(scene: Phaser.Scene): void {
-    if (!scene.anims.exists("boar_idle")) {
-      scene.anims.create({
-        key: "boar_idle",
-        frames: [{ key: "boar_spritesheet", frame: 0 }],
-        frameRate: 1,
-      });
-    }
-  }
-
-  private handleCollision(direction: "left" | "right"): void {
+  private onWallHit(side: "left" | "right"): void {
     if (Math.random() < BOAR_JUMP_ON_COLLISION_PROBABILITY) {
-      this.handleJump();
+      this.setVelocityY(-BOAR_JUMP_VELOCITY);
       return;
     }
-
-    const directionFactor = direction === "left" ? 1 : -1;
-
-    this.direction = directionFactor;
+    this.direction = side === "left" ? 1 : -1;
   }
 
-  private handleJump(): void {
-    this.setVelocityY(-BOAR_JUMP_VELOCITY);
+  private applyMovement(): void {
+    const speedMultiplier = this.behavior === "fleeing" ? 4 : 1;
+    this.setVelocityX(BOAR_SPEED * this.direction * speedMultiplier);
+    this.setFlipX(this.direction < 0);
   }
+
+  private updateAnimation(): void {
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    if (body.velocity.x === 0) {
+      this.play("boar_idle", true);
+    } else if (this.behavior === "fleeing") {
+      this.play("boar_run", true);
+    } else {
+      this.play("boar_walk", true);
+    }
+  }
+
+  // ============================================================================
+  // Combat
+  // ============================================================================
 
   public takeHit(fromX: number, damage: number, sounds?: GameSounds): void {
-    if (!this.active || !this.body) return;
+    if (!this.active || !this.body || this.isOnCooldown()) return;
 
-    const now = this.scene.time.now;
-    if (this.isOnCooldown()) return;
-    this.lastHitTime = now;
+    this.lastHitTime = this.scene.time.now;
     this.sounds = sounds;
 
-    // Play hit sound
     sounds?.boarTakingHit.play();
 
     // Knockback away from attacker
@@ -170,68 +134,81 @@ export class Boar extends Phaser.Physics.Arcade.Sprite implements IUpdatable {
       if (this.active) this.clearTint();
     });
 
-    this.handleLifeLoss(damage);
+    this.applyDamage(damage);
   }
 
-  private handleLifeLoss(lifeLoss: number): void {
-    this.life -= lifeLoss;
+  private applyDamage(amount: number): void {
+    this.life -= amount;
 
-    // Show floating damage text above the boar
     const damageText = createFloatingText(
       this.scene,
       this.x,
       this.y - 20,
-      `-${lifeLoss}`,
+      `-${amount}`,
       "#ff4444",
     );
     ignoreOnUICameras(this.scene, damageText);
 
-    if (this.life === this.maxLife) return;
-
     if (this.life <= 0) {
-      this.handleDeath();
+      this.die();
       return;
     }
 
-    this.healthBar.setVisible(true);
-
-    const healthPercentage = this.life / this.maxLife;
-
-    let healthBarFrame = 0;
-
-    if (healthPercentage > 0.9) {
-      healthBarFrame = 0;
-    } else if (healthPercentage > 0.8) {
-      healthBarFrame = 1;
-    } else if (healthPercentage > 0.7) {
-      healthBarFrame = 2;
-    } else if (healthPercentage > 0.6) {
-      healthBarFrame = 3;
-    } else if (healthPercentage > 0.5) {
-      healthBarFrame = 4;
-    } else if (healthPercentage > 0.4) {
-      healthBarFrame = 5;
-    } else if (healthPercentage > 0.3) {
-      healthBarFrame = 6;
-    } else if (healthPercentage > 0.2) {
-      healthBarFrame = 7;
-    } else if (healthPercentage > 0.1) {
-      healthBarFrame = 8;
-    } else {
-      healthBarFrame = 9;
-    }
-
-    this.healthBar.setFrame(healthBarFrame);
+    this.updateHealthBar();
   }
 
-  private handleDeath(): void {
+  private updateHealthBar(): void {
+    this.healthBar.setVisible(true);
+    const healthPercentage = this.life / this.maxLife;
+    const frame = Math.min(9, Math.floor((1 - healthPercentage) * 10));
+    this.healthBar.setFrame(frame);
+  }
+
+  private die(): void {
     this.sounds?.boarDying.play();
     this.healthBar.destroy();
     this.destroy();
   }
 
   private isOnCooldown(): boolean {
-    const now = this.scene.time.now;
-    return now - this.lastHitTime < BOAR_HIT_COOLDOWN;
+    return this.scene.time.now - this.lastHitTime < BOAR_HIT_COOLDOWN;
+  }
+
+  // ============================================================================
+  // Animations
+  // ============================================================================
+
+  private registerAnimations(scene: Phaser.Scene): void {
+    if (!scene.anims.exists("boar_walk")) {
+      scene.anims.create({
+        key: "boar_walk",
+        frames: scene.anims.generateFrameNumbers("boar_spritesheet", {
+          start: 0,
+          end: 1,
+        }),
+        frameRate: 4,
+        repeat: -1,
+      });
+    }
+
+    if (!scene.anims.exists("boar_run")) {
+      scene.anims.create({
+        key: "boar_run",
+        frames: scene.anims.generateFrameNumbers("boar_spritesheet", {
+          start: 0,
+          end: 1,
+        }),
+        frameRate: 16,
+        repeat: -1,
+      });
+    }
+
+    if (!scene.anims.exists("boar_idle")) {
+      scene.anims.create({
+        key: "boar_idle",
+        frames: [{ key: "boar_spritesheet", frame: 0 }],
+        frameRate: 1,
+      });
+    }
   }
 }

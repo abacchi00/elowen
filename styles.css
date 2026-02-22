@@ -3,3 +3,46 @@ body {
   padding: 0;
   overflow: hidden;
 }
+
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #5a8a5c;
+  transition: opacity 0.4s ease;
+}
+
+#loading-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#loading-screen img {
+  image-rendering: pixelated;
+  width: 320px;
+}
+
+#loading-text {
+  position: absolute;
+  bottom: 48px;
+  color: #fff;
+  font-family: monospace;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+#loading-text .dots::after {
+  content: "";
+  animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}

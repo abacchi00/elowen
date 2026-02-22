@@ -65,6 +65,15 @@ export class GameScene extends Phaser.Scene {
 
     this.ctx.sounds.backgroundMusic.play();
     this.scale.on("resize", () => this.hotbar.onResize());
+
+    // Fade out and remove the loading screen
+    const loadingScreen = document.getElementById("loading-screen");
+    if (loadingScreen) {
+      loadingScreen.classList.add("fade-out");
+      loadingScreen.addEventListener("transitionend", () => {
+        loadingScreen.remove();
+      });
+    }
   }
 
   update(_time: number, delta: number): void {

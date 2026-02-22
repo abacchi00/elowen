@@ -19,6 +19,7 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
     this.ctx = ctx;
 
     this.ctx.inventory.onChange(item => {
+      // Stop primary and secondary actions if the held item is changing
       if (this.heldItem) {
         this.heldItem.stopPrimaryAction?.();
         this.heldItem.stopSecondaryAction?.();
@@ -91,7 +92,6 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
    * Returns the held item type if currently swinging, or null otherwise.
    */
   isSwinging(): HoldableType | null {
-    console.log(this.heldItem?.rotationOffset);
     if (this.heldItem && (this.heldItem.rotationOffset ?? 0) !== 0) {
       return this.heldItem.type;
     }

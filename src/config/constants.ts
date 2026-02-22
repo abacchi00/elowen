@@ -93,11 +93,11 @@ export const BASE_DEPTH = 43;
 // ============================================================================
 
 export const TREE_MAX_LIFE = 80;
-export const TREE_SPAWN_CHANCE = 0.15; // 15%
-export const TREE_DARK_TINT_CHANCE = 0.3; // 30%
+export const TREE_SPAWN_CHANCE = 0.1;
+export const TREE_DARK_TINT_CHANCE = 0.3;
 export const TREE_DISPLAY_WIDTH = BLOCK_SIZE * 6;
 export const TREE_DISPLAY_HEIGHT = BLOCK_SIZE * 6;
-export const TREE_DARK_TINT = 0xbbbbbb;
+export const TREE_DARK_TINT = 0xcccccc;
 
 // ============================================================================
 // Mob Constants

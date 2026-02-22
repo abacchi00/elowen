@@ -136,7 +136,7 @@ export class Tree
   }
 
   private applyRandomVariant(): void {
-    if (Math.random() < 0.7) {
+    if (Math.random() < 0.6) {
       this.setTexture("tree_variant_2");
     } else {
       this.setTexture("tree_variant_1");

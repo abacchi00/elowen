@@ -18,8 +18,13 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
 
     this.ctx = ctx;
 
+    // Set initial held item
+    this.setHeldItem(
+      this.ctx.inventory.getSelectedSlot().item?.holdable ?? null,
+    );
+
+    // Handle inventory item change
     this.ctx.inventory.onChange(item => {
-      // Stop primary and secondary actions if the held item is changing
       if (this.heldItem) {
         this.heldItem.stopPrimaryAction?.();
         this.heldItem.stopSecondaryAction?.();
@@ -27,11 +32,6 @@ export class HeldItemSystem extends Phaser.GameObjects.Image {
 
       this.setHeldItem(item?.holdable ?? null);
     });
-
-    // Set initial held item
-    this.setHeldItem(
-      this.ctx.inventory.getSelectedSlot().item?.holdable ?? null,
-    );
 
     // Set pivot point at the handle
     this.setDepth(1000);

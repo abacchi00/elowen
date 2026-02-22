@@ -74,8 +74,8 @@ export class BerryBush
       1,
     );
     this.hoverOutline.strokeRect(
-      -BLOCK_SIZE / 2,
-      -BLOCK_SIZE,
+      -BLOCK_SIZE * 0.5,
+      -BLOCK_SIZE * 1.5,
       BLOCK_SIZE,
       BLOCK_SIZE,
     );

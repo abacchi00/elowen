@@ -19,6 +19,7 @@ import { BlockFactory } from "../blocks";
 import { Tree } from "../entities";
 import { TerrainGenerator } from "../terrain";
 import { Block } from "@/blocks/Block";
+import { BerryBush } from "@/entities/BerryBush";
 
 /**
  * Manages the game world: terrain, blocks, trees, and coordinate conversions.
@@ -31,6 +32,7 @@ export class WorldManager {
   private blocks: Phaser.Physics.Arcade.StaticGroup;
   private blockMap: Map<string, Block> = new Map();
   private trees: Phaser.GameObjects.Group;
+  private berryBushes: Phaser.GameObjects.Group;
   private blockFactory: BlockFactory;
 
   // Single shared Graphics for all block outlines
@@ -49,6 +51,7 @@ export class WorldManager {
     this.scene = scene;
     this.blocks = scene.physics.add.staticGroup();
     this.trees = scene.add.group();
+    this.berryBushes = scene.add.group();
 
     this.blockFactory = new BlockFactory(scene);
     this.blockOutlines = scene.add.graphics();
@@ -72,7 +75,19 @@ export class WorldManager {
     this.drawBlockOutlines();
   }
 
+  private isEntityNearby(
+    matrixX: number,
+    positions: { matrixX: number; matrixY: number }[],
+    minDistance: number,
+  ): boolean {
+    return positions.some(
+      pos => Math.abs(pos.matrixX - matrixX) <= minDistance,
+    );
+  }
+
   private createBlocksFromMatrix(): void {
+    const bushPositions: { matrixX: number; matrixY: number }[] = [];
+    const treePositions: { matrixX: number; matrixY: number }[] = [];
     for (let matrixX = 0; matrixX < this.mapMatrix.length; matrixX++) {
       for (
         let matrixY = 0;
@@ -93,8 +108,29 @@ export class WorldManager {
 
         this.addBlock(block);
 
-        if (blockType === "grass_block" && Math.random() < TREE_SPAWN_CHANCE) {
+        if (
+          blockType === "grass_block" &&
+          !this.isEntityNearby(matrixX, treePositions, 2) &&
+          Math.random() < TREE_SPAWN_CHANCE
+        ) {
           this.createTree(worldPos.x, worldPos.y, block.depth);
+          treePositions.push({ matrixX, matrixY });
+        }
+
+        // TODO: Move to constants
+        const BERRY_BUSH_SPAWN_CHANCE = 0.1;
+
+        if (
+          blockType === "grass_block" &&
+          !this.mapMatrix[matrixX - 1]?.[matrixY - 1] &&
+          !this.mapMatrix[matrixX + 1]?.[matrixY - 1] &&
+          !!this.mapMatrix[matrixX - 1]?.[matrixY] &&
+          !!this.mapMatrix[matrixX + 1]?.[matrixY] &&
+          !this.isEntityNearby(matrixX, bushPositions, 2) &&
+          Math.random() < BERRY_BUSH_SPAWN_CHANCE
+        ) {
+          this.createBerryBush(worldPos.x, worldPos.y, block.depth);
+          bushPositions.push({ matrixX, matrixY });
         }
       }
     }
@@ -113,6 +149,16 @@ export class WorldManager {
     const randomZOffset = (Math.random() - 0.5) * 1;
     tree.setDepth(blockDepth - 1 + randomZOffset);
     this.trees.add(tree);
+  }
+
+  private createBerryBush(
+    worldX: number,
+    worldY: number,
+    blockDepth: number,
+  ): void {
+    const berryBush = new BerryBush(this.scene, worldX, worldY);
+    berryBush.setDepth(blockDepth);
+    this.berryBushes.add(berryBush);
   }
 
   // ============================================================================
@@ -286,6 +332,23 @@ export class WorldManager {
     return foundTree;
   }
 
+  findBerryBushAtWorld(worldX: number, worldY: number): BerryBush | null {
+    let foundBush: BerryBush | null = null;
+
+    this.berryBushes.children.each(child => {
+      const bush = child as BerryBush;
+      if (bush.active) {
+        const bounds = bush.getBounds();
+        if (bounds.contains(worldX, worldY)) {
+          foundBush = bush;
+        }
+      }
+      return true;
+    });
+
+    return foundBush;
+  }
+
   // ============================================================================
   // Block Modifications
   // ============================================================================
@@ -324,11 +387,13 @@ export class WorldManager {
     return block;
   }
 
-  remove(target: Block | Tree): void {
+  remove(target: Block | Tree | BerryBush): void {
     if (target instanceof Block) {
       this.removeBlock(target);
     } else if (target instanceof Tree) {
       this.removeTree(target);
+    } else if (target instanceof BerryBush) {
+      this.removeBerryBush(target);
     }
   }
 
@@ -365,6 +430,11 @@ export class WorldManager {
   private removeTree(tree: Tree): void {
     this.trees.remove(tree, true, true);
     tree.mine();
+  }
+
+  private removeBerryBush(bush: BerryBush): void {
+    this.berryBushes.remove(bush, true, true);
+    bush.mine();
   }
 
   canPlaceAt({ matrixX, matrixY }: MatrixPosition): boolean {

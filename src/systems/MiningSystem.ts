@@ -1,9 +1,10 @@
 import { MINING_DAMAGE, MINING_INTERVAL } from "../config/constants";
 import { Block } from "../blocks/Block";
 import { Tree } from "../entities/Tree";
+import { BerryBush } from "../entities/BerryBush";
 import { GameContext } from "../types";
 
-type MineableTarget = Block | Tree;
+type MineableTarget = Block | Tree | BerryBush;
 
 /**
  * Handles mining logic for blocks and trees.
@@ -40,7 +41,11 @@ export class MiningSystem {
   }
 
   private findTargetAt(worldX: number, worldY: number): MineableTarget | null {
-    // Check trees first (they're on top)
+    // Check berry bushes first (they're in front)
+    const bush = this.ctx.world.findBerryBushAtWorld(worldX, worldY);
+    if (bush) return bush;
+
+    // Check trees (they're on top of blocks)
     const tree = this.ctx.world.findTreeAtWorld(worldX, worldY);
     if (tree) return tree;
 

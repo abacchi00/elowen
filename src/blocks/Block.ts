@@ -68,8 +68,15 @@ export abstract class Block
   mine(): void {
     if (this.scene?.tweens) this.scene.tweens.killTweensOf(this);
 
+    this.destroySecondaryImages();
     this.destroy();
   }
+
+  /**
+   * Destroys any secondary images associated with the block.
+   * This is useful for blocks that have secondary images, such as grass blocks with turf.
+   */
+  destroySecondaryImages(): void {}
 
   takeDamage(damage: number): { destroyed: boolean } {
     this.life = Math.max(0, this.life - damage);

@@ -234,6 +234,7 @@ export const IMAGE_ASSETS: AssetConfig[] = [
   { key: "boar_meat", path: "./assets/images/boar_meat.png" },
   { key: "slime_goo", path: "./assets/images/slime_goo.png" },
   { key: "tree_seed", path: "./assets/images/tree_seed.png" },
+  { key: "grass_turf", path: "./assets/images/grass_turf.png" },
 ];
 
 export const AUDIO_ASSETS: AssetConfig[] = [

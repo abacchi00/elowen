@@ -438,9 +438,23 @@ export class WorldManager {
   }
 
   canPlaceAt({ matrixX, matrixY }: MatrixPosition): boolean {
-    if (matrixX < 0 || matrixX >= this.mapMatrix.length) return false;
-    if (matrixY < 0 || matrixY >= this.mapMatrix[matrixX].length) return false;
-    if (this.mapMatrix[matrixX][matrixY] !== null) return false;
+    if (matrixX < 0 || matrixX >= this.mapMatrix.length) return false; // Check if the block is out of bounds
+    if (matrixY < 0 || matrixY >= this.mapMatrix[matrixX].length) return false; // Check if the block is out of bounds
+    if (this.mapMatrix[matrixX][matrixY] !== null) return false; // Check if the block is already occupied
+
+    const { x, y } = this.matrixToWorld({ matrixX, matrixY });
+
+    const SAFETY_MARGIN = 1;
+
+    const bodies = this.scene.physics.overlapRect(
+      x - BLOCK_SIZE / 2 + SAFETY_MARGIN,
+      y - BLOCK_SIZE / 2 + SAFETY_MARGIN,
+      BLOCK_SIZE - SAFETY_MARGIN * 2,
+      BLOCK_SIZE - SAFETY_MARGIN * 2,
+    );
+
+    if (bodies.length > 0) return false; // Check if the block is blocked by bodies
+
     return this.blockAt({ matrixX, matrixY }).hasNeighbours();
   }
 

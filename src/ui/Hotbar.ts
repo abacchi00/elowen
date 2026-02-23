@@ -89,7 +89,7 @@ export class Hotbar {
       this.itemImages.push(null);
 
       // Quantity text
-      const text = this.scene.add.text(x + SLOT_SIZE - 5, SLOT_SIZE - 5, "", {
+      const text = this.scene.add.text(x + SLOT_SIZE - 1, SLOT_SIZE, "", {
         fontSize: `${FONT_SIZE}px`,
         color: COLORS.textColor,
         stroke: COLORS.textStroke,

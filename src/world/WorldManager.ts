@@ -167,7 +167,7 @@ export class WorldManager {
 
   drawBlockOutlines(): void {
     this.blockOutlines.clear();
-    this.blockOutlines.lineStyle(2, 0x111111, 1);
+    this.blockOutlines.lineStyle(2, 0x212121, 1);
 
     const halfSize = BLOCK_SIZE / 2;
 

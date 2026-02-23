@@ -24,9 +24,6 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
   public quantity: number;
   public labelText: string;
   private creationTime: number;
-  private outline: Phaser.GameObjects.Graphics | null = null;
-  private shouldCreateOutline: boolean = false;
-  private dropDisplayScale: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -42,12 +39,9 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     this.quantity = quantity;
     this.labelText = config.labelText;
     this.creationTime = scene.time.now;
-    this.shouldCreateOutline = config.hasOutline;
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
-
-    this.dropDisplayScale = config.dropDisplayScale;
 
     this.setDisplaySize(
       BLOCK_SIZE * config.dropDisplayScale,
@@ -57,7 +51,6 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     ignoreOnUICameras(this.scene, this);
 
     this.setupPhysics();
-    this.createOutline();
   }
 
   // ============================================================================
@@ -119,13 +112,9 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
 
   preUpdate(time: number, delta: number): void {
     super.preUpdate(time, delta);
-    if (this.outline && this.active) {
-      this.outline.setPosition(this.x, this.y);
-    }
   }
 
   destroy(fromScene?: boolean): void {
-    this.destroyOutline();
     super.destroy(fromScene);
   }
 
@@ -155,31 +144,5 @@ export class ItemDrop extends Phaser.Physics.Arcade.Sprite {
     body.setGravityY(ITEM_DROP_GRAVITY);
     body.setBounce(ITEM_DROP_BOUNCE);
     body.setDragX(ITEM_DROP_DRAG);
-  }
-
-  private createOutline(): void {
-    if (!this.shouldCreateOutline) return;
-
-    this.outline = this.scene.add.graphics();
-    this.outline.lineStyle(2, 0x222222, 1);
-    this.outline.strokeRect(
-      -BLOCK_SIZE / 2,
-      -BLOCK_SIZE / 2,
-      BLOCK_SIZE,
-      BLOCK_SIZE,
-    );
-    this.outline.setPosition(this.x, this.y);
-    this.outline.setDepth(this.depth + 1);
-    this.outline.setScrollFactor(1, 1);
-    this.outline.setScale(this.dropDisplayScale);
-
-    ignoreOnUICameras(this.scene, this.outline);
-  }
-
-  private destroyOutline(): void {
-    if (this.outline) {
-      this.outline.destroy();
-      this.outline = null;
-    }
   }
 }

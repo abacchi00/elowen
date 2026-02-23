@@ -140,7 +140,6 @@ export interface ItemConfig {
   texture: string;
   frame: number;
   holdable: IHoldable;
-  hasOutline: boolean;
   dropDisplayScale: number;
   labelText: string;
 }

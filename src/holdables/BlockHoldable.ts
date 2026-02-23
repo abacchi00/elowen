@@ -9,7 +9,7 @@ export class BlockHoldable implements IHoldable {
   };
   private blockType: BlockType;
   texture: string;
-  frame: number = 0;
+  frame: number = 1;
   type: HoldableType = "block";
 
   constructor(blockType: BlockType) {
